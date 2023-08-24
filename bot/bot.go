@@ -65,27 +65,6 @@ func StartBot() {
 		}
 
 		bot.handleUpdate(&update)
-		// // Create a new MessageConfig. We don't have text yet,
-		// // so we leave it empty.
-		// msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-
-		// // Extract the command from the Message.
-		// switch strings.ToLower(update.Message.Command()) {
-		// case "help":
-		// 	msg.Text = "I understand /sayhi and /status."
-		// case "sayhi":
-		// 	msg.Text = "Hi :)"
-		// case "status":
-		// 	msg.Text = "I'm ok."
-		// case "start":
-		// 	fallthrough
-		// default:
-		// 	continue
-		// }
-
-		// if _, err := bot.bot.Send(msg); err != nil {
-		// 	log.Panic(err)
-		// }
 	}
 }
 
