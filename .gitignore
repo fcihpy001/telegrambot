@@ -1,1 +1,5 @@
 .idea
+.env
+cert/
+telegramBot
+telegramBot.exe

@@ -1,16 +1,18 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func main() {
-	configBot()
+	// configBot()
+	mybot()
 }
 
 func configBot() {
@@ -24,7 +26,7 @@ func configBot() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	// 设置 Webhook
 	_, err = bot.SetWebhook(tgbotapi.NewWebhook("https://toplinkbot.com/bot/notify"))
 	if err != nil {
@@ -48,7 +50,7 @@ func configBot() {
 			// 解析发消息
 			if strings.HasPrefix(messageText, "/help") {
 				// 如果消息以 "/help" 开头，执行相应的处理逻辑
-				reply := "这是帮助信息..."
+				reply := "这是帮助信息2..."
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
 				_, err := bot.Send(msg)
 				if err != nil {
@@ -61,7 +63,7 @@ func configBot() {
 				if err != nil {
 					log.Println(err)
 				}
-			}  else if strings.HasPrefix(messageText, "/settings") {
+			} else if strings.HasPrefix(messageText, "/settings") {
 				reply := "来玩游戏"
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
 				inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
@@ -119,5 +121,7 @@ func configBot() {
 	})
 
 	// 启动 Gin 服务器
-	r.RunTLS(":"+strconv.Itoa(443), "/home/ubuntu/cert/toplinkbot_com.pem", "/home/ubuntu/cert/toplinkbot_com.key")
+	if err := r.RunTLS(":"+strconv.Itoa(443), "./cert/toplinkbot_com.pem", "./cert/toplinkbot_com.key"); err != nil {
+		panic(err)
+	}
 }
