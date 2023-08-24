@@ -1,16 +1,18 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func main() {
 	configBot()
+	//mybot()
 }
 
 var bot *tgbotapi.BotAPI
@@ -51,7 +53,9 @@ func configBot() {
 	})
 
 	// 启动 Gin 服务器
-	r.RunTLS(":"+strconv.Itoa(443), "/home/ubuntu/cert/toplinkbot_com.pem", "/home/ubuntu/cert/toplinkbot_com.key")
+	if err := r.RunTLS(":"+strconv.Itoa(443), "./cert/toplinkbot_com.pem", "./cert/toplinkbot_com.key"); err != nil {
+		panic(err)
+	}
 }
 
 func handleMessage(update tgbotapi.Update) {
