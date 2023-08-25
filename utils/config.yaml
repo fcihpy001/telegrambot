@@ -1,0 +1,7 @@
+#token: 6670867019:AAFZwsnxb0sAP4XMRvUmJI5Lm8l5UCEAoZQ
+token: 6313743575:AAFcWeymKrcfKklGuAWlQtEzIM995T2kF9U
+#webhook_url: https://toplinkbot.com/bot/notify
+url: https://toplinkbot.com/
+cert_file: ./cert/toplinkbot_com.crt
+key_file: ./cert/toplinkbot_com.pem
+api_path: /bot/notify
