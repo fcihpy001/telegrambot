@@ -8,6 +8,7 @@ import (
 
 // ban unban
 
+// todo param in text, 4 4min 4day etc
 func (bot *SmartBot) Ban(update *tgbotapi.Update) {
 	msg := update.Message
 	replyTo := msg.ReplyToMessage
