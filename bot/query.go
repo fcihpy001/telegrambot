@@ -14,12 +14,16 @@ import (
 func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	query := update.CallbackQuery.Data
 	fmt.Println("query command--", query)
+
 	if strings.HasPrefix(query, "lucky") {
 		lucky.LuckyHandler(update, bot.bot)
+
 	} else if strings.HasPrefix(query, "group") {
-		group.GroupHandler(update, bot.bot)
+		group.GroupHandlerQuery(update, bot.bot)
+
 	} else if strings.HasPrefix(query, "settings") {
 		setting.Settings(update.CallbackQuery.Message.Chat.ID, bot.bot)
+
 	} else {
 		msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "邀请链接")
 		_, err := bot.bot.Send(msg)
@@ -27,5 +31,4 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 			log.Println(err)
 		}
 	}
-
 }

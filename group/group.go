@@ -5,7 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func GroupHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	mgr := GroupManager{
 		bot: bot,
 	}
@@ -23,6 +23,33 @@ func GroupHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		fmt.Println("group_verification")
 	case "group_welcome":
 		mgr.welcomeNewMember(update.Message)
+	}
+}
+
+func GroupHandlerCommand(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	mgr := GroupManager{
+		bot: bot,
+	}
+	query := update.CallbackQuery.Data
+	switch query {
+	case "invite":
+		mgr.inviteLink(update)
+	case "stats":
+
+	case "stat_week":
+
+	case "mute":
+
+	case "unmute":
+
+	case "ban":
+		mgr.ban(update)
+	case "unban":
+		mgr.unBan(update)
+	case "admin":
+		mgr.checkAdmin(update)
+	case "kick":
+
 	}
 }
 
