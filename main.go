@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"telegramBot/bot"
+	"telegramBot/services"
 
 	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -18,6 +19,7 @@ func main() {
 	if err != nil {
 		log.Println("Error loading .env file:", err)
 	}
+	services.Init()
 	// configBot()
 	bot.StartBot()
 }

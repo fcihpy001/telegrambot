@@ -70,6 +70,7 @@ func StartBot() {
 
 func (bot *SmartBot) handleUpdate(update *tgbotapi.Update) {
 	msg := update.Message
+
 	switch strings.ToLower(msg.Command()) {
 	case "help":
 		// msg.Text = "I understand /sayhi and /status."
@@ -86,9 +87,13 @@ func (bot *SmartBot) handleUpdate(update *tgbotapi.Update) {
 	case "mute":
 	case "unmute":
 	case "stat":
+		fallthrough
 	case "stats":
+		bot.StatsMemberMessages(update)
 	case "start":
 		return
+	case "invite":
+		bot.inviteLink(update)
 	default:
 		return
 	}
