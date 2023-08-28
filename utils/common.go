@@ -2,18 +2,21 @@ package utils
 
 import (
 	"bufio"
-	"gopkg.in/yaml.v3"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/rs/zerolog"
+	"gopkg.in/yaml.v3"
 )
 
 var Config ConfigData
 
 func InitConfig() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
 	// 读取配置文件
-	data, err := ioutil.ReadFile("./utils/config.yaml")
+	data, err := os.ReadFile("./utils/config.yaml")
 	if err != nil {
 		log.Fatalf("Error reading config file: %v", err)
 	}
@@ -22,6 +25,11 @@ func InitConfig() {
 	if err := yaml.Unmarshal(data, &Config); err != nil {
 		log.Fatalf("Error unmarshalling config: %v", err)
 	}
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if Config.Debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
 	log.Println("配置文件加载成功...:")
 }
 

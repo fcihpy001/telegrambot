@@ -9,6 +9,7 @@ type ConfigData struct {
 	URL         string `yaml:"url"`
 	DatabaseURL string `yaml:"database_url"`
 	RedisURL    string `yaml:"redis_url"`
+	Debug       bool   `yaml:debug`
 }
 
 type RequestFile struct {

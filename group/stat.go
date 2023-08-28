@@ -2,7 +2,6 @@ package group
 
 import (
 	"encoding/json"
-	"log"
 	"telegramBot/model"
 	"telegramBot/services"
 	"time"
@@ -14,7 +13,7 @@ func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 	msg := update.Message
 	chat := msg.Chat
 	if chat == nil {
-		log.Println("not group chat message")
+		logger.Warn().Msg("not group chat message")
 		return
 	}
 	startTs, endTs, err := parseTimeRange(msg.Text)
@@ -24,7 +23,7 @@ func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 	}
 	rows, err := services.FindChatMessageCount(model.StatTypeMessageCount, chat.ID, startTs, endTs, 0, 5)
 	if err != nil {
-		log.Println(err)
+		logger.Err(err)
 		return
 	}
 	_ = rows
@@ -34,7 +33,7 @@ func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
 	msg := update.Message
 	if msg.Chat == nil {
-		log.Printf("not chat group")
+		logger.Warn().Msg("not chat group")
 		return
 	}
 	chatId := msg.Chat.ID
@@ -49,7 +48,7 @@ func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
 	}
 	link, err := mgr.bot.Request(resp)
 	if err != nil {
-		log.Printf("invite send failed: %v", err)
+		logger.Warn().Msgf("invite send failed: %v", err)
 	}
 
 	m := map[string]interface{}{}
