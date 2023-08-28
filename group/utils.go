@@ -135,7 +135,8 @@ func convertToSeconds(s string) int64 {
 	return int64(num * coefficient)
 }
 
-func prettyJSON(v interface{}) string { //nolint:golint,unused
+//lint:ignore U1000 ignore unused
+func prettyJSON(v interface{}) string {
 	buf, _ := json.MarshalIndent(v, "", "  ")
 	return string(buf)
 }
@@ -145,6 +146,7 @@ func prettyJSON(v interface{}) string { //nolint:golint,unused
 // @return endTs end timestamp in second
 // @return error error
 func parseTimeRange(s string) (startTs int64, endTs int64, err error) {
+	s = strings.Replace(s, "/stats", "", -1)
 	s = strings.TrimSpace(s)
 	if s == "" {
 		// 今天

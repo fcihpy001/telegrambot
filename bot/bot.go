@@ -1,19 +1,20 @@
 package bot
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"telegramBot/group"
 	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func StartBot() {
-
+func StartBot(ctx context.Context) {
 	bot, err := createBot(utils.Config.Token, os.Getenv(utils.BOT_DEBUG) == "true")
 	if err != nil {
 		panic(err)
@@ -38,6 +39,9 @@ func (bot *SmartBot) setupBotWithPool() {
 	for update := range updatesChannel {
 		s, _ := json.Marshal(update)
 		log.Println("update:", string(s))
+		// 统计
+		group.DoStat(&update)
+
 		if update.Message != nil && update.Message.IsCommand() {
 			bot.handleCommand(update)
 		} else if update.Message != nil && update.Message.NewChatMembers != nil {
@@ -54,6 +58,7 @@ func (bot *SmartBot) setupBotWithPool() {
 	}
 }
 
+//lint:ignore U1000 ignore unused lint
 func (bot *SmartBot) setupBotWithWebhook() {
 	// load file
 	certFile := utils.RequestFile{

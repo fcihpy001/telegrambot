@@ -19,15 +19,19 @@ var (
 	err error
 )
 
-func InitDB() {
-
-	initPostgres()
-
-	initRedis()
+func Init(ctx context.Context) {
+	InitDB()
+	go StatsRoutine(ctx)
 }
 
-func initPostgres() {
-	db, err = gorm.Open(postgres.Open(utils.Config.DatabaseURL), &gorm.Config{
+func InitDB() {
+	initPostgres(utils.Config.DatabaseURL)
+
+	initRedis(utils.Config.RedisURL)
+}
+
+func initPostgres(dsn string) {
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
@@ -37,17 +41,18 @@ func initPostgres() {
 		panic("failed to connect database")
 	}
 	logger.Info().Msg("数据库初始化成功...")
-	createTable()
+	// createTable()
 }
 
+//lint:ignore U1000 ignore unused lint
 func createTable() {
 	if err := db.AutoMigrate(&model.StatCount{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
 }
 
-func initRedis() {
-	opts, err := redis.ParseURL(utils.Config.RedisURL)
+func initRedis(uri string) {
+	opts, err := redis.ParseURL(uri)
 	if err != nil {
 		panic(err)
 	}
