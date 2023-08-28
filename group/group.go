@@ -1,9 +1,11 @@
 package group
 
 import (
+	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
+	"time"
 )
 
 func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
@@ -88,15 +90,23 @@ func GroupHandlerMessage(message *tgbotapi.Message, bot *tgbotapi.BotAPI) {
 }
 
 func (mgr *GroupManager) getInviteLink(receiver int64, name string) {
-	config := tgbotapi.ChatInviteLinkConfig{
-		tgbotapi.ChatConfig{
+	config := tgbotapi.CreateChatInviteLinkConfig{
+		ChatConfig: tgbotapi.ChatConfig{
 			ChatID: receiver,
 		},
+		Name:               "fcihpy",
+		ExpireDate:         int(time.Now().Unix() + 86400*365),
+		MemberLimit:        9999,
+		CreatesJoinRequest: false,
 	}
-	link, err := mgr.bot.GetInviteLink(config)
+	resp, err := mgr.bot.Request(config)
 	if err != nil {
-		fmt.Println("linkerr", err)
+		fmt.Println("linkerr111", err)
 	}
+	m := map[string]interface{}{}
+	json.Unmarshal(resp.Result, &m)
+	link := m["invite_link"].(string)
+
 	msg := fmt.Sprintf("🔗 %s 您的专属链接:\n %s (点击复制)\n\n👉 👉 当前总共邀请0人\n\n（本消息5分钟自毁）", name, link)
 	mgr.sendText(receiver, msg)
 }
