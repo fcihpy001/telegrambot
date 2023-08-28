@@ -13,4 +13,4 @@ database_url:
 redis_url:
   "redis://localhost:6379/0"
 
-debug:true
+debug: true

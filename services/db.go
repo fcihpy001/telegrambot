@@ -2,13 +2,12 @@ package services
 
 import (
 	"context"
-	"fmt"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
-	"log"
 	"telegramBot/model"
 	"telegramBot/utils"
+
+	"gorm.io/driver/postgres"
+	gormlogger "gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -28,24 +27,23 @@ func InitDB() {
 }
 
 func initPostgres() {
-	fmt.Println(utils.Config.DatabaseURL)
-	logMode := logger.Info
-
 	db, err = gorm.Open(postgres.Open(utils.Config.DatabaseURL), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
-		Logger: logger.Default.LogMode(logMode),
+		Logger: gormlogger.Default.LogMode(gormlogger.Info),
 	})
 	if err != nil {
 		panic("failed to connect database")
 	}
-	fmt.Println("数据库初始化成功...")
+	logger.Info().Msg("数据库初始化成功...")
 	createTable()
 }
 
 func createTable() {
-	db.AutoMigrate(&model.StatCount{})
+	if err := db.AutoMigrate(&model.StatCount{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 }
 
 func initRedis() {
@@ -58,5 +56,5 @@ func initRedis() {
 	if err = rdb.Ping(context.Background()).Err(); err != nil {
 		panic(err)
 	}
-	log.Println("Redis 连接成功")
+	logger.Info().Msg("Redis 连接成功")
 }

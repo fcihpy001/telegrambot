@@ -16,7 +16,7 @@ func InitConfig() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 	// 读取配置文件
-	data, err := os.ReadFile("./utils/config.yaml")
+	data, err := os.ReadFile("./config.yaml")
 	if err != nil {
 		log.Fatalf("Error reading config file: %v", err)
 	}
