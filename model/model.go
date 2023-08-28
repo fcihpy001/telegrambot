@@ -1,5 +1,9 @@
 package model
 
+import (
+	"gorm.io/gorm"
+)
+
 const (
 	StatTypeMessageCount = iota + 1
 	StatTypeInviteCount
@@ -16,3 +20,25 @@ type StatCount struct {
 	Timestamp int64
 	Count     int
 }
+
+type User struct {
+	gorm.Model
+	Uid       int64
+	Name      string
+	ChatCount int
+	GroupName string
+}
+
+type ButtonInfo struct {
+	Text    string
+	Data    string
+	BtnType BtnType
+}
+
+type BtnType string
+
+const (
+	BtnTypeUrl    BtnType = "url"
+	BtnTypeData   BtnType = "data"
+	BtnTypeSwitch BtnType = "switch"
+)

@@ -20,6 +20,13 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 		if err != nil {
 			log.Println(err)
 		}
+	} else if strings.Contains(messageText, "美国") {
+		reply := "这是个违禁词，小心被禁言"
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
+		_, err := bot.bot.Send(msg)
+		if err != nil {
+			log.Println(err)
+		}
 	} else {
 		reply := "感谢您的消息，我还在进修闭关中。。。"
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)

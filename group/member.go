@@ -18,6 +18,8 @@ func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 			log.Println(err)
 			continue
 		}
+		//	todo: 保存用户信息
+
 	}
 }
 

@@ -3,14 +3,14 @@ package services
 import (
 	"context"
 	"fmt"
-	"gorm.io/driver/postgres"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 	"log"
 	"telegramBot/model"
 	"telegramBot/utils"
 
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -22,16 +22,21 @@ var (
 
 func InitDB() {
 
-	initPostgres()
+	//InitMysql()
 
 	initRedis()
 }
 
-func initPostgres() {
-	fmt.Println(utils.Config.DatabaseURL)
+func InitMysql() {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		utils.Config.Mysql.UserName,
+		utils.Config.Mysql.Passwd,
+		utils.Config.Mysql.Address,
+		utils.Config.Mysql.Database)
+	fmt.Println(dsn)
 	logMode := logger.Info
 
-	db, err = gorm.Open(postgres.Open(utils.Config.DatabaseURL), &gorm.Config{
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
@@ -42,6 +47,7 @@ func initPostgres() {
 	}
 	fmt.Println("数据库初始化成功...")
 	createTable()
+	return
 }
 
 func createTable() {

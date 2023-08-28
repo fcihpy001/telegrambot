@@ -41,6 +41,10 @@ func (bot *SmartBot) setupBotWithPool() {
 		if update.Message != nil && update.Message.IsCommand() {
 			bot.handleCommand(update)
 		} else if update.Message != nil && update.Message.NewChatMembers != nil {
+			bot.SendText(update.Message.Chat.ID, "欢迎进群。。。")
+			group.GroupHandlerMessage(update.Message, bot.bot)
+		} else if update.Message != nil && update.Message.LeftChatMember != nil {
+			bot.SendText(update.Message.Chat.ID, "有人离开了群组。。。")
 			group.GroupHandlerMessage(update.Message, bot.bot)
 		} else if update.Message != nil {
 			bot.handleMessage(&update)

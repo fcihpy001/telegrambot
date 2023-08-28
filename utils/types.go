@@ -9,6 +9,15 @@ type ConfigData struct {
 	URL         string `yaml:"url"`
 	DatabaseURL string `yaml:"database_url"`
 	RedisURL    string `yaml:"redis_url"`
+	Mysql       Mysql  `yaml:"mysql"`
+	Dsn         string `yaml:"dsn"`
+}
+
+type Mysql struct {
+	Address  string `yaml:"address"`
+	Database string `yaml:"database"`
+	UserName string `yaml:"user_name"`
+	Passwd   string `yaml:"passwd"`
 }
 
 type RequestFile struct {
