@@ -1,0 +1,90 @@
+[
+  {
+    "update_id": 590727032,
+    "message": {
+      "message_id": 262,
+      "from": {
+        "id": 1091633677,
+        "first_name": "炒币养家",
+        "username": "liurunq"
+      },
+      "date": 1692854851,
+      "chat": {
+        "id": -1001916451498,
+        "type": "supergroup",
+        "title": "测试",
+        "username": "cesjj",
+        "photo": null,
+        "location": null
+      },
+      "new_chat_members": [
+        { "id": 1091633677, "first_name": "炒币养家", "username": "liurunq" }
+      ],
+      "message_auto_delete_timer_changed": null,
+      "proximity_alert_triggered": null,
+      "voice_chat_scheduled": null,
+      "voice_chat_started": null,
+      "voice_chat_ended": null,
+      "voice_chat_participants_invited": null
+    },
+    "my_chat_member": null,
+    "chat_member": null,
+    "chat_join_request": null
+  },
+
+  {
+    "update_id": 590727072,
+    "my_chat_member": {
+      "chat": {
+        "id": -1001916451498,
+        "type": "supergroup",
+        "title": "测试",
+        "username": "cesjj",
+        "photo": null,
+        "location": null
+      },
+      "from": {
+        "id": 5394405541,
+        "first_name": "big",
+        "last_name": "winner",
+        "username": "bigwineth",
+        "language_code": "zh-hans"
+      },
+      "date": 1692859114,
+      "old_chat_member": {
+        "user": {
+          "id": 6374129665,
+          "is_bot": true,
+          "first_name": "goat2023",
+          "username": "goat2023_bot"
+        },
+        "status": "member",
+        "is_anonymous": false,
+        "can_manage_chat": false,
+        "can_manage_voice_chats": false,
+        "is_member": false
+      },
+      "new_chat_member": {
+        "user": {
+          "id": 6374129665,
+          "is_bot": true,
+          "first_name": "goat2023",
+          "username": "goat2023_bot"
+        },
+        "status": "administrator",
+        "is_anonymous": false,
+        "can_manage_chat": true,
+        "can_delete_messages": true,
+        "can_manage_voice_chats": true,
+        "can_restrict_members": true,
+        "can_change_info": true,
+        "can_invite_users": true,
+        "can_pin_messages": true,
+        "is_member": false
+      },
+      "invite_link": null
+    },
+    "chat_member": null,
+    "chat_join_request": null
+  }
+]

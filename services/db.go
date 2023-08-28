@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
-	"gorm.io/gorm/logger"
+	gormlogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-	"log"
 	"telegramBot/model"
 	"telegramBot/utils"
 
@@ -20,42 +19,49 @@ var (
 	err error
 )
 
-func InitDB() {
-
-	//InitMysql()
-
-	initRedis()
+func Init(ctx context.Context) {
+	InitDB()
+	go StatsRoutine(ctx)
 }
 
-func InitMysql() {
+func InitDB() {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		utils.Config.Mysql.UserName,
 		utils.Config.Mysql.Passwd,
 		utils.Config.Mysql.Address,
 		utils.Config.Mysql.Database)
 	fmt.Println(dsn)
-	logMode := logger.Info
+	InitMysql(dsn)
+
+	initRedis(utils.Config.RedisURL)
+}
+
+func InitMysql(dsn string) {
 
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
-		Logger: logger.Default.LogMode(logMode),
+		Logger: gormlogger.Default.LogMode(gormlogger.Info),
 	})
 	if err != nil {
 		panic("failed to connect database")
 	}
-	fmt.Println("数据库初始化成功...")
+	logger.Info().Msg("数据库初始化成功...")
 	createTable()
-	return
 }
 
 func createTable() {
-	db.AutoMigrate(&model.StatCount{})
+	if err := db.AutoMigrate(&model.StatCount{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.User{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 }
 
-func initRedis() {
-	opts, err := redis.ParseURL(utils.Config.RedisURL)
+func initRedis(uri string) {
+	opts, err := redis.ParseURL(uri)
 	if err != nil {
 		panic(err)
 	}
@@ -64,5 +70,5 @@ func initRedis() {
 	if err = rdb.Ping(context.Background()).Err(); err != nil {
 		panic(err)
 	}
-	log.Println("Redis 连接成功")
+	logger.Info().Msg("Redis 连接成功")
 }

@@ -22,7 +22,7 @@ func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 		mgr.sendText(chat.ID, err.Error())
 		return
 	}
-	rows, err := services.FindChatMessageCount(model.StatTypeMessageCount, chat.ID, startTs, endTs, 0, 5)
+	rows, err := services.FindChatCountGroupByUser(model.StatTypeMessageCount, chat.ID, startTs, endTs, 0, 5)
 	if err != nil {
 		log.Println(err)
 		return
@@ -42,7 +42,7 @@ func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
 		ChatConfig: tgbotapi.ChatConfig{
 			ChatID: chatId,
 		},
-		Name:               "xxxxxxxx",
+		Name:               "fc",
 		ExpireDate:         int(time.Now().Unix() + 86400*365),
 		MemberLimit:        9999,
 		CreatesJoinRequest: false,

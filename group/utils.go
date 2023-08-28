@@ -3,7 +3,6 @@ package group
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -34,7 +33,7 @@ func (mgr *GroupManager) checkAdmin(update *tgbotapi.Update) {
 	chat := msg.Chat
 	replyTo := msg.ReplyToMessage
 	if chat == nil || replyTo == nil {
-		log.Println("chat is nil or replyTo is nil")
+		logger.Warn().Msg("chat is nil or replyTo is nil")
 		return
 	}
 	mgr.CheckUserIsAdmin(chat.ID, replyTo.From.ID)
@@ -81,7 +80,7 @@ func parseUntilDate(s string) int64 {
 func convertToSeconds(s string) int64 {
 	mats := untilRe.FindStringSubmatch(s)
 	if len(mats) != 3 {
-		log.Printf("invalid until pattern: %s\n", s)
+		logger.Warn().Msgf("invalid until pattern: %s\n", s)
 		return 0
 	}
 	num, _ := strconv.Atoi(mats[1])
@@ -136,7 +135,8 @@ func convertToSeconds(s string) int64 {
 	return int64(num * coefficient)
 }
 
-func prettyJSON(v interface{}) string { //nolint:golint,unused
+//lint:ignore U1000 ignore unused
+func prettyJSON(v interface{}) string {
 	buf, _ := json.MarshalIndent(v, "", "  ")
 	return string(buf)
 }
@@ -146,6 +146,7 @@ func prettyJSON(v interface{}) string { //nolint:golint,unused
 // @return endTs end timestamp in second
 // @return error error
 func parseTimeRange(s string) (startTs int64, endTs int64, err error) {
+	s = strings.Replace(s, "/stats", "", -1)
 	s = strings.TrimSpace(s)
 	if s == "" {
 		// 今天
@@ -183,7 +184,7 @@ func parseTime(s string, start bool) (int64, error) {
 	mats := timeRe.FindStringSubmatch(s)
 	// println("mats:", mats)
 	if len(mats) != 9 {
-		log.Printf("invalid time range pattern: %s\n", s)
+		logger.Warn().Msgf("invalid time range pattern: %s\n", s)
 		return 0, ErrInvalidTimeFormat
 	}
 	now := time.Now()

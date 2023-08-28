@@ -121,5 +121,8 @@ func (bot *SmartBot) sendMessage(c tgbotapi.Chattable, fmt string, args ...inter
 
 func (bot *SmartBot) SendText(chatId int64, text string) {
 	msg := tgbotapi.NewMessage(chatId, text)
-	bot.bot.Send(msg)
+	_, err := bot.bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
 }

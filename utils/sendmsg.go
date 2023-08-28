@@ -44,3 +44,20 @@ func MakeKeyboard(btns [][]model.ButtonInfo) tgbotapi.InlineKeyboardMarkup {
 	}
 	return inlineKeyboard
 }
+
+func SendReply(msgId string, bot *tgbotapi.BotAPI, isAlert bool, msg string) {
+	callback := tgbotapi.NewCallback(msgId, msg)
+	callback.ShowAlert = isAlert
+	if _, err := bot.Request(callback); err != nil {
+		panic(err)
+	}
+}
+
+func SendNotify(chatId int64, text string, bot *tgbotapi.BotAPI) {
+	msg := tgbotapi.NewMessage(chatId, text)
+	msg.DisableNotification = false
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
+}

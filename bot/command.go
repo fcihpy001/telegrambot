@@ -5,6 +5,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
 	"telegramBot/group"
+	"telegramBot/model"
+	"telegramBot/services"
 	"telegramBot/setting"
 )
 
@@ -15,6 +17,7 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	switch strings.ToLower(update.Message.Command()) {
 	case "help":
 		setting.Help(update.Message.Chat.ID, bot.bot)
+
 	case "start":
 		setting.Settings(update.Message.Chat.ID, bot.bot)
 
@@ -28,28 +31,17 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 
 	case "filters":
 
-	case "invite":
+	case "stat", "stats", "statistic", "stat_week", "mute", "unmute", "ban", "unban", "admin", "kick", "invite", "link":
 		group.GroupHandlerCommand(&update, bot.bot)
-	case "stat":
-		fallthrough
-	case "stats":
-		group.GroupHandlerCommand(&update, bot.bot)
-	case "stat_week":
-		group.GroupHandlerCommand(&update, bot.bot)
-	case "mute":
-		group.GroupHandlerCommand(&update, bot.bot)
-	case "unmute":
-		group.GroupHandlerCommand(&update, bot.bot)
-	case "ban":
-		group.GroupHandlerCommand(&update, bot.bot)
-	case "unban":
-		group.GroupHandlerCommand(&update, bot.bot)
-	case "admin":
-		group.GroupHandlerCommand(&update, bot.bot)
-	case "kick":
-		group.GroupHandlerCommand(&update, bot.bot)
+
 	default:
 		fmt.Println("i dont't know this command")
 		return
 	}
+	//	todo: 保存用户信息
+	u := model.User{
+		Uid:  update.Message.From.ID,
+		Name: update.Message.Chat.FirstName,
+	}
+	services.SaveUser(&u)
 }

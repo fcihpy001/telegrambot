@@ -8,6 +8,7 @@ import (
 	"telegramBot/group"
 	"telegramBot/lucky"
 	"telegramBot/setting"
+	"telegramBot/utils"
 )
 
 // 处理行内按钮事件
@@ -40,32 +41,6 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		if err != nil {
 			log.Printf("Error sending message: %v", err)
 		}
-
-		//groupLink := "https://t.me/-1001856649282" // 请替换为你的群组链接
-
-		//将机器人加入群组
-		//bot.bot.JoinChat(update.CallbackQuery.Message.Chat.ID, "")
-		////
-		//fmt.Println("join_group")
-		//msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "点击以下链接加入我们的群组：\n"+groupLink) // 用户点击了按钮，执行加入群组的操作
-		//bot.bot.Send(msg)
-		//err := addMemberToGroup(update.CallbackQuery.From.ID, update.CallbackQuery.Message.Chat.ID, bot.bot)
-		//if err != nil {
-		//	log.Printf("Error adding member to group: %v", err)
-		//}
-
-		//回复回调查询
-		//answer := tgbotapi.NewCallback(update.CallbackQuery.From.ID, "处理完成")
-		//_, err := bot.AnswerCallbackQuery(answer)
-		//if err != nil {
-		//	log.Printf("Error answering callback query: %v", err)
-		//}
-
-		//callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "消息已经处理")
-		//callback.ShowAlert = true
-		//if _, err := bot.bot.Request(callback); err != nil {
-		//	panic(err)
-		//}
 	} else if query == "next_page" {
 		//	发送还键盘的推送消息
 		msg := tgbotapi.NewMessage(6401399435, "🎁【零度社区 (LingduDAO)- 中文群】群组发起了发言次数抽奖活动\n已开奖：1       未开奖：1       取消：0\n\nLDD是零度DAO的社区币\n├参与条件：发言6条\n├发言起始统计时间：2023-08-28 11:20:00\n├开奖时间：2023-08-28 22:00:00\n├奖品列表：\n├       2USDT     ×3份\n\n【如何参与？】在群组中发言6次，参与活动。")
@@ -100,4 +75,5 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 			log.Println(err)
 		}
 	}
+	utils.SendReply(update.CallbackQuery.ID, bot.bot, false, "消息已经处理")
 }

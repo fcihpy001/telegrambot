@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"github.com/rs/zerolog"
 	"gopkg.in/yaml.v3"
 	"io"
 	"io/ioutil"
@@ -23,6 +24,13 @@ func InitConfig() {
 		log.Fatalf("Error unmarshalling config: %v", err)
 	}
 	log.Println("配置文件加载成功...:")
+
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if os.Getenv(BOT_DEBUG) == "true" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+	log.Println("日志模块初始化成功...")
 }
 
 func (r RequestFile) NeedsUpload() bool {

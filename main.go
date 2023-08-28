@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
 	"telegramBot/bot"
 	"telegramBot/services"
 	"telegramBot/utils"
@@ -12,9 +15,16 @@ func main() {
 	utils.InitConfig()
 	//=======================================================
 	// 2. 初始化数据库
-	services.InitDB()
-
+	ctx, cancel := context.WithCancel(context.Background())
+	services.Init(ctx)
 	//=======================================================
 	// 3. 启动 Bot
-	bot.StartBot()
+	go bot.StartBot()
+	//=======================================================
+	// 4. gracefully shutdown
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	// Block until a signal is received.
+	<-c
+	cancel()
 }
