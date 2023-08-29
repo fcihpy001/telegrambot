@@ -16,3 +16,20 @@ type StatCount struct {
 	Ts       int64 // timestamp
 	Count    int
 }
+
+type User struct {
+	ID        uint64 `gorm:"id"`
+	UserId    int64
+	FirstName string `gorm:"type:varchar(30)"`
+	Username  string `gorm:"type:varchar(30)"`
+}
+
+type ChatGroup struct {
+	ID        uint64 `gorm:"id"`
+	ChatId    int64
+	Title     string `gorm:"type:varchar(30)"`
+	GroupType string `gorm:"type:varchar(30)"`
+	Chatname  string `gorm:"type:varchar(30)"`
+	Photo     string `gorm:"type:varchar(100)"`
+	Location  string `gorm:"type:varchar(50)"`
+}
