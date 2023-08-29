@@ -23,9 +23,11 @@ type StatCount struct {
 
 type User struct {
 	gorm.Model
-	Uid       int64
-	FirstName string `gorm:"type:varchar(30)"`
-	Username  string `gorm:"type:varchar(30)"`
+	Uid          int64
+	FirstName    string `gorm:"type:varchar(30)"`
+	LastName     string `gorm:"type:varchar(30)"`
+	Username     string `gorm:"type:varchar(30)"`
+	LanguageCode string `gorm:"type:varchar(20)"`
 }
 
 type ChatGroup struct {

@@ -2,12 +2,13 @@ package bot
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
 	"telegramBot/group"
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/setting"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // 处理以/开头的指令消息,如/help  /status等
@@ -40,8 +41,8 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	}
 	//	todo: 保存用户信息
 	u := model.User{
-		Uid:  update.Message.From.ID,
-		Name: update.Message.Chat.FirstName,
+		Uid:       update.Message.From.ID,
+		FirstName: update.Message.Chat.FirstName,
 	}
 	services.SaveUser(&u)
 }
