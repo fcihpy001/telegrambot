@@ -23,7 +23,8 @@ type StatCount struct {
 
 type User struct {
 	gorm.Model
-	Uid          int64
+	Uid          int64 `gorm:"uniqueIndex"`
+	IsBot        bool
 	FirstName    string `gorm:"type:varchar(30)"`
 	LastName     string `gorm:"type:varchar(30)"`
 	Username     string `gorm:"type:varchar(30)"`
@@ -32,7 +33,7 @@ type User struct {
 
 type ChatGroup struct {
 	ID        uint64 `gorm:"id"`
-	ChatId    int64
+	ChatId    int64  `gorm:"uniqueIndex"`
 	Title     string `gorm:"type:varchar(30)"`
 	GroupType string `gorm:"type:varchar(30)"`
 	Chatname  string `gorm:"type:varchar(30)"`
@@ -52,4 +53,24 @@ const (
 	BtnTypeUrl    BtnType = "url"
 	BtnTypeData   BtnType = "data"
 	BtnTypeSwitch BtnType = "switch"
+
+	UserJoin = "join"
+	UserLeft = "left"
 )
+
+// 用户与群组关系表
+type UserChat struct {
+	gorm.Model
+	UserId int64  `gorm:"index:user_chat_idx"`
+	ChatId int64  `gorm:"index:user_chat_idx"`
+	Status string `gorm:"type:varchar(20)"` // member administrator
+}
+
+// 用户进群退群动作
+type UserAction struct {
+	gorm.Model
+	Action string `gorm:"type:varchar(20)"` // join, left, subscribe, unsubscribe
+	UserId int64
+	ChatId int64
+	Day    string `gorm:"type:varchar(20)"` // 20230828
+}

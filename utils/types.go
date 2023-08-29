@@ -1,6 +1,7 @@
 package utils
 
 type ConfigData struct {
+	botUserId   int64
 	Token       string `yaml:"token"`
 	WebhookUrl  string `yaml:"webhook_url"`
 	CertFile    string `yaml:"cert_file"`

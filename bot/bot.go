@@ -57,7 +57,10 @@ func (bot *SmartBot) setupBotWithPool() {
 		} else if update.InlineQuery != nil {
 			fmt.Println("inline query")
 		} else {
-			bot.SendText(update.Message.Chat.ID, "这个问题，暂时无法处理")
+			if update.Message != nil && update.Message.Chat != nil {
+				// if chat is nil, panic
+				bot.SendText(update.Message.Chat.ID, "这个问题，暂时无法处理")
+			}
 		}
 	}
 }

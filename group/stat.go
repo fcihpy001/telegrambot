@@ -23,11 +23,23 @@ func DoStat(update *tgbotapi.Update) {
 			return
 		}
 		if msg.From != nil {
+			if msg.NewChatMembers != nil {
+				// new group member
+				services.StatsNewMembers(update)
+				return
+			}
+			if msg.LeftChatMember != nil {
+				// leave group
+				services.StatsLeave(update)
+				return
+			}
+
+			// message stat
 			if msg.From.IsBot {
 				return
 			}
 			chat := msg.Chat
-			if chat != nil {
+			if chat != nil && !chat.IsPrivate() {
 				// 消息统计
 				services.StatChatMessage(chat.ID, msg.From.ID, int64(msg.Date))
 				return
@@ -62,7 +74,7 @@ func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 	mgr.sendText(chat.ID, res)
 }
 
-// just for test
+//lint:ignore U1000 just for test
 func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
 	msg := update.Message
 	if msg.Chat == nil {

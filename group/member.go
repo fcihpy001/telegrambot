@@ -27,6 +27,7 @@ func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 			Username:     user.UserName,
 			LastName:     user.LastName,
 			LanguageCode: user.LanguageCode,
+			IsBot:        user.IsBot,
 		}
 		services.SaveUser(&u)
 	}

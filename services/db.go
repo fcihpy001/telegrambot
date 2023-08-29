@@ -58,6 +58,18 @@ func createTable() {
 	if err := db.AutoMigrate(&model.User{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
+	if err := db.AutoMigrate(&model.UserChat{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.UserAction{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.ChatGroup{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.StatCount{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 }
 
 func initRedis(uri string) {

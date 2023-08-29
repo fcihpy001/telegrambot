@@ -2,9 +2,12 @@ package utils
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/rs/zerolog"
 	"gopkg.in/yaml.v3"
@@ -25,19 +28,26 @@ func InitConfig() {
 	if err := yaml.Unmarshal(data, &Config); err != nil {
 		log.Fatalf("Error unmarshalling config: %v", err)
 	}
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if Config.Debug {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	// 解析bot userId
+	ss := strings.Split(Config.Token, ":")
+	uid, err := strconv.ParseInt(ss[0], 10, 64)
+	if err != nil || uid == 0 {
+		panic(fmt.Sprintf("invalid token: %s", Config.Token))
 	}
+	Config.botUserId = uid
 
 	log.Println("配置文件加载成功...:")
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if os.Getenv(BOT_DEBUG) == "true" {
+	if Config.Debug || os.Getenv(BOT_DEBUG) == "true" {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 	log.Println("日志模块初始化成功...")
+}
+
+func GetBotUserId() int64 {
+	return Config.botUserId
 }
 
 func (r RequestFile) NeedsUpload() bool {

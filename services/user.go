@@ -1,7 +1,27 @@
 package services
 
-import "telegramBot/model"
+import (
+	"telegramBot/model"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"gorm.io/gorm/clause"
+)
 
 func SaveUser(user *model.User) {
-	db.Create(user)
+	// ignore on duplicate
+	err := db.Clauses(clause.Insert{Modifier: "IGNORE"}).Create(user).Error
+	if err != nil {
+		logger.Err(err).Int64("userId", user.Uid).Msg("create user failed")
+	}
+}
+
+func saveUser(user *tgbotapi.User) {
+	SaveUser(&model.User{
+		Uid:          user.ID,
+		IsBot:        user.IsBot,
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
+		Username:     user.UserName,
+		LanguageCode: user.LanguageCode,
+	})
 }
