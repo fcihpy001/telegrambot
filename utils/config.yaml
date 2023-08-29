@@ -9,8 +9,14 @@ cert_file:
 key_file:
   "./cert/toplinkbot_com.pem"
 database_url:
-  "postgresql://postgres:@localahost:5432/dbname?schema=public"
+  "postgresql://postgres:@localhost:5432/postgres"
 redis_url:
   "redis://localhost:6379/0"
+mysql:
+  address: 34.192.77.144:13306
+  database: testdb
+  user_name: root
+  passwd: openIM123
+
 
 debug: true

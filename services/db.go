@@ -2,15 +2,15 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"telegramBot/model"
 	"telegramBot/utils"
 
-	"gorm.io/driver/postgres"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 var (
@@ -25,13 +25,22 @@ func Init(ctx context.Context) {
 }
 
 func InitDB() {
-	initPostgres(utils.Config.DatabaseURL)
+	// initPostgres(utils.Config.DatabaseURL)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		utils.Config.Mysql.UserName,
+		utils.Config.Mysql.Passwd,
+		utils.Config.Mysql.Address,
+		utils.Config.Mysql.Database)
+	fmt.Println(dsn)
+	InitMysql(dsn)
 
 	initRedis(utils.Config.RedisURL)
 }
 
-func initPostgres(dsn string) {
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+//	func initPostgres(dsn string) {
+//		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+func InitMysql(dsn string) {
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
@@ -41,12 +50,12 @@ func initPostgres(dsn string) {
 		panic("failed to connect database")
 	}
 	logger.Info().Msg("数据库初始化成功...")
-	// createTable()
+	createTable()
 }
 
 //lint:ignore U1000 ignore unused lint
 func createTable() {
-	if err := db.AutoMigrate(&model.StatCount{}); err != nil {
+	if err := db.AutoMigrate(&model.User{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
 }

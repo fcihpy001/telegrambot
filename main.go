@@ -22,7 +22,8 @@ func main() {
 	// 3. 启动 Bot
 	go bot.StartBot(ctx)
 
-	// gracelfully shutdown
+	//=======================================================
+	// 4. gracefully shutdown
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	// Block until a signal is received.

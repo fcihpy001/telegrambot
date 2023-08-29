@@ -1,5 +1,9 @@
 package model
 
+import (
+	"gorm.io/gorm"
+)
+
 const (
 	StatTypeMessageCount = iota + 1
 	StatTypeInviteCount
@@ -18,8 +22,8 @@ type StatCount struct {
 }
 
 type User struct {
-	ID        uint64 `gorm:"id"`
-	UserId    int64
+	gorm.Model
+	Uid       int64
 	FirstName string `gorm:"type:varchar(30)"`
 	Username  string `gorm:"type:varchar(30)"`
 }
@@ -33,3 +37,17 @@ type ChatGroup struct {
 	Photo     string `gorm:"type:varchar(100)"`
 	Location  string `gorm:"type:varchar(50)"`
 }
+
+type ButtonInfo struct {
+	Text    string
+	Data    string
+	BtnType BtnType
+}
+
+type BtnType string
+
+const (
+	BtnTypeUrl    BtnType = "url"
+	BtnTypeData   BtnType = "data"
+	BtnTypeSwitch BtnType = "switch"
+)
