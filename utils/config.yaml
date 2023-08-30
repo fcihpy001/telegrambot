@@ -19,3 +19,4 @@ mysql:
   passwd: openIM123
 
 
+debug: true

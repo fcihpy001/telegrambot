@@ -3,9 +3,10 @@ package group
 import (
 	"encoding/json"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
@@ -53,9 +54,11 @@ func GroupHandlerCommand(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	mgr := GroupManager{
 		bot: bot,
 	}
-	fmt.Println("groupcommand---", update.Message.Command())
-
-	switch strings.ToLower(update.Message.Command()) {
+	// if update.CallbackQuery == nil {
+	// 	return
+	// }
+	query := strings.ToLower(update.Message.Command())
+	switch query {
 	case "invite":
 		//mgr.inviteLink(update)
 	case "stats":

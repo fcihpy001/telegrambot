@@ -17,9 +17,11 @@ func main() {
 	// 2. 初始化数据库
 	ctx, cancel := context.WithCancel(context.Background())
 	services.Init(ctx)
+
 	//=======================================================
 	// 3. 启动 Bot
-	go bot.StartBot()
+	go bot.StartBot(ctx)
+
 	//=======================================================
 	// 4. gracefully shutdown
 	c := make(chan os.Signal, 1)

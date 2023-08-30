@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"telegramBot/model"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -48,6 +49,49 @@ func StatChatMessage(chatId, userId, timestamp int64) {
 	if err != nil {
 		logger.Error().Err(err).Msg("stat chat message failed")
 	}
+}
+
+// 进群入库
+func StatsNewMembers(update *tgbotapi.Update) {
+	msg := update.Message
+	chat := msg.Chat
+	if chat == nil {
+		logger.Err(err).Msg("chat is nil")
+		return
+	}
+	chatId := chat.ID
+	// 1. 创建group
+	saveChatGroup(chat)
+	newMembers := msg.NewChatMembers
+	for _, member := range newMembers {
+		userId := member.ID
+		//  创建用户
+		saveUser(&member)
+		// 创建/更新 user-chat 关系 createOrUpdate
+		UpdateChatMember(chatId, userId, "member")
+		// 创建 user action
+		SaveUserAction(userId, chatId, model.UserJoin)
+	}
+}
+
+// 离群入库
+func StatsLeave(update *tgbotapi.Update) {
+	msg := update.Message
+	chat := msg.Chat
+	if chat == nil {
+		logger.Err(err).Msg("chat is nil")
+		return
+	}
+	chatId := chat.ID
+	leftMember := msg.LeftChatMember
+	if leftMember == nil {
+		return
+	}
+	userId := leftMember.ID
+
+	RemoveChatMember(userId, chatId)
+	// 创建 user action
+	SaveUserAction(userId, chatId, model.UserLeft)
 }
 
 // IncStatCount 增加 redis 统计值

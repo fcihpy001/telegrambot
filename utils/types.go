@@ -1,6 +1,7 @@
 package utils
 
 type ConfigData struct {
+	botUserId   int64
 	Token       string `yaml:"token"`
 	WebhookUrl  string `yaml:"webhook_url"`
 	CertFile    string `yaml:"cert_file"`
@@ -9,6 +10,7 @@ type ConfigData struct {
 	URL         string `yaml:"url"`
 	DatabaseURL string `yaml:"database_url"`
 	RedisURL    string `yaml:"redis_url"`
+	Debug       bool   `yaml:"debug"`
 	Mysql       Mysql  `yaml:"mysql"`
 	Dsn         string `yaml:"dsn"`
 }

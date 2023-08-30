@@ -86,5 +86,246 @@
     },
     "chat_member": null,
     "chat_join_request": null
+  },
+
+  {
+    "update_id": 590727265,
+    "my_chat_member": {
+      "chat": {
+        "id": -1001916451498,
+        "type": "supergroup",
+        "title": "流量聚集地",
+        "username": "cesjj",
+        "photo": null,
+        "location": null
+      },
+      "from": {
+        "id": 5394405541,
+        "first_name": "big",
+        "last_name": "winner",
+        "username": "bigwineth",
+        "language_code": "zh-hans"
+      },
+      "date": 1693272816,
+      "old_chat_member": {
+        "user": {
+          "id": 6374129665,
+          "is_bot": true,
+          "first_name": "goat2023",
+          "username": "goat2023_bot"
+        },
+        "status": "administrator",
+        "is_anonymous": false,
+        "can_manage_chat": true,
+        "can_delete_messages": true,
+        "can_manage_voice_chats": true,
+        "can_restrict_members": true,
+        "can_change_info": true,
+        "can_invite_users": true,
+        "can_pin_messages": true,
+        "is_member": false
+      },
+      "new_chat_member": {
+        "user": {
+          "id": 6374129665,
+          "is_bot": true,
+          "first_name": "goat2023",
+          "username": "goat2023_bot"
+        },
+        "status": "left",
+        "is_anonymous": false,
+        "can_manage_chat": false,
+        "can_manage_voice_chats": false,
+        "is_member": false
+      },
+      "invite_link": null
+    },
+    "chat_member": null,
+    "chat_join_request": null
+  },
+
+  {
+    "update_id": 590727264,
+    "message": {
+      "message_id": 983,
+      "from": {
+        "id": 5394405541,
+        "first_name": "big",
+        "last_name": "winner",
+        "username": "bigwineth",
+        "language_code": "zh-hans"
+      },
+      "date": 1693272816,
+      "chat": {
+        "id": -1001916451498,
+        "type": "supergroup",
+        "title": "流量聚集地",
+        "username": "cesjj",
+        "photo": null,
+        "location": null
+      },
+      "left_chat_member": {
+        "id": 6374129665,
+        "is_bot": true,
+        "first_name": "goat2023",
+        "username": "goat2023_bot"
+      },
+      "message_auto_delete_timer_changed": null,
+      "proximity_alert_triggered": null,
+      "voice_chat_scheduled": null,
+      "voice_chat_started": null,
+      "voice_chat_ended": null,
+      "voice_chat_participants_invited": null
+    },
+    "my_chat_member": null,
+    "chat_member": null,
+    "chat_join_request": null
+  },
+
+  {
+    "update_id": 590727266,
+    "my_chat_member": {
+      "chat": {
+        "id": -1001916451498,
+        "type": "supergroup",
+        "title": "流量聚集地",
+        "username": "cesjj",
+        "photo": null,
+        "location": null
+      },
+      "from": {
+        "id": 5394405541,
+        "first_name": "big",
+        "last_name": "winner",
+        "username": "bigwineth",
+        "language_code": "zh-hans"
+      },
+      "date": 1693273162,
+      "old_chat_member": {
+        "user": {
+          "id": 6374129665,
+          "is_bot": true,
+          "first_name": "goat2023",
+          "username": "goat2023_bot"
+        },
+        "status": "left",
+        "is_anonymous": false,
+        "can_manage_chat": false,
+        "can_manage_voice_chats": false,
+        "is_member": false
+      },
+      "new_chat_member": {
+        "user": {
+          "id": 6374129665,
+          "is_bot": true,
+          "first_name": "goat2023",
+          "username": "goat2023_bot"
+        },
+        "status": "member",
+        "is_anonymous": false,
+        "can_manage_chat": false,
+        "can_manage_voice_chats": false,
+        "is_member": false
+      },
+      "invite_link": null
+    },
+    "chat_member": null,
+    "chat_join_request": null
+  },
+
+  {
+    "update_id": 590727267,
+    "message": {
+      "message_id": 984,
+      "from": {
+        "id": 5394405541,
+        "first_name": "big",
+        "last_name": "winner",
+        "username": "bigwineth",
+        "language_code": "zh-hans"
+      },
+      "date": 1693273162,
+      "chat": {
+        "id": -1001916451498,
+        "type": "supergroup",
+        "title": "流量聚集地",
+        "username": "cesjj",
+        "photo": null,
+        "location": null
+      },
+      "new_chat_members": [
+        {
+          "id": 6374129665,
+          "is_bot": true,
+          "first_name": "goat2023",
+          "username": "goat2023_bot"
+        }
+      ],
+      "message_auto_delete_timer_changed": null,
+      "proximity_alert_triggered": null,
+      "voice_chat_scheduled": null,
+      "voice_chat_started": null,
+      "voice_chat_ended": null,
+      "voice_chat_participants_invited": null
+    },
+    "my_chat_member": null,
+    "chat_member": null,
+    "chat_join_request": null
+  },
+
+  {
+    "update_id": 590727270,
+    "my_chat_member": {
+      "chat": {
+        "id": -1001916451498,
+        "type": "supergroup",
+        "title": "流量聚集地",
+        "username": "cesjj",
+        "photo": null,
+        "location": null
+      },
+      "from": {
+        "id": 5394405541,
+        "first_name": "big",
+        "last_name": "winner",
+        "username": "bigwineth",
+        "language_code": "zh-hans"
+      },
+      "date": 1693273266,
+      "old_chat_member": {
+        "user": {
+          "id": 6374129665,
+          "is_bot": true,
+          "first_name": "goat2023",
+          "username": "goat2023_bot"
+        },
+        "status": "member",
+        "is_anonymous": false,
+        "can_manage_chat": false,
+        "can_manage_voice_chats": false,
+        "is_member": false
+      },
+      "new_chat_member": {
+        "user": {
+          "id": 6374129665,
+          "is_bot": true,
+          "first_name": "goat2023",
+          "username": "goat2023_bot"
+        },
+        "status": "administrator",
+        "is_anonymous": false,
+        "can_manage_chat": true,
+        "can_delete_messages": true,
+        "can_manage_voice_chats": true,
+        "can_restrict_members": true,
+        "can_change_info": true,
+        "can_invite_users": true,
+        "can_pin_messages": true,
+        "is_member": false
+      },
+      "invite_link": null
+    },
+    "chat_member": null,
+    "chat_join_request": null
   }
 ]

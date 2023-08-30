@@ -2,7 +2,7 @@ package group
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"telegramBot/model"
 	"telegramBot/services"
 	"time"
@@ -10,31 +10,75 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// DoStat 统计入口
+//
+//	消息统计
+//	进群统计
+//	邀请统计
+//	离群统计
+func DoStat(update *tgbotapi.Update) {
+	if update.Message != nil {
+		msg := update.Message
+		if msg.IsCommand() {
+			return
+		}
+		if msg.From != nil {
+			if msg.NewChatMembers != nil {
+				// new group member
+				services.StatsNewMembers(update)
+				return
+			}
+			if msg.LeftChatMember != nil {
+				// leave group
+				services.StatsLeave(update)
+				return
+			}
+
+			// message stat
+			if msg.From.IsBot {
+				return
+			}
+			chat := msg.Chat
+			if chat != nil && !chat.IsPrivate() {
+				// 消息统计
+				services.StatChatMessage(chat.ID, msg.From.ID, int64(msg.Date))
+				return
+			}
+		}
+	}
+}
+
 func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 	msg := update.Message
 	chat := msg.Chat
 	if chat == nil {
-		log.Println("not group chat message")
+		logger.Warn().Msg("not group chat message")
 		return
 	}
 	startTs, endTs, err := parseTimeRange(msg.Text)
 	if err != nil {
 		mgr.sendText(chat.ID, err.Error())
+		logger.Warn().Err(err).Msg("invalid time range")
 		return
 	}
-	rows, err := services.FindChatCountGroupByUser(model.StatTypeMessageCount, chat.ID, startTs, endTs, 0, 5)
+	rows, err := services.FindChatCountGroupByUser(model.StatTypeMessageCount, chat.ID, startTs/60, endTs/60, 0, 5)
+	// rows, err := services.FindChatCountGroupByUser(model.StatTypeMessageCount, chat.ID, startTs, endTs, 0, 5)
 	if err != nil {
-		log.Println(err)
+		logger.Err(err)
 		return
 	}
-	_ = rows
+	res := ""
+	for _, row := range rows {
+		res += fmt.Sprintf("%d    %d\n", row.UserId, row.Count)
+	}
+	mgr.sendText(chat.ID, res)
 }
 
-// just for test
+//lint:ignore U1000 just for test
 func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
 	msg := update.Message
 	if msg.Chat == nil {
-		log.Printf("not chat group")
+		logger.Warn().Msg("not chat group")
 		return
 	}
 	chatId := msg.Chat.ID
@@ -49,7 +93,7 @@ func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
 	}
 	link, err := mgr.bot.Request(resp)
 	if err != nil {
-		log.Printf("invite send failed: %v", err)
+		logger.Warn().Msgf("invite send failed: %v", err)
 	}
 
 	m := map[string]interface{}{}

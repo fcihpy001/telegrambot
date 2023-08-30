@@ -3,14 +3,14 @@ package services
 import (
 	"context"
 	"fmt"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/driver/mysql"
-	gormlogger "gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
 	"telegramBot/model"
 	"telegramBot/utils"
 
+	"github.com/redis/go-redis/v9"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 )
 
 var (
@@ -25,6 +25,7 @@ func Init(ctx context.Context) {
 }
 
 func InitDB() {
+	// initPostgres(utils.Config.DatabaseURL)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		utils.Config.Mysql.UserName,
 		utils.Config.Mysql.Passwd,
@@ -36,8 +37,9 @@ func InitDB() {
 	initRedis(utils.Config.RedisURL)
 }
 
+//	func initPostgres(dsn string) {
+//		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 func InitMysql(dsn string) {
-
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
@@ -51,11 +53,21 @@ func InitMysql(dsn string) {
 	createTable()
 }
 
+//lint:ignore U1000 ignore unused lint
 func createTable() {
-	if err := db.AutoMigrate(&model.StatCount{}); err != nil {
+	if err := db.AutoMigrate(&model.User{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
-	if err := db.AutoMigrate(&model.User{}); err != nil {
+	if err := db.AutoMigrate(&model.UserChat{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.UserAction{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.ChatGroup{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.StatCount{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
 }

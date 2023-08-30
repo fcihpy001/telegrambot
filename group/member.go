@@ -2,7 +2,7 @@ package group
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
+
 	"telegramBot/model"
 	"telegramBot/services"
 )
@@ -17,13 +17,17 @@ func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 		}
 		msg := tgbotapi.NewMessage(message.Chat.ID, "👏👏👏 欢迎 "+user.FirstName+" 加入"+message.Chat.Title)
 		if _, err := mgr.bot.Send(msg); err != nil {
-			log.Println(err)
+			logger.Err(err)
 			continue
 		}
 		//	todo: 保存用户信息
 		u := model.User{
-			Uid:  message.Chat.ID,
-			Name: user.FirstName,
+			Uid:          message.Chat.ID,
+			FirstName:    user.FirstName,
+			Username:     user.UserName,
+			LastName:     user.LastName,
+			LanguageCode: user.LanguageCode,
+			IsBot:        user.IsBot,
 		}
 		services.SaveUser(&u)
 	}
