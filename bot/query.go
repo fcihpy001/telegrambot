@@ -66,7 +66,8 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		if err != nil {
 			log.Println(err)
 		}
-
+	} else if query == "go_setting" { //违禁词列表
+		bot.go_setting(update)
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")
 		msg.DisableNotification = false
@@ -76,4 +77,10 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		}
 	}
 	utils.SendReply(update.CallbackQuery.ID, bot.bot, false, "消息已经处理")
+}
+
+func (bot *SmartBot) go_setting(update *tgbotapi.Update) {
+	fmt.Println("go_setting...")
+	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, "设置【流量聚集地】群组，选择要更改的项目", utils.SettingMenuMarkup)
+	bot.bot.Send(msg)
 }

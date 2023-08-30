@@ -78,11 +78,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 		Data:    "new_member_limit",
 		BtnType: model.BtnTypeData,
 	}
-	btn81 := model.ButtonInfo{
-		Text:    "🚂下一页",
-		Data:    "next_page",
-		BtnType: model.BtnTypeData,
-	}
+
 	btn91 := model.ButtonInfo{
 		Text:    "🥦语言切换",
 		Data:    "language_switch",
@@ -101,11 +97,11 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	btnRow5 := []model.ButtonInfo{btn51, btn52}
 	btnRow6 := []model.ButtonInfo{btn61, btn62}
 	btnRow7 := []model.ButtonInfo{btn71, btn72}
-	btnRow8 := []model.ButtonInfo{btn81}
 	btnRow9 := []model.ButtonInfo{btn91, btn92}
 
-	btns := [][]model.ButtonInfo{btnRow1, btnRow2, btnRow3, btnRow4, btnRow5, btnRow6, btnRow7, btnRow8, btnRow9}
+	btns := [][]model.ButtonInfo{btnRow1, btnRow2, btnRow3, btnRow4, btnRow5, btnRow6, btnRow7, btnRow9}
 	keyboard := utils.MakeKeyboard(btns)
+	utils.SettingMenuMarkup = keyboard
 	groupName := "流量工程"
 	utils.SendMenu(chatId, fmt.Sprintf("设置【%s】群组，选择要更改的项目", groupName), keyboard, bot)
 }
