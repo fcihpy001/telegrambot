@@ -132,11 +132,44 @@ func FindChatCountGroupByUser(
 	return
 }
 
+// 查找时间范围内消息数量
+func GroupChatMessageByDay(chatId int64, startDay, endDay string) (stats []model.StatCount, err error) {
+	err = db.Raw("select day, sum(count) as count from stat_count sc where chat_id=? and stat_type=? and day>? and day<=? group by day order by count DESC",
+		chatId, model.StatTypeMessageCount, startDay, endDay).Scan(&stats).Error
+	return
+}
+
 func FindChatCount(
 	statType int,
 	chatId int64,
 	startTs, endTs int64,
 	offset, limit int64) (stats []model.StatCount, err error) {
 	db.Where("stat_type = ?", statType).Where("chat_id = ?", chatId).Find(&stats)
-	return nil, nil
+	return stats, nil
+}
+
+// 查找时间范围内用户邀请数量排行
+func GroupChatInviteByUser(
+	chatId, userId int64,
+	startTs, endTs int64,
+	limit int64) ([]model.Counter, error) {
+	// select  sum(1) as count, invited_by , chat_id  from user_chat sc where chat_id=-1001916451498 and ts>'20230820' and ts<='20230830' group by invited_by  , chat_id order by count desc
+	var items []model.Counter
+	err := db.Raw("select  sum(1) as count, invited_by , chat_id  from user_chat sc where chat_id=? and ts>? and ts<=? group by invited_by, chat_id order by count DESC limit ?",
+		chatId, startTs, endTs, userId, limit).
+		Find(&items).Error
+	return items, err
+}
+
+// 查找时间范围内进群、退群数量
+func GroupChatJoinLeave(
+	action string,
+	chatId int64,
+	startTs, endTs int64,
+) ([]model.Counter, error) {
+	var items []model.Counter
+	err := db.Raw("select  sum(1) as count, day  from user_action sc where chat_id=? and action=? and ts>? and ts<=? group by day order by count desc",
+		chatId, action, startTs, endTs).
+		Find(&items).Error
+	return items, err
 }

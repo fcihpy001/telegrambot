@@ -110,3 +110,19 @@ func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 	}
 	mgr.sendText(chat.ID, res)
 }
+
+// 邀请排名
+func (mgr *GroupManager) StatInvite(update *tgbotapi.Update, startTs, endTs int64) {
+
+}
+
+// 进群、退群排名
+func (mgr *GroupManager) StatJoinLeave(update *tgbotapi.Update, startTs, endTs int64) {
+
+}
+
+// 1 调整格式
+// 2 用户名可以点击
+func (mgr *GroupManager) fmtRating() {
+
+}

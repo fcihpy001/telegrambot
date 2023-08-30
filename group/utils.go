@@ -273,6 +273,21 @@ func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
 	mgr.sendMessage(inviteMsg, "send invite link failed")
 }
 
-func (mgr *GroupManager) SendMentioned(update *tgbotapi.Update) {
-	mgr.sendText(update.Message.Chat.ID, "@bigwinner")
+//lint:ignore U1000 ignore unused function
+func SendTestMentioned(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
+	mgr := GroupManager{bot}
+	// me := tgbotapi.MessageEntity{
+	// 	Type: "text_mention",
+	// 	User: &tgbotapi.User{
+	// 		ID:        5394405541,
+	// 		FirstName: "哈哈哈",
+	// 		UserName:  "bigwinner",
+	// 	},
+	// }
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "[测试提及](tg://user?id=5394405541)\nwhat's up\n下一页")
+	msg.ParseMode = "MarkdownV2"
+	_, err := mgr.bot.Send(msg)
+	if err != nil {
+		logger.Err(err)
+	}
 }

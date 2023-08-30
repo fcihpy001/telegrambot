@@ -44,8 +44,11 @@ func UpdateChatMember(chatId, userId int64, status string, ts int64) {
 		Day:    toDay(ts),
 	}
 	err := db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "user_id"}, {Name: "chat_id"}},
-		DoUpdates: clause.Assignments(map[string]interface{}{"stats": status}),
+		Columns: []clause.Column{{Name: "user_id"}, {Name: "chat_id"}},
+		DoUpdates: clause.Assignments(map[string]interface{}{
+			"stats": status,
+			"ts":    ts,
+		}),
 	}).Create(&item).Error
 	if err != nil {
 		logger.Err(err).
@@ -66,5 +69,6 @@ func SaveUserAction(userId, chatId int64, action string, ts int64) {
 		UserId: userId,
 		ChatId: chatId,
 		Day:    toDay(ts),
+		Ts:     ts,
 	})
 }
