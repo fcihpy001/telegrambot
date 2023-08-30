@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func saveChatGroup(chat *tgbotapi.Chat) {
+func SaveChatGroupByChat(chat *tgbotapi.Chat) {
 	photo := ""
 	location := ""
 	if chat.Photo != nil {

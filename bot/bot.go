@@ -40,7 +40,7 @@ func (bot *SmartBot) setupBotWithPool() {
 		s, _ := json.Marshal(update)
 		log.Println("update:", string(s))
 		// 统计
-		group.DoStat(&update)
+		group.DoStat(&update, bot.bot)
 
 		if update.Message != nil && update.Message.IsCommand() {
 			bot.handleCommand(update)

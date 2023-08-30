@@ -61,7 +61,7 @@ func StatsNewMembers(update *tgbotapi.Update) {
 	}
 	chatId := chat.ID
 	// 1. 创建group
-	saveChatGroup(chat)
+	SaveChatGroupByChat(chat)
 	newMembers := msg.NewChatMembers
 	for _, member := range newMembers {
 		userId := member.ID
