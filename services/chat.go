@@ -1,15 +1,13 @@
 package services
 
 import (
-	"fmt"
 	"telegramBot/model"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"gorm.io/gorm/clause"
 )
 
-func saveChatGroup(chat *tgbotapi.Chat) {
+func SaveChatGroupByChat(chat *tgbotapi.Chat) {
 	photo := ""
 	location := ""
 	if chat.Photo != nil {
@@ -38,15 +36,19 @@ func SaveChatGroup(chatId int64, title, typ, username, photo, location string) {
 }
 
 // create or update chat member
-func UpdateChatMember(chatId, userId int64, status string) {
+func UpdateChatMember(chatId, userId int64, status string, ts int64) {
 	item := model.UserChat{
 		UserId: userId,
 		ChatId: chatId,
 		Status: status,
+		Day:    toDay(ts),
 	}
 	err := db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "user_id"}, {Name: "chat_id"}},
-		DoUpdates: clause.Assignments(map[string]interface{}{"stats": status}),
+		Columns: []clause.Column{{Name: "user_id"}, {Name: "chat_id"}},
+		DoUpdates: clause.Assignments(map[string]interface{}{
+			"stats": status,
+			"ts":    ts,
+		}),
 	}).Create(&item).Error
 	if err != nil {
 		logger.Err(err).
@@ -61,12 +63,12 @@ func RemoveChatMember(chatId, userId int64) {
 	db.Exec("delete user_chat where user_id = ? and chat_id = ?", userId, chatId)
 }
 
-func SaveUserAction(userId, chatId int64, action string) {
-	now := time.Now()
+func SaveUserAction(userId, chatId int64, action string, ts int64) {
 	db.Save(&model.UserAction{
 		Action: action,
 		UserId: userId,
 		ChatId: chatId,
-		Day:    fmt.Sprintf("%d%02d%02d", now.Year(), now.Month(), now.Day()),
+		Day:    toDay(ts),
+		Ts:     ts,
 	})
 }

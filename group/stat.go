@@ -1,11 +1,10 @@
 package group
 
 import (
-	"encoding/json"
 	"fmt"
 	"telegramBot/model"
 	"telegramBot/services"
-	"time"
+	"telegramBot/utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -16,7 +15,7 @@ import (
 //	进群统计
 //	邀请统计
 //	离群统计
-func DoStat(update *tgbotapi.Update) {
+func DoStat(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if update.Message != nil {
 		msg := update.Message
 		if msg.IsCommand() {
@@ -26,6 +25,13 @@ func DoStat(update *tgbotapi.Update) {
 			if msg.NewChatMembers != nil {
 				// new group member
 				services.StatsNewMembers(update)
+				for _, member := range msg.NewChatMembers {
+					if member.ID == utils.GetBotUserId() {
+						// 第一次被邀请进入群, 获取群信息及群用户
+						mgr := GroupManager{bot}
+						mgr.GetChatInfo(msg.Chat.ID)
+					}
+				}
 				return
 			}
 			if msg.LeftChatMember != nil {
@@ -48,6 +54,37 @@ func DoStat(update *tgbotapi.Update) {
 	}
 }
 
+// 获取群及群用户信息
+func (mgr *GroupManager) GetChatInfo(id int64) {
+	resp, err := mgr.bot.GetChat(tgbotapi.ChatInfoConfig{
+		ChatConfig: tgbotapi.ChatConfig{
+			ChatID: id,
+		},
+	})
+
+	if err != nil {
+		logger.Err(err).Int64("chatId", id).Msg("get chat info failed")
+		return
+	}
+	fmt.Println(prettyJSON(resp))
+	// save chat group
+	services.SaveChatGroupByChat(&resp)
+}
+
+// 获取chat 群用户数
+func (mgr *GroupManager) GetChatMemberCount(id int64) int {
+	resp, err := mgr.bot.GetChatMembersCount(tgbotapi.ChatMemberCountConfig{ChatConfig: tgbotapi.ChatConfig{
+		ChatID: id,
+	}})
+	if err != nil {
+		logger.Err(err).Int64("chatId", id).Msg("get chat member count failed")
+		return 0
+	}
+
+	return resp
+}
+
+// 统计回应
 func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 	msg := update.Message
 	chat := msg.Chat
@@ -74,31 +111,18 @@ func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 	mgr.sendText(chat.ID, res)
 }
 
-//lint:ignore U1000 just for test
-func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
-	msg := update.Message
-	if msg.Chat == nil {
-		logger.Warn().Msg("not chat group")
-		return
-	}
-	chatId := msg.Chat.ID
-	resp := tgbotapi.CreateChatInviteLinkConfig{
-		ChatConfig: tgbotapi.ChatConfig{
-			ChatID: chatId,
-		},
-		Name:               "fc",
-		ExpireDate:         int(time.Now().Unix() + 86400*365),
-		MemberLimit:        9999,
-		CreatesJoinRequest: false,
-	}
-	link, err := mgr.bot.Request(resp)
-	if err != nil {
-		logger.Warn().Msgf("invite send failed: %v", err)
-	}
+// 邀请排名
+func (mgr *GroupManager) StatInvite(update *tgbotapi.Update, startTs, endTs int64) {
 
-	m := map[string]interface{}{}
-	json.Unmarshal(link.Result, &m)
-	// fmt.Println(prettyJSON(link))
-	inviteMsg := tgbotapi.NewMessage(chatId, m["invite_link"].(string))
-	mgr.sendMessage(inviteMsg, "send invite link failed")
+}
+
+// 进群、退群排名
+func (mgr *GroupManager) StatJoinLeave(update *tgbotapi.Update, startTs, endTs int64) {
+
+}
+
+// 1 调整格式
+// 2 用户名可以点击
+func (mgr *GroupManager) fmtRating() {
+
 }

@@ -19,6 +19,7 @@ type StatCount struct {
 	UserId   int64
 	Ts       int64 // timestamp
 	Count    int
+	Day      string `gorm:"type:varchar(20)"` // 20230828
 }
 
 type User struct {
@@ -61,9 +62,19 @@ const (
 // 用户与群组关系表
 type UserChat struct {
 	gorm.Model
-	UserId int64  `gorm:"index:user_chat_idx"`
-	ChatId int64  `gorm:"index:user_chat_idx"`
-	Status string `gorm:"type:varchar(20)"` // member administrator
+	UserId    int64  `gorm:"index:user_chat_idx"`
+	ChatId    int64  `gorm:"index:user_chat_idx"`
+	InvitedBy int64  // 邀请人
+	Status    string `gorm:"type:varchar(20)"` // member administrator
+	Ts        int64
+	Day       string `gorm:"type:varchar(20)"` // 20230828
+}
+
+type Counter struct {
+	Count     int
+	InvitedBy int64
+	ChatId    int64
+	Day       string
 }
 
 // 用户进群退群动作
@@ -72,6 +83,7 @@ type UserAction struct {
 	Action string `gorm:"type:varchar(20)"` // join, left, subscribe, unsubscribe
 	UserId int64
 	ChatId int64
+	Ts     int64
 	Day    string `gorm:"type:varchar(20)"` // 20230828
 }
 

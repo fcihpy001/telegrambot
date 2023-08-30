@@ -25,3 +25,19 @@ func saveUser(user *tgbotapi.User) {
 		LanguageCode: user.LanguageCode,
 	})
 }
+
+// 根据 userId 获取 username
+func GetUserNames(ids []int64) map[int64]model.User {
+	var items []model.User
+
+	users := map[int64]model.User{}
+	if err := db.Where("uid in ?", ids).Find(&items).Error; err != nil {
+		logger.Err(err).Msg("get user names failed")
+		return users
+	}
+
+	for _, item := range items {
+		users[item.Uid] = item
+	}
+	return users
+}

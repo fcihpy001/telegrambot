@@ -31,8 +31,9 @@ func InitDB() {
 		utils.Config.Mysql.Passwd,
 		utils.Config.Mysql.Address,
 		utils.Config.Mysql.Database)
-	fmt.Println(dsn)
+	// fmt.Println(dsn)
 	InitMysql(dsn)
+	createTable()
 
 	initRedis(utils.Config.RedisURL)
 }
@@ -50,7 +51,6 @@ func InitMysql(dsn string) {
 		panic("failed to connect database")
 	}
 	logger.Info().Msg("数据库初始化成功...")
-	createTable()
 }
 
 //lint:ignore U1000 ignore unused lint
