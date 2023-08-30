@@ -45,6 +45,7 @@ func StatChatMessage(chatId, userId, timestamp int64) {
 		UserId:   userId,
 		Ts:       timestamp,
 		Count:    1,
+		Day:      toDay(timestamp),
 	})
 	if err != nil {
 		logger.Error().Err(err).Msg("stat chat message failed")
@@ -68,9 +69,9 @@ func StatsNewMembers(update *tgbotapi.Update) {
 		//  创建用户
 		saveUser(&member)
 		// 创建/更新 user-chat 关系 createOrUpdate
-		UpdateChatMember(chatId, userId, "member")
+		UpdateChatMember(chatId, userId, "member", int64(msg.Date))
 		// 创建 user action
-		SaveUserAction(userId, chatId, model.UserJoin)
+		SaveUserAction(userId, chatId, model.UserJoin, int64(msg.Date))
 	}
 }
 
@@ -91,7 +92,7 @@ func StatsLeave(update *tgbotapi.Update) {
 
 	RemoveChatMember(userId, chatId)
 	// 创建 user action
-	SaveUserAction(userId, chatId, model.UserLeft)
+	SaveUserAction(userId, chatId, model.UserLeft, int64(msg.Date))
 }
 
 // IncStatCount 增加 redis 统计值

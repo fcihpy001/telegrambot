@@ -25,3 +25,7 @@ type Mysql struct {
 type RequestFile struct {
 	FileName string
 }
+
+func GetBotUserId() int64 {
+	return Config.botUserId
+}
