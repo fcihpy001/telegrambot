@@ -1,12 +1,10 @@
 package group
 
 import (
-	"encoding/json"
 	"fmt"
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -111,33 +109,4 @@ func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 		res += fmt.Sprintf("%d    %d\n", row.UserId, row.Count)
 	}
 	mgr.sendText(chat.ID, res)
-}
-
-//lint:ignore U1000 just for test
-func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
-	msg := update.Message
-	if msg.Chat == nil {
-		logger.Warn().Msg("not chat group")
-		return
-	}
-	chatId := msg.Chat.ID
-	resp := tgbotapi.CreateChatInviteLinkConfig{
-		ChatConfig: tgbotapi.ChatConfig{
-			ChatID: chatId,
-		},
-		Name:               "fc",
-		ExpireDate:         int(time.Now().Unix() + 86400*365),
-		MemberLimit:        9999,
-		CreatesJoinRequest: false,
-	}
-	link, err := mgr.bot.Request(resp)
-	if err != nil {
-		logger.Warn().Msgf("invite send failed: %v", err)
-	}
-
-	m := map[string]interface{}{}
-	json.Unmarshal(link.Result, &m)
-	// fmt.Println(prettyJSON(link))
-	inviteMsg := tgbotapi.NewMessage(chatId, m["invite_link"].(string))
-	mgr.sendMessage(inviteMsg, "send invite link failed")
 }

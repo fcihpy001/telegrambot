@@ -243,3 +243,36 @@ func (mgr *GroupManager) sendMessage(c tgbotapi.Chattable, fmt string, args ...i
 func (mgr *GroupManager) sendText(chatId int64, text string) {
 	utils.SendText(chatId, text, mgr.bot)
 }
+
+//lint:ignore U1000 just for test
+func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
+	msg := update.Message
+	if msg.Chat == nil {
+		logger.Warn().Msg("not chat group")
+		return
+	}
+	chatId := msg.Chat.ID
+	resp := tgbotapi.CreateChatInviteLinkConfig{
+		ChatConfig: tgbotapi.ChatConfig{
+			ChatID: chatId,
+		},
+		Name:               "fc",
+		ExpireDate:         int(time.Now().Unix() + 86400*365),
+		MemberLimit:        9999,
+		CreatesJoinRequest: false,
+	}
+	link, err := mgr.bot.Request(resp)
+	if err != nil {
+		logger.Warn().Msgf("invite send failed: %v", err)
+	}
+
+	m := map[string]interface{}{}
+	json.Unmarshal(link.Result, &m)
+	// fmt.Println(prettyJSON(link))
+	inviteMsg := tgbotapi.NewMessage(chatId, m["invite_link"].(string))
+	mgr.sendMessage(inviteMsg, "send invite link failed")
+}
+
+func (mgr *GroupManager) SendMentioned(update *tgbotapi.Update) {
+	mgr.sendText(update.Message.Chat.ID, "@bigwinner")
+}
