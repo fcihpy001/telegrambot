@@ -41,6 +41,8 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		mgr.groupmemberstatis(update, "today")
 	case "group_7days_quit":
 		mgr.groupmemberstatis(update, "week")
+	case "group_back_statics":
+		mgr.group_back_statics(update)
 
 	case "toast":
 		fmt.Println("请选择")

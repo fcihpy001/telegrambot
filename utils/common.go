@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/rs/zerolog"
 	"gopkg.in/yaml.v3"
 	"io"
@@ -11,6 +12,8 @@ import (
 )
 
 var Config ConfigData
+var SettingMenuMarkup tgbotapi.InlineKeyboardMarkup
+var StaticsMarkup tgbotapi.InlineKeyboardMarkup
 
 func InitConfig() {
 	// 读取配置文件
