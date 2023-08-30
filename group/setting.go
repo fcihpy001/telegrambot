@@ -1,26 +1,50 @@
 package group
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"telegramBot/model"
+	"telegramBot/services"
 	"telegramBot/utils"
 )
 
-func (mgr *GroupManager) welcomeSetting(update *tgbotapi.Update) {
+var welcomeSetting model.WelcomeSetting
+
+func (mgr *GroupManager) group_welcome_setting(update *tgbotapi.Update) {
+	//从数据库中获取welecome setting
+	chatId := update.CallbackQuery.Message.Chat.ID
+	log.Println("welcomeSetting:", chatId)
+	welcomeSetting = services.GetSettings(chatId)
+	welcomeSetting.ChatId = chatId
+
+	btn12txt := "启用"
+	btn13txt := "✅关闭"
+	if welcomeSetting.Enable {
+		btn12txt = "✅启用"
+		btn13txt = "关闭"
+	}
+
+	btn22txt := "删除"
+	btn23txt := "✅不删"
+	if welcomeSetting.DeletePrevMsg {
+		btn22txt = "✅删除"
+		btn23txt = "不删"
+	}
+
 	btn11 := model.ButtonInfo{
 		Text:    "是否启用",
 		Data:    "toast",
 		BtnType: model.BtnTypeData,
 	}
 	btn12 := model.ButtonInfo{
-		Text:    "✅启用",
-		Data:    "toast",
+		Text:    btn12txt,
+		Data:    "group_welcomeSettingEnable",
 		BtnType: model.BtnTypeData,
 	}
 	btn13 := model.ButtonInfo{
-		Text:    "关闭",
-		Data:    "toast",
+		Text:    btn13txt,
+		Data:    "group_welcomeSettingDisable",
 		BtnType: model.BtnTypeData,
 	}
 	btn21 := model.ButtonInfo{
@@ -29,13 +53,13 @@ func (mgr *GroupManager) welcomeSetting(update *tgbotapi.Update) {
 		BtnType: model.BtnTypeData,
 	}
 	btn22 := model.ButtonInfo{
-		Text:    "✅删除",
-		Data:    "toast",
+		Text:    btn22txt,
+		Data:    "group_welcome_DeletePrevMsg_enable",
 		BtnType: model.BtnTypeData,
 	}
 	btn23 := model.ButtonInfo{
-		Text:    "不删",
-		Data:    "toast",
+		Text:    btn23txt,
+		Data:    "group_welcome_DeletePrevMsg_disable",
 		BtnType: model.BtnTypeData,
 	}
 	btn31 := model.ButtonInfo{
@@ -45,22 +69,22 @@ func (mgr *GroupManager) welcomeSetting(update *tgbotapi.Update) {
 	}
 	btn41 := model.ButtonInfo{
 		Text:    "🦚文本内容",
-		Data:    "group_welcome_text",
+		Data:    "group_welcome_setting_text",
 		BtnType: model.BtnTypeData,
 	}
 	btn42 := model.ButtonInfo{
 		Text:    "🍇媒体图片",
-		Data:    "toast",
+		Data:    "group_welcome_setting_media",
 		BtnType: model.BtnTypeData,
 	}
 	btn43 := model.ButtonInfo{
 		Text:    "🍵链接按钮",
-		Data:    "toast",
+		Data:    "group_welcome_setting_button",
 		BtnType: model.BtnTypeData,
 	}
 	btn51 := model.ButtonInfo{
 		Text:    "🏠返回",
-		Data:    "toast",
+		Data:    "go_setting",
 		BtnType: model.BtnTypeData,
 	}
 	row1 := []model.ButtonInfo{btn11, btn12, btn13}
@@ -70,32 +94,111 @@ func (mgr *GroupManager) welcomeSetting(update *tgbotapi.Update) {
 	row5 := []model.ButtonInfo{btn51}
 	rows := [][]model.ButtonInfo{row1, row2, row3, row4, row5}
 	keyboard := utils.MakeKeyboard(rows)
-	msg := "🎉 进群欢迎\n\n当前状态：关闭 ❌\n删除上条消息：✅\n\n自定义欢迎内容：\n┌📸 媒体图片:❌\n├🔠 链接按钮:❌\n└📄 文本内容:❌"
-	utils.SendMenu(update.CallbackQuery.Message.Chat.ID, msg, keyboard, mgr.bot)
-}
+	utils.GroupWelcomeMarkup = keyboard
 
-func (mgr *GroupManager) welcomeTextSetting(update *tgbotapi.Update) {
-	//btn11 := model.ButtonInfo{
-	//	Text:    "返回",
-	//	Data:    "toast",
-	//	BtnType: model.BtnTypeData,
-	//}
-	//row := []model.ButtonInfo{btn11}
-	//rows := [][]model.ButtonInfo{row}
-	//keyboard := utils.MakeKeyboard(rows)
-	//msg := "👉 输入内容设置你的欢迎内容，仅支持文字和emoji:"
-	//utils.SendMenu(update.CallbackQuery.Message.Chat.ID, msg, keyboard, mgr.bot)
-
-	btn := tgbotapi.NewKeyboardButton("请输入欢迎内容")
-	keybord := tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(btn),
-	)
-
-	message := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "不知道写什么")
-	message.ReplyMarkup = keybord
-	_, err := mgr.bot.Send(message)
+	//要读取用户设置的数据
+	content := updateMsg()
+	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard)
+	_, err := mgr.bot.Send(msg)
 	if err != nil {
 		log.Println(err)
 	}
+}
 
+func (mgr *GroupManager) group_welcomeSettingStatus(update *tgbotapi.Update, enable bool) {
+
+	if enable {
+		utils.GroupWelcomeMarkup.InlineKeyboard[0][1].Text = "✅启用"
+		utils.GroupWelcomeMarkup.InlineKeyboard[0][2].Text = "关闭"
+		welcomeSetting.Enable = true
+	} else {
+		utils.GroupWelcomeMarkup.InlineKeyboard[0][1].Text = "启用"
+		utils.GroupWelcomeMarkup.InlineKeyboard[0][2].Text = "✅关闭"
+		welcomeSetting.Enable = false
+	}
+
+	content := updateMsg()
+	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.GroupWelcomeMarkup)
+	_, err := mgr.bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (mgr *GroupManager) welcomeSettingDeletePrevMsg(update *tgbotapi.Update, deletePrev bool) {
+
+	if deletePrev {
+		utils.GroupWelcomeMarkup.InlineKeyboard[1][1].Text = "✅删除"
+		utils.GroupWelcomeMarkup.InlineKeyboard[1][2].Text = "不删"
+		welcomeSetting.DeletePrevMsg = true
+	} else {
+		utils.GroupWelcomeMarkup.InlineKeyboard[1][1].Text = "删除"
+		utils.GroupWelcomeMarkup.InlineKeyboard[1][2].Text = "✅不删"
+		welcomeSetting.DeletePrevMsg = false
+	}
+	content := updateMsg()
+	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.GroupWelcomeMarkup)
+	_, err := mgr.bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (mgr *GroupManager) welcomeTextSetting(update *tgbotapi.Update) {
+
+	btn11 := model.ButtonInfo{
+		Text:    "⛔️删除已经设置的文本",
+		Data:    "group_welcome_text_remove",
+		BtnType: model.BtnTypeData,
+	}
+	btn21 := model.ButtonInfo{
+		Text:    "返回",
+		Data:    "group_welcome_setting",
+		BtnType: model.BtnTypeData,
+	}
+
+	row1 := []model.ButtonInfo{btn11}
+	row2 := []model.ButtonInfo{btn21}
+	rows := [][]model.ButtonInfo{row2}
+	content := "👉 输入内容设置你的欢迎内容，仅支持文字和emoji:"
+	if len(welcomeSetting.WelcomeText) > 0 {
+		content = fmt.Sprintf("当前设置的文本(长按下方文字复制)：\n%s\n\n\n👉 输入内容设置你的欢迎内容，仅支持文字和emoji:", welcomeSetting.WelcomeText)
+		rows = [][]model.ButtonInfo{row1, row2}
+	}
+	keyboard := utils.MakeKeyboard(rows)
+	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard)
+
+	_, err := mgr.bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func updateMsg() string {
+	content := "🎉 进群欢迎"
+	enableMsg := "当前状态：关闭 ❌"
+	if welcomeSetting.Enable {
+		enableMsg = "当前状态：开启 ✅"
+	}
+	deletePrevMsg := "删除上条消息：❌"
+	if welcomeSetting.DeletePrevMsg {
+		deletePrevMsg = "删除上条消息：✅"
+	}
+
+	welcome_media := "┌📸 媒体图片:❌"
+	welcome_button := "├🔠 链接按钮:❌"
+	welcome_text := "└📄 文本内容:❌"
+	if len(welcomeSetting.WelcomeText) > 0 {
+		welcome_text = "└📄 文本内容: " + welcomeSetting.WelcomeText
+	}
+	if len(welcomeSetting.WelcomeButton) > 0 {
+		welcome_button = "├🔠 链接按钮:✅"
+	}
+	if len(welcomeSetting.WelcomeMedia) > 0 {
+		welcome_media = "📸 媒体图片:✅"
+	}
+
+	content = "进群欢迎\n\n" + enableMsg + "\n" + deletePrevMsg + "\n\n自定义欢迎内容：\n" + welcome_media + "\n" + welcome_button + "\n" + welcome_text
+	services.SaveSettings(&welcomeSetting)
+	return content
 }

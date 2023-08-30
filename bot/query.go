@@ -76,7 +76,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 			log.Println(err)
 		}
 	}
-	utils.SendReply(update.CallbackQuery.ID, bot.bot, false, "消息已经处理")
+	//utils.SendReply(update.CallbackQuery.ID, bot.bot, false, "消息已经处理")
 }
 
 func (bot *SmartBot) go_setting(update *tgbotapi.Update) {

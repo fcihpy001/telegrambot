@@ -1,10 +1,10 @@
 package services
 
 import (
+	"gorm.io/gorm/clause"
 	"telegramBot/model"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"gorm.io/gorm/clause"
 )
 
 func SaveUser(user *model.User) {

@@ -14,9 +14,11 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		bot: bot,
 	}
 	query := update.CallbackQuery.Data
+	fmt.Println("group query --", query)
 	switch query {
-	case "group_setting":
+	case "group_welcome_setting":
 		fmt.Println("group_setting")
+		mgr.group_welcome_setting(update)
 	case "group_solitaire":
 		fmt.Println("group_solitaire")
 	case "group_record":
@@ -26,8 +28,7 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		mgr.statics(update)
 	case "group_verification":
 		fmt.Println("group_verification")
-	case "group_welcome":
-		mgr.welcomeNewMember(update.Message)
+
 	case "group_speechtodayranging":
 		mgr.speechRanging(update, "today")
 	case "group_speech7daysranging":
@@ -44,7 +45,16 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		mgr.groupmemberstatis(update, "week")
 	case "group_back_statics":
 		mgr.group_back_statics(update)
-
+	case "group_welcomeSettingEnable":
+		mgr.group_welcomeSettingStatus(update, true)
+	case "group_welcomeSettingDisable":
+		mgr.group_welcomeSettingStatus(update, false)
+	case "group_welcome_DeletePrevMsg_enable":
+		mgr.welcomeSettingDeletePrevMsg(update, true)
+	case "group_welcome_DeletePrevMsg_disable":
+		mgr.welcomeSettingDeletePrevMsg(update, false)
+	case "group_welcome_setting_text":
+		mgr.welcomeTextSetting(update)
 	case "toast":
 		fmt.Println("请选择")
 	}

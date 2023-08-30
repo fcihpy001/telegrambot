@@ -74,3 +74,15 @@ type UserAction struct {
 	ChatId int64
 	Day    string `gorm:"type:varchar(20)"` // 20230828
 }
+
+type WelcomeSetting struct {
+	gorm.Model
+	ChatId        int64 `gorm:"index:user_chat_idx"`
+	Uid           int64
+	Enable        bool
+	WelcomeType   string
+	WelcomeText   string
+	WelcomeMedia  string
+	WelcomeButton string
+	DeletePrevMsg bool
+}
