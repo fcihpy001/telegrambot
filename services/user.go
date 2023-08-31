@@ -7,12 +7,13 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func SaveUser(user *model.User) {
+func SaveUser(user *model.User) error {
 	// ignore on duplicate
 	err := db.Clauses(clause.Insert{Modifier: "IGNORE"}).Create(user).Error
 	if err != nil {
 		logger.Err(err).Int64("userId", user.Uid).Msg("create user failed")
 	}
+	return err
 }
 
 func saveUser(user *tgbotapi.User) {

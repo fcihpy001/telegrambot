@@ -3,9 +3,11 @@ package group
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"telegramBot/services"
 	"telegramBot/utils"
 	"time"
 
@@ -284,10 +286,65 @@ func SendTestMentioned(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
 	// 		UserName:  "bigwinner",
 	// 	},
 	// }
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "[测试提及](tg://user?id=5394405541)\nwhat's up\n下一页")
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID,
+		fmt.Sprintf("[%s](tg://user?id=6297349406)\nwhat's up\n下一页",
+			escapeText("Mm-hmm. Okay?")),
+	)
 	msg.ParseMode = "MarkdownV2"
 	_, err := mgr.bot.Send(msg)
 	if err != nil {
-		logger.Err(err)
+		logger.Err(err).Msg("send message failed")
 	}
+}
+
+func mentionUser(username interface{}, userId int64) string {
+	return fmt.Sprintf("[%s](tg://user?id=%d)", escapeText(fmt.Sprint(username)), userId)
+}
+
+// 获取chat 群用户数
+func (mgr *GroupManager) GetChatMemberCount(id int64) int {
+	resp, err := mgr.bot.GetChatMembersCount(tgbotapi.ChatMemberCountConfig{ChatConfig: tgbotapi.ChatConfig{
+		ChatID: id,
+	}})
+	if err != nil {
+		logger.Err(err).Int64("chatId", id).Msg("get chat member count failed")
+		return 0
+	}
+
+	return resp
+}
+
+// period: today 今天 week 7天
+func getTimeRange(period string) (startTs, endTs int64) {
+	now := time.Now()
+	if period == "week" {
+		now_7 := now.Add(time.Duration(-7) * time.Hour * 24)
+		startTs = now_7.Unix()
+	} else {
+		// today
+		startTs = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Unix()
+	}
+	endTs = now.Unix() + 60
+	return
+}
+
+func getRangeDays(startTs, endTs int64) (days []string) {
+	for startTs < endTs {
+		days = append(days, services.ToDay(startTs))
+		startTs += 86400
+	}
+	return
+}
+
+func getWeekRange() (startDay, endDay string) {
+	now := time.Now()
+	now_7 := now.Add(time.Duration(-7) * time.Hour * 24)
+
+	return fmt.Sprintf("%d%02d%02d", now_7.Year(), now_7.Month(), now_7.Day()),
+		fmt.Sprintf("%d%02d%02d", now.Year(), now.Month(), now.Day())
+}
+
+// 转义 markdown
+func escapeText(s string) string {
+	return strings.Replace(strings.Replace(s, "-", "\\-", -1), ".", `\.`, -1)
 }

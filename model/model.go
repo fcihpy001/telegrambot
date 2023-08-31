@@ -62,8 +62,8 @@ const (
 // 用户与群组关系表
 type UserChat struct {
 	gorm.Model
-	UserId    int64  `gorm:"index:user_chat_idx"`
-	ChatId    int64  `gorm:"index:user_chat_idx"`
+	UserId    int64  `gorm:"uniqueIndex:user_chat_idx"`
+	ChatId    int64  `gorm:"uniqueIndex:user_chat_idx"`
 	InvitedBy int64  // 邀请人
 	Status    string `gorm:"type:varchar(20)"` // member administrator
 	Ts        int64
@@ -73,6 +73,7 @@ type UserChat struct {
 type Counter struct {
 	Count     int
 	InvitedBy int64
+	UserName  string
 	ChatId    int64
 	Day       string
 }
