@@ -99,3 +99,41 @@ type WelcomeSetting struct {
 	WelcomeButton string
 	DeletePrevMsg bool
 }
+
+type InviteSetting struct {
+	gorm.Model
+	ChatId            int64 `gorm:"index:user_chat_idx"`
+	Uid               int64
+	Enable            bool
+	AutoGenerate      bool
+	Remind            bool
+	LinkExpireTime    int64
+	InviteLinkLimit   int
+	InvitePeopleLimit int
+	InviteCount       int
+}
+
+type Invite struct {
+	gorm.Model
+	Uid         int64 `gorm:"index:invite_idx"`
+	InviteLink  string
+	InviteCount int
+}
+
+type ReplySetting struct {
+	gorm.Model
+	ChatId          int64 `gorm:"uniqueIndex"`
+	Uid             int64
+	Enable          bool
+	KeywordReply    []Reply
+	DeleteReplyTime int
+}
+
+type Reply struct {
+	gorm.Model
+	ChatId         int64
+	KeyWorld       string `gorm:"uniqueIndex"`
+	ReplyWorld     string
+	MatchAll       bool
+	ReplySettingID uint
+}

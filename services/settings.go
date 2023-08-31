@@ -32,3 +32,57 @@ func GetSettings(chatId int64) model.WelcomeSetting {
 	}
 	return setting
 }
+
+func SaveInviteSettings(setting *model.InviteSetting) {
+	if setting.ChatId < 1 {
+		return
+	}
+	//更新或者创建
+	if GetSettings(setting.ChatId).ChatId > 0 {
+		err := db.Save(setting)
+		if err != nil {
+			log.Println("update invite settings failed", err)
+		}
+	} else {
+		err := db.Create(setting)
+		if err != nil {
+			log.Println("create invite settings failed", err)
+		}
+	}
+}
+
+func GetInviteSettings(chatId int64) model.InviteSetting {
+	var setting model.InviteSetting
+	err := db.Where("chat_id = ?", chatId).First(&setting)
+	if err != nil {
+		log.Println("get invite settings failed")
+	}
+	return setting
+}
+
+func SaveReplySettings(model *model.ReplySetting) {
+	if model.ChatId < 1 {
+		return
+	}
+	//更新或者创建
+	if GetSettings(model.ChatId).ChatId > 0 {
+		err := db.Save(model)
+		if err != nil {
+			log.Println("update reply settings failed", err)
+		}
+	} else {
+		err := db.Create(model)
+		if err != nil {
+			log.Println("create reply settings failed", err)
+		}
+	}
+}
+
+func GetReplySettings(chatId int64) model.ReplySetting {
+	var setting model.ReplySetting
+	err := db.Where("chat_id = ?", chatId).First(&setting)
+	if err != nil {
+		log.Println("get reply settings failed")
+	}
+	return setting
+}
