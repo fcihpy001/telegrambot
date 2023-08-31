@@ -61,6 +61,10 @@ func StatsNewMembers(update *tgbotapi.Update) {
 		return
 	}
 	chatId := chat.ID
+	invitedBy := int64(0)
+	if msg.From != nil {
+		invitedBy = msg.From.ID
+	}
 	// 1. 创建group
 	SaveChatGroupByChat(chat)
 	newMembers := msg.NewChatMembers
@@ -69,7 +73,12 @@ func StatsNewMembers(update *tgbotapi.Update) {
 		//  创建用户
 		saveUser(&member)
 		// 创建/更新 user-chat 关系 createOrUpdate
-		UpdateChatMember(chatId, userId, "member", int64(msg.Date))
+		if userId == invitedBy {
+			// 无人邀请
+			UpdateChatMember(chatId, userId, 0, "member", int64(msg.Date))
+		} else {
+			UpdateChatMember(chatId, userId, invitedBy, "member", int64(msg.Date))
+		}
 		// 创建 user action
 		SaveUserAction(userId, chatId, model.UserJoin, int64(msg.Date))
 	}
@@ -90,7 +99,7 @@ func StatsLeave(update *tgbotapi.Update) {
 	}
 	userId := leftMember.ID
 
-	RemoveChatMember(userId, chatId)
+	RemoveChatMember(chatId, userId)
 	// 创建 user action
 	SaveUserAction(userId, chatId, model.UserLeft, int64(msg.Date))
 }
