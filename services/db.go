@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 	"telegramBot/model"
 	"telegramBot/utils"
 
@@ -25,7 +26,6 @@ func Init(ctx context.Context) {
 }
 
 func InitDB() {
-	// initPostgres(utils.Config.DatabaseURL)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		utils.Config.Mysql.UserName,
 		utils.Config.Mysql.Passwd,
@@ -33,13 +33,11 @@ func InitDB() {
 		utils.Config.Mysql.Database)
 	// fmt.Println(dsn)
 	InitMysql(dsn)
-	// createTable()
+	createTable()
 
 	initRedis(utils.Config.RedisURL)
 }
 
-//	func initPostgres(dsn string) {
-//		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 func InitMysql(dsn string) {
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
@@ -82,7 +80,10 @@ func createTable() {
 	if err := db.AutoMigrate(&model.ReplySetting{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
-
+	if err := db.AutoMigrate(&model.ProhibitedSetting{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	log.Println("数据表创建成功...")
 }
 
 func initRedis(uri string) {

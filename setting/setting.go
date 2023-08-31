@@ -8,7 +8,7 @@ import (
 )
 
 func Settings(chatId int64, bot *tgbotapi.BotAPI) {
-	btn11 := model.ButtonInfo{
+	_ = model.ButtonInfo{
 		Text:    "🌺抽奖活动",
 		Data:    "lucky_activity",
 		BtnType: model.BtnTypeData,
@@ -90,7 +90,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 		BtnType: model.BtnTypeData,
 	}
 
-	btnRow1 := []model.ButtonInfo{btn11, btn12}
+	btnRow1 := []model.ButtonInfo{btn12}
 	btnRow2 := []model.ButtonInfo{btn21, btn22}
 	btnRow3 := []model.ButtonInfo{btn31, btn32}
 	btnRow4 := []model.ButtonInfo{btn41, btn42}
