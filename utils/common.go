@@ -18,6 +18,9 @@ var Config ConfigData
 var SettingMenuMarkup tgbotapi.InlineKeyboardMarkup
 var StaticsMarkup tgbotapi.InlineKeyboardMarkup
 var GroupWelcomeMarkup tgbotapi.InlineKeyboardMarkup
+var InviteMenuMarkup tgbotapi.InlineKeyboardMarkup
+var ReplEnableyMenuMarkup tgbotapi.InlineKeyboardMarkup
+var ReplDisableMenuMarkup tgbotapi.InlineKeyboardMarkup
 
 func InitConfig() {
 	// 读取配置文件

@@ -66,8 +66,17 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		if err != nil {
 			log.Println(err)
 		}
-	} else if query == "go_setting" { //违禁词列表
+	} else if query == "go_setting" {
 		bot.go_setting(update)
+	} else if query == "go_group" { //违禁词列表
+
+	} else if query == "auto_reply" { //回复消息
+		setting.AutoReply(update, bot.bot)
+	} else if query == "reply_status_enable" {
+		setting.AutoReplyStatus(update, bot.bot, true)
+	} else if query == "reply_status_disable" {
+		setting.AutoReplyStatus(update, bot.bot, false)
+
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")
 		msg.DisableNotification = false

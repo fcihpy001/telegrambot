@@ -15,7 +15,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	}
 	btn12 := model.ButtonInfo{
 		Text:    "😊专属邀请链接生成",
-		Data:    "group_invite_link",
+		Data:    "group_invite_setting",
 		BtnType: model.BtnTypeData,
 	}
 	btn21 := model.ButtonInfo{

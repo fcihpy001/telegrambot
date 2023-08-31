@@ -73,6 +73,16 @@ func createTable() {
 	if err := db.AutoMigrate(&model.WelcomeSetting{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
+	if err := db.AutoMigrate(&model.InviteSetting{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.Reply{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.ReplySetting{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+
 }
 
 func initRedis(uri string) {

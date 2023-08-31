@@ -26,6 +26,7 @@ func StartBot(ctx context.Context) {
 }
 
 func (bot *SmartBot) setupBotWithPool() {
+
 	updateConfig := tgbotapi.NewUpdate(0)
 	timeout := 600
 	if os.Getenv(utils.POLL_TIMEOUT) != "" {
