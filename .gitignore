@@ -5,3 +5,5 @@ telegramBot
 telegramBot.exe
 config.yaml
 doc/
+.VSCodeCounter/
+.vscode/

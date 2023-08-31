@@ -36,9 +36,9 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	case "group_speechstatistics":
 		mgr.speechstatistics(update)
 	case "group_invite_ranging":
-		mgr.inviteRanging(update)
+		mgr.invitesToday(update)
 	case "group_invite_7days_ranging":
-		mgr.invitestatis(update)
+		mgr.invitesWeek(update)
 	case "group_today_quit":
 		mgr.groupmemberstatis(update, "today")
 	case "group_7days_quit":

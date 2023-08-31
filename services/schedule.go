@@ -99,7 +99,7 @@ func convertToStatCounts(statType int, kv map[string]string, currentMinute int64
 			UserId:   userId,
 			Ts:       minutes, // timestamp
 			Count:    count,
-			Day:      toDay(minutes * 60),
+			Day:      ToDay(minutes * 60),
 		})
 	}
 	return expiredKeys, stats

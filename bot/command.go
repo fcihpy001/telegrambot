@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"telegramBot/group"
-	"telegramBot/model"
-	"telegramBot/services"
 	"telegramBot/setting"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -35,14 +33,17 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	case "stat", "stats", "statistic", "stat_week", "mute", "unmute", "ban", "unban", "admin", "kick", "invite", "link":
 		group.GroupHandlerCommand(&update, bot.bot)
 
+	case "mention":
+		group.SendTestMentioned(bot.bot, &update)
+
 	default:
 		fmt.Println("i dont't know this command")
 		return
 	}
 	//	todo: 保存用户信息
-	u := model.User{
-		Uid:       update.Message.From.ID,
-		FirstName: update.Message.Chat.FirstName,
-	}
-	services.SaveUser(&u)
+	// u := model.User{
+	// 	Uid:       update.Message.From.ID,
+	// 	FirstName: update.Message.Chat.FirstName,
+	// }
+	// services.SaveUser(&u)
 }

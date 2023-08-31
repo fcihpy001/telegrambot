@@ -51,3 +51,21 @@ func (mgr *GroupManager) CheckUserIsAdmin(chatId int64, userId int64) (bool, err
 	}
 	return info.IsAdministrator(), nil
 }
+
+func (mgr *GroupManager) fetchAndSaveMember(chatId int64, userId int64) (model.User, error) {
+	member, err := mgr.CheckUserInfo(chatId, userId)
+	if err != nil {
+		return model.User{}, err
+	}
+	user := model.User{
+		Uid:          member.User.ID,
+		IsBot:        member.User.IsBot,
+		FirstName:    member.User.FirstName,
+		LastName:     member.User.LastName,
+		Username:     member.User.UserName,
+		LanguageCode: member.User.LanguageCode,
+	}
+	err = services.SaveUser(&user)
+	services.UpdateChatMember(chatId, userId, member.Status, 0) // 这里不知道用户是什么时候加入的, 设置为0
+	return user, err
+}

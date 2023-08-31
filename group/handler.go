@@ -1,10 +1,12 @@
 package group
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
+	"fmt"
 	"telegramBot/model"
+	"telegramBot/services"
 	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func (mgr *GroupManager) statics(update *tgbotapi.Update) {
@@ -72,34 +74,122 @@ func (mgr *GroupManager) statics(update *tgbotapi.Update) {
 }
 
 func (mgr *GroupManager) speechRanging(update *tgbotapi.Update, period string) {
-	content := "今日总发言：7条，以下是前100名：\n\n1.fcihpy - 6 条\n2.Fcihpy3 - 1 条"
-	if period == "week" {
-		content = "7日发言数：8条，以下是前100名：\n\n1.fcihpy - 7 条\n2.Fcihpy3 - 1 条"
+	startTs, endTs := getTimeRange(period)
+	chatId := update.CallbackQuery.Message.Chat.ID
+
+	result, err := mgr.statPeroidChatMessages(chatId, startTs, endTs, 0, 10)
+	if err != nil {
+		logger.Err(err).Msg("speechRanging failed")
+		return
 	}
+	content := ""
+	fmtUserRating(1, result.Data)
+
+	if period == "week" {
+		content = fmt.Sprintf("7日发言数：%d 条 聊天人数: %d，以下是排名: \n\n", result.TotalMsg, result.TotalUser)
+	} else {
+		content = fmt.Sprintf("今日总发言：%d 条，聊天人数: %d, 以下是排名：\n\n", result.TotalMsg, result.TotalUser)
+	}
+	content += fmtUserRating(1, result.Data)
 	mgr.staticsDetail(update, content)
 }
 
 func (mgr *GroupManager) speechstatistics(update *tgbotapi.Update) {
-
-	content := "以下是7日发言统计：\n\n2023-08-28       7 条\n2023-08-27       1 条"
+	chatId := update.CallbackQuery.Message.Chat.ID
+	startDay, endDay := getWeekRange()
+	records, err := services.GroupChatMessageByDay(chatId, startDay, endDay)
+	if err != nil {
+		logger.Err(err).Msg("stat messages by day failed")
+		return
+	}
+	content := "以下是7日发言统计:\n"
+	for _, record := range records {
+		content += fmt.Sprintf("%s   %d\n", record.Day, record.Count)
+	}
 	mgr.staticsDetail(update, content)
 }
 
-func (mgr *GroupManager) inviteRanging(update *tgbotapi.Update) {
+// 今日邀请
+func (mgr *GroupManager) invitesToday(update *tgbotapi.Update) {
+	startTs, endTs := getTimeRange("today")
+	mgr.invitestatis(update, startTs, endTs, 0, "今日")
+}
 
-	content := "今日邀请：7人，以下是前100名：\n\n1.fcihpy - 6 条\n2.Fcihpy3 - 1 条"
+func (mgr *GroupManager) invitestatis(update *tgbotapi.Update, startTs, endTs int64, startIdx int, timeRange string) {
+	chatId := update.CallbackQuery.Message.Chat.ID
+	total, invites, err := services.GroupChatInviteByUser(chatId, startTs, endTs, 10, int64(startIdx))
+	if err != nil {
+		logger.Err(err).Msg("stat today invites failed")
+		return
+	}
+	var ids []int64
+	for _, record := range invites {
+		ids = append(ids, record.InvitedBy)
+	}
+	names := mgr.getUserNames(chatId, ids)
+	content := fmt.Sprintf("%s共邀请: %d人，以下是排名\n", timeRange, total)
+	for i, record := range invites {
+		name := names[record.InvitedBy]
+		if name == "" {
+			name = fmt.Sprintf("%d", record.InvitedBy)
+		}
+		content += fmt.Sprintf("%d\\. \t%s \\-  %d\n", 1+startIdx+i, mentionUser(name, record.InvitedBy), record.Count)
+	}
+	// 1.fcihpy - 6 条\n2.Fcihpy3 - 1 条"
 	mgr.staticsDetail(update, content)
 }
 
-func (mgr *GroupManager) invitestatis(update *tgbotapi.Update) {
-
-	content := "7日邀请统计，以下是前100名：\n\n1.fcihpy - 6 条\n2.Fcihpy3 - 1 条"
-	mgr.staticsDetail(update, content)
+// 7日邀请
+func (mgr *GroupManager) invitesWeek(update *tgbotapi.Update) {
+	startTs, endTs := getTimeRange("week")
+	mgr.invitestatis(update, startTs, endTs, 0, "7日")
 }
 
+// 今日进群数据
 func (mgr *GroupManager) groupmemberstatis(update *tgbotapi.Update, period string) {
+	chatId := update.CallbackQuery.Message.Chat.ID
+	startTs, endTs := getTimeRange(period)
+	var content string
+	if period == "today" {
+		joinCount, _ := services.CountChatJoinLeft("join", chatId, startTs, endTs)
+		leftCount, _ := services.CountChatJoinLeft("left", chatId, startTs, endTs)
+		joinList, leftList, err := services.GetLatestJoinLeftUsers(chatId, startTs, endTs, 10)
+		if err != nil {
+			logger.Err(err).Msg("get latest join/left users failed")
+			return
+		}
+		content = fmt.Sprintf("今日进群: %d 人，退群: %d人\n", joinCount, leftCount)
+		content += "\n以下是今日最新进群用户:\n"
+		// 以下是今日最新进群20人：\n\n\n以下是今日最新退群20人：
+		for _, item := range joinList {
+			content += mentionUser(getDisplayName(&item), item.Uid) + "\n"
+		}
+		content += "\n以下是今日最新退群用户:\n"
+		for _, item := range leftList {
+			content += mentionUser(getDisplayName(&item), item.Uid) + "\n"
+		}
+	} else {
+		content = "7日进群：%d人，退群：%d人\n以下是近7日进群退群人数:\n日期 \t  进群数量    退群数量\n"
+		joins, _ := services.GroupChatJoinLeftByDay("join", chatId, startTs, endTs)
+		leaves, _ := services.GroupChatJoinLeftByDay("left", chatId, startTs, endTs)
+		days := getRangeDays(startTs, endTs)
+		joinIdx := 0
+		leaveIdx := 0
+		for _, day := range days {
+			join := 0
+			left := 0
+			if len(joins) > joinIdx && joins[joinIdx].Day == day {
+				join = joins[joinIdx].Count
+				joinIdx++
+			}
+			if len(leaves) > leaveIdx && leaves[leaveIdx].Day == day {
+				left = leaves[leaveIdx].Count
+				leaveIdx++
+			}
+			content += fmt.Sprintf("%s   %d   %d\n", day, join, left)
+		}
+	}
 
-	content := "今日进群：0人，退群：0人\n以下是今日最新进群20人：\n\n\n以下是今日最新退群20人："
 	mgr.staticsDetail(update, content)
 }
 
@@ -109,9 +199,10 @@ func (mgr *GroupManager) staticsDetail(update *tgbotapi.Update, content string) 
 			tgbotapi.NewInlineKeyboardButtonData("🦀返回", "group_back_statics"),
 		))
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard)
+	msg.ParseMode = "MarkdownV2"
 	_, err := mgr.bot.Send(msg)
 	if err != nil {
-		log.Println(err)
+		logger.Err(err).Stack().Str("content", content).Msg("send msg failed")
 	}
 }
 

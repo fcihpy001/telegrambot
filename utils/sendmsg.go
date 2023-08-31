@@ -1,9 +1,10 @@
 package utils
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"telegramBot/model"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func SendText(chatId int64, text string, bot *tgbotapi.BotAPI) {
@@ -49,7 +50,7 @@ func SendReply(msgId string, bot *tgbotapi.BotAPI, isAlert bool, msg string) {
 	callback := tgbotapi.NewCallback(msgId, msg)
 	callback.ShowAlert = isAlert
 	if _, err := bot.Request(callback); err != nil {
-		panic(err)
+		log.Println(err)
 	}
 }
 
