@@ -170,3 +170,37 @@ const (
 	BanTimeType5 BanTimeType = "BanTimeType5"
 	BanTimeType6 BanTimeType = "BanTimeType6"
 )
+
+type Punishment struct {
+	gorm.Model
+	Punish              PunishType
+	WarningCount        int
+	WarningAfterPunish  PunishType
+	BanTime             int
+	DeleteNotifyMsgTime int64
+}
+
+type NewMemberCheck struct {
+	gorm.Model
+	ChatId    int64 `gorm:"uniqueIndex"`
+	Uid       int64
+	Enable    bool
+	DelayTime int
+}
+
+type UserCheck struct {
+	gorm.Model
+	ChatId              int64 `gorm:"uniqueIndex"`
+	Uid                 int64
+	SetName             bool
+	SetUserName         bool
+	SetIcon             bool
+	SubScribe           bool
+	ChannelAddr         string
+	NameNotContainWord  string
+	Punish              PunishType
+	WarningCount        int
+	WarningAfterPunish  PunishType
+	BanTime             int
+	DeleteNotifyMsgTime int64
+}

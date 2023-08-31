@@ -83,6 +83,15 @@ func createTable() {
 	if err := db.AutoMigrate(&model.ProhibitedSetting{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
+	if err := db.AutoMigrate(&model.Punishment{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.NewMemberCheck{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.UserCheck{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 	log.Println("数据表创建成功...")
 }
 

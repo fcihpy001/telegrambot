@@ -75,7 +75,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	}
 	btn72 := model.ButtonInfo{
 		Text:    "🌰新群员限制",
-		Data:    "new_member_limit",
+		Data:    "new_member_check",
 		BtnType: model.BtnTypeData,
 	}
 

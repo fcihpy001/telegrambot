@@ -148,6 +148,20 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if query == "reply_status_disable" {
 		setting.AutoReplyStatus(update, bot.bot, false)
 
+	} else if query == "new_member_check" {
+		setting.MemberCheckMenu(update, bot.bot)
+
+	} else if query == "new_member_check_enable" {
+		setting.MemberCheckStatus(update, bot.bot, true)
+
+	} else if query == "new_member_check_disable" {
+		setting.MemberCheckStatus(update, bot.bot, false)
+
+	} else if query == "new_member_check_time_menu" {
+		setting.MemberCheckTimeMenu(update, bot.bot)
+
+	} else if query == "user_check" {
+
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")
 		msg.DisableNotification = false
