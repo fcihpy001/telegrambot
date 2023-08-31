@@ -45,7 +45,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	}
 	btn42 := model.ButtonInfo{
 		Text:    "进群欢迎",
-		Data:    "group_welcome",
+		Data:    "group_welcome_setting",
 		BtnType: model.BtnTypeData,
 	}
 	btn51 := model.ButtonInfo{

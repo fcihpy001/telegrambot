@@ -29,4 +29,5 @@ func main() {
 	// Block until a signal is received.
 	<-c
 	cancel()
+	//bot.StartBot(context.Background())
 }

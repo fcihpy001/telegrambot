@@ -70,6 +70,9 @@ func createTable() {
 	if err := db.AutoMigrate(&model.StatCount{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
+	if err := db.AutoMigrate(&model.WelcomeSetting{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 }
 
 func initRedis(uri string) {

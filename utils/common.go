@@ -17,6 +17,7 @@ import (
 var Config ConfigData
 var SettingMenuMarkup tgbotapi.InlineKeyboardMarkup
 var StaticsMarkup tgbotapi.InlineKeyboardMarkup
+var GroupWelcomeMarkup tgbotapi.InlineKeyboardMarkup
 
 func InitConfig() {
 	// 读取配置文件
