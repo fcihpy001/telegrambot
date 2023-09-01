@@ -2,9 +2,10 @@ package setting
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"telegramBot/model"
 	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func Settings(chatId int64, bot *tgbotapi.BotAPI) {
@@ -21,7 +22,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	btn21 := model.ButtonInfo{
 		Text:    "👨‍🎓群接龙",
 		Data:    "group_solitaire",
-		BtnType: model.BtnTypeSwitch,
+		BtnType: model.BtnTypeData,
 	}
 	btn22 := model.ButtonInfo{
 		Text:    "🧝‍群统计",

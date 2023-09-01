@@ -9,6 +9,12 @@ const (
 	StatTypeInviteCount
 	StatTypeJoinChat
 	StatTypeLeaveChat
+
+	ActionJoin = "join"
+	ActionLeft = "left"
+
+	CautionTriggerByWords = "words" // 违禁词触发警告
+	CautionTriggerByName  = "name"  // 用户名检查触发警告
 )
 
 // StatCount 统计指定范围内 StatType 数量, 精度: 分钟
@@ -204,3 +210,39 @@ type UserCheck struct {
 	BanTime             int
 	DeleteNotifyMsgTime int64
 }
+
+// 接龙
+type Solitaire struct {
+	gorm.Model
+	ChatId      int64
+	LimitUsers  int
+	LimitTime   int    // 截止时间
+	Creator     int64  // 创建用户 id
+	Description string `gorm:""`
+	Status      string
+}
+
+// 消息接龙 一个用户只能接一次 如果接了多次会覆盖上次内容
+type SolitaireMessage struct {
+	gorm.Model
+	ChatId      int64
+	SolitaireId int64
+	UserId      int64
+	Message     string
+}
+
+// 用户警告记录
+type UserCautions struct {
+	gorm.Model
+	UserId       int64  `gorm:"uniqueIndex:chat_user_trigger_idx"`
+	ChatId       int64  `gorm:"uniqueIndex:chat_user_trigger_idx"`
+	TriggerType  string `gorm:"uniqueIndex:chat_user_trigger_idx"` // 由于何种原因触发警告
+	TriggerCount int64
+}
+
+type TriggerType string
+
+const (
+	TriggerTypeWords    = "words"
+	TriggerTypeUsername = "username"
+)

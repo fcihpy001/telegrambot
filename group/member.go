@@ -20,15 +20,15 @@ func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 			continue
 		}
 		//	保存用户信息
-		u := model.User{
-			Uid:          message.Chat.ID,
-			FirstName:    user.FirstName,
-			Username:     user.UserName,
-			LastName:     user.LastName,
-			LanguageCode: user.LanguageCode,
-			IsBot:        user.IsBot,
-		}
-		services.SaveUser(&u)
+		// u := model.User{
+		// 	Uid:          message.Chat.ID, // 这里有问题 chat.ID 是群组id
+		// 	FirstName:    user.FirstName,
+		// 	Username:     user.UserName,
+		// 	LastName:     user.LastName,
+		// 	LanguageCode: user.LanguageCode,
+		// 	IsBot:        user.IsBot,
+		// }
+		// services.SaveUser(&u)
 	}
 }
 
@@ -41,6 +41,23 @@ func (mgr *GroupManager) CheckUserInfo(chatId int64, userId int64) (tgbotapi.Cha
 		},
 	}
 	return mgr.bot.GetChatMember(req)
+}
+
+// 是否有头像
+func (mgr *GroupManager) HasUserProfilePhotos(userId int64) (bool, error) {
+	resp, err := mgr.bot.GetUserProfilePhotos(tgbotapi.UserProfilePhotosConfig{
+		UserID: userId,
+		Limit:  5,
+		Offset: 0,
+	})
+	if err != nil {
+		return false, err
+	}
+	if resp.TotalCount == 0 {
+		return false, nil
+	}
+	// fmt.Println(resp.Photos)
+	return true, nil
 }
 
 func (mgr *GroupManager) CheckUserIsAdmin(chatId int64, userId int64) (bool, error) {

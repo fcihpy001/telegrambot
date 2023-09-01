@@ -1,8 +1,9 @@
 package group
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // ban unban
@@ -22,15 +23,26 @@ func (mgr *GroupManager) ban(update *tgbotapi.Update) {
 		return
 	}
 	seconds := parseUntilDate(update.Message.Text)
+
+	mgr.banChatMember(chatId, fromId, seconds)
+}
+
+// until_date	Integer	Optional
+//
+//	Date when the user will be unbanned; Unix time.
+//	If user is banned for more than 366 days or less than 30 seconds
+//	from the current time they are considered to be banned forever.
+//	Applied for supergroups and channels only.
+func (mgr *GroupManager) banChatMember(chatId, userId, ts int64) {
 	// if user is administrator
 	resp := tgbotapi.BanChatMemberConfig{
 		ChatMemberConfig: tgbotapi.ChatMemberConfig{
 			ChatID: chatId,
 			// SuperGroupUsername: chat.UserName,
 			ChannelUsername: "",
-			UserID:          fromId,
+			UserID:          userId,
 		},
-		UntilDate:      seconds,
+		UntilDate:      ts,
 		RevokeMessages: false,
 	}
 
