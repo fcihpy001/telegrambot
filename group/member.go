@@ -10,7 +10,6 @@ import (
 // WelcomeNewMember 进群欢迎
 func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 	newMembersMsg := message.NewChatMembers
-
 	for _, user := range newMembersMsg {
 		if user.IsBot {
 			continue
@@ -20,16 +19,16 @@ func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 			logger.Err(err)
 			continue
 		}
-		//	todo: 保存用户信息
-		u := model.User{
-			Uid:          message.Chat.ID,
-			FirstName:    user.FirstName,
-			Username:     user.UserName,
-			LastName:     user.LastName,
-			LanguageCode: user.LanguageCode,
-			IsBot:        user.IsBot,
-		}
-		services.SaveUser(&u)
+		//	保存用户信息
+		// u := model.User{
+		// 	Uid:          message.Chat.ID, // 这里有问题 chat.ID 是群组id
+		// 	FirstName:    user.FirstName,
+		// 	Username:     user.UserName,
+		// 	LastName:     user.LastName,
+		// 	LanguageCode: user.LanguageCode,
+		// 	IsBot:        user.IsBot,
+		// }
+		// services.SaveUser(&u)
 	}
 }
 
@@ -42,6 +41,23 @@ func (mgr *GroupManager) CheckUserInfo(chatId int64, userId int64) (tgbotapi.Cha
 		},
 	}
 	return mgr.bot.GetChatMember(req)
+}
+
+// 是否有头像
+func (mgr *GroupManager) HasUserProfilePhotos(userId int64) (bool, error) {
+	resp, err := mgr.bot.GetUserProfilePhotos(tgbotapi.UserProfilePhotosConfig{
+		UserID: userId,
+		Limit:  5,
+		Offset: 0,
+	})
+	if err != nil {
+		return false, err
+	}
+	if resp.TotalCount == 0 {
+		return false, nil
+	}
+	// fmt.Println(resp.Photos)
+	return true, nil
 }
 
 func (mgr *GroupManager) CheckUserIsAdmin(chatId int64, userId int64) (bool, error) {
@@ -66,6 +82,6 @@ func (mgr *GroupManager) fetchAndSaveMember(chatId int64, userId int64) (model.U
 		LanguageCode: member.User.LanguageCode,
 	}
 	err = services.SaveUser(&user)
-	services.UpdateChatMember(chatId, userId, member.Status, 0) // 这里不知道用户是什么时候加入的, 设置为0
+	services.UpdateChatMember(chatId, userId, 0, member.Status, 0) // 这里不知道用户是什么时候加入的, 设置为0
 	return user, err
 }

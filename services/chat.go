@@ -36,18 +36,20 @@ func SaveChatGroup(chatId int64, title, typ, username, photo, location string) {
 }
 
 // create or update chat member
-func UpdateChatMember(chatId, userId int64, status string, ts int64) {
+func UpdateChatMember(chatId, userId, inviteBy int64, status string, ts int64) {
 	item := model.UserChat{
-		UserId: userId,
-		ChatId: chatId,
-		Status: status,
-		Day:    ToDay(ts),
+		UserId:    userId,
+		ChatId:    chatId,
+		Status:    status,
+		Day:       ToDay(ts),
+		InvitedBy: inviteBy,
 	}
 	err := db.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "user_id"}, {Name: "chat_id"}},
 		DoUpdates: clause.Assignments(map[string]interface{}{
-			"status": status,
-			"ts":     ts,
+			"status":     status,
+			"ts":         ts,
+			"invited_by": inviteBy,
 		}),
 	}).Create(&item).Error
 	if err != nil {
@@ -60,7 +62,7 @@ func UpdateChatMember(chatId, userId int64, status string, ts int64) {
 }
 
 func RemoveChatMember(chatId, userId int64) {
-	db.Exec("delete user_chat where user_id = ? and chat_id = ?", userId, chatId)
+	db.Exec("delete from user_chat where user_id = ? and chat_id = ?", userId, chatId)
 }
 
 func SaveUserAction(userId, chatId int64, action string, ts int64) {
