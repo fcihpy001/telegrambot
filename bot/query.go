@@ -184,6 +184,27 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if query == "go_user_check_setting" {
 		setting.UserCheckSetting(update, bot.bot)
 
+	} else if query == "flood_setting" {
+		setting.FloodSettingMenu(update, bot.bot)
+
+	} else if query == "flood_status_enable" {
+		setting.FloodStatus(update, bot.bot, true)
+
+	} else if query == "flood_status_disable" {
+		setting.FloodStatus(update, bot.bot, false)
+
+	} else if query == "flood_msg_count" {
+		setting.FloodMsgCountMenu(update, bot.bot)
+
+	} else if query == "flood_interval" {
+		setting.FloodIntervalMenu(update, bot.bot)
+
+	} else if query == "flood_trigger_delete" {
+		setting.FloodDeleteMsg(update, bot.bot)
+
+	} else if query == "spam_setting" {
+		setting.SpamSettingMenu(update, bot.bot)
+
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")
 		msg.DisableNotification = false

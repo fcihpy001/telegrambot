@@ -19,5 +19,11 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 
 	} else if strings.Contains(replyMsg, "请输入要禁止的名字（一行一个") {
 		setting.BlackUserAddResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "请输入时间内发送消息的最大条数") {
+		setting.FloodMsgCountResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "请输入统计发送消息的间隔时间（秒）") {
+		setting.FloodIntervalResult(update, bot.bot)
 	}
 }

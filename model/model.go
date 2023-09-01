@@ -178,6 +178,8 @@ type Punishment struct {
 	WarningAfterPunish  PunishType
 	BanTime             int
 	DeleteNotifyMsgTime int64
+	FloodSettingID      uint
+	SpamSettingID       uint
 }
 
 type NewMemberCheck struct {
@@ -203,4 +205,38 @@ type UserCheck struct {
 	WarningAfterPunish  PunishType
 	BanTime             int
 	DeleteNotifyMsgTime int64
+}
+
+type SpamSetting struct {
+	gorm.Model
+	ChatId int64 `gorm:"uniqueIndex"`
+	Uid    int64
+
+	EnableAi       bool
+	DDos           bool
+	BlackUser      bool
+	Link           bool
+	ChannelCopy    bool
+	ChannelForward bool
+	UserForward    bool
+	AtGroupId      bool
+	AtUserId       bool
+	EthAddr        bool
+	Command        bool
+	LongMsg        bool
+	MsgLength      int
+	LongName       bool
+	NameLength     int
+	PunishInfo     Punishment
+}
+
+type FloodSetting struct {
+	gorm.Model
+	ChatId     int64 `gorm:"uniqueIndex"`
+	Uid        int64
+	Enable     bool
+	MsgCount   int
+	Interval   int
+	DeleteMsg  bool
+	PunishInfo Punishment
 }

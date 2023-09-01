@@ -8,24 +8,45 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"telegramBot/model"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/rs/zerolog"
 	"gopkg.in/yaml.v3"
 )
 
-var Config ConfigData
-var SettingMenuMarkup tgbotapi.InlineKeyboardMarkup
-var StaticsMarkup tgbotapi.InlineKeyboardMarkup
-var GroupWelcomeMarkup tgbotapi.InlineKeyboardMarkup
-var InviteMenuMarkup tgbotapi.InlineKeyboardMarkup
-var ReplEnableyMenuMarkup tgbotapi.InlineKeyboardMarkup
-var ReplDisableMenuMarkup tgbotapi.InlineKeyboardMarkup
-var ProhibiteMenuMarkup tgbotapi.InlineKeyboardMarkup
-var PunishMenuMarkup tgbotapi.InlineKeyboardMarkup
-var PunishTimeMarkup tgbotapi.InlineKeyboardMarkup
-var MemberCheckMarkup tgbotapi.InlineKeyboardMarkup
-var UserCheckMenuMarkup tgbotapi.InlineKeyboardMarkup
+var (
+	Config                 ConfigData
+	SettingMenuMarkup      tgbotapi.InlineKeyboardMarkup
+	StaticsMarkup          tgbotapi.InlineKeyboardMarkup
+	GroupWelcomeMarkup     tgbotapi.InlineKeyboardMarkup
+	InviteMenuMarkup       tgbotapi.InlineKeyboardMarkup
+	ReplEnableyMenuMarkup  tgbotapi.InlineKeyboardMarkup
+	ReplDisableMenuMarkup  tgbotapi.InlineKeyboardMarkup
+	ProhibiteMenuMarkup    tgbotapi.InlineKeyboardMarkup
+	PunishMenuMarkup       tgbotapi.InlineKeyboardMarkup
+	PunishTimeMarkup       tgbotapi.InlineKeyboardMarkup
+	MemberCheckMarkup      tgbotapi.InlineKeyboardMarkup
+	UserCheckMenuMarkup    tgbotapi.InlineKeyboardMarkup
+	FloodSettingMenuMarkup tgbotapi.InlineKeyboardMarkup
+	SpamSettingMenuMarkup  tgbotapi.InlineKeyboardMarkup
+
+	ActionMap = map[model.PunishType]string{
+		model.PunishTypeWarning:    "警告",
+		model.PunishTypeBan:        "禁言",
+		model.PunishTypeKick:       "踢出",
+		model.PunishTypeBanAndKick: "踢出+封禁",
+		model.PunishTypeRevoke:     "仅撤回消息+不惩罚",
+	}
+	NotifyTimeMap = map[model.BanTimeType]string{
+		model.BanTimeType1: "10秒",
+		model.BanTimeType2: "60秒",
+		model.BanTimeType3: "5分钟",
+		model.BanTimeType4: "30分钟",
+		model.BanTimeType5: "不删除",
+		model.BanTimeType6: "不提醒",
+	}
+)
 
 func InitConfig() {
 	// 读取配置文件

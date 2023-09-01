@@ -50,12 +50,12 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	}
 	btn51 := model.ButtonInfo{
 		Text:    "🦬反垃圾",
-		Data:    "anti_spam",
+		Data:    "spam_setting",
 		BtnType: model.BtnTypeData,
 	}
 	btn52 := model.ButtonInfo{
 		Text:    "🌓反刷屏",
-		Data:    "anti_flood",
+		Data:    "flood_setting",
 		BtnType: model.BtnTypeData,
 	}
 	btn61 := model.ButtonInfo{
@@ -70,7 +70,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	}
 	btn71 := model.ButtonInfo{
 		Text:    "🌗夜晚模式",
-		Data:    "night_mode",
+		Data:    "dark_mode",
 		BtnType: model.BtnTypeData,
 	}
 	btn72 := model.ButtonInfo{

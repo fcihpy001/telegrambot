@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log"
 	"telegramBot/model"
 )
@@ -142,7 +143,9 @@ func GetMemberSettings(chatId int64) model.NewMemberCheck {
 }
 
 func SaveModel(model interface{}, chatId int64) {
+	fmt.Println("savemode chatid", chatId)
 	if chatId == 0 {
+		fmt.Println("不符合存储条件")
 		return
 	}
 	err := db.Save(model)
