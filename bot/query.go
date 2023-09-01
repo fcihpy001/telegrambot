@@ -161,6 +161,28 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		setting.MemberCheckTimeMenu(update, bot.bot)
 
 	} else if query == "user_check" {
+		setting.UserCheckMenu(update, bot.bot)
+
+	} else if query == "check_name" {
+		setting.NameCheck(update, bot.bot)
+
+	} else if query == "check_username" {
+		setting.UserNameCheck(update, bot.bot)
+
+	} else if query == "check_icon" {
+		setting.IconCheck(update, bot.bot)
+
+	} else if query == "check_channel" {
+		setting.SubScribeCheck(update, bot.bot)
+
+	} else if query == "black_user_list" {
+		setting.BlackUserList(update, bot.bot)
+
+	} else if query == "black_user_add" {
+		setting.BlackUserAdd(update, bot.bot)
+
+	} else if query == "go_user_check_setting" {
+		setting.UserCheckSetting(update, bot.bot)
 
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")

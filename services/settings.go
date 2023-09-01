@@ -140,3 +140,23 @@ func GetMemberSettings(chatId int64) model.NewMemberCheck {
 	}
 	return setting
 }
+
+func SaveModel(model interface{}, chatId int64) {
+	if chatId == 0 {
+		return
+	}
+	err := db.Save(model)
+	if err != nil {
+		log.Println("update or insert model data failed", err)
+	}
+}
+
+func GetModelData(chatId int64, model interface{}) error {
+
+	err := db.Where("chat_id = ?", chatId).First(&model)
+	if err != nil {
+		log.Println("get Prohibit settings failed")
+		return err.Error
+	}
+	return nil
+}

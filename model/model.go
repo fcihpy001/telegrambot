@@ -192,12 +192,12 @@ type UserCheck struct {
 	gorm.Model
 	ChatId              int64 `gorm:"uniqueIndex"`
 	Uid                 int64
-	SetName             bool
-	SetUserName         bool
-	SetIcon             bool
+	NameCheck           bool
+	UserNameCheck       bool
+	IconCheck           bool
 	SubScribe           bool
 	ChannelAddr         string
-	NameNotContainWord  string
+	BlackUserList       string `gorm:"type:longtext"`
 	Punish              PunishType
 	WarningCount        int
 	WarningAfterPunish  PunishType
