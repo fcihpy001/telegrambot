@@ -45,6 +45,9 @@ func (bot *SmartBot) setupBotWithPool() {
 
 		if update.Message != nil && update.Message.IsCommand() {
 			bot.handleCommand(update)
+		} else if update.Message != nil && update.Message.ReplyToMessage != nil {
+			bot.handleReply(&update)
+
 		} else if update.Message != nil && update.Message.NewChatMembers != nil {
 			bot.SendText(update.Message.Chat.ID, "欢迎进群。。。")
 			group.GroupHandlerMessage(update.Message, bot.bot)

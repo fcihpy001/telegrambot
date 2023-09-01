@@ -137,3 +137,70 @@ type Reply struct {
 	MatchAll       bool
 	ReplySettingID uint
 }
+
+type ProhibitedSetting struct {
+	gorm.Model
+	ChatId              int64 `gorm:"uniqueIndex"`
+	Uid                 int64
+	Enable              bool
+	World               string `gorm:"type:longtext"`
+	Punish              PunishType
+	WarningCount        int
+	WarningAfterPunish  PunishType
+	BanTime             int
+	DeleteNotifyMsgTime int64
+}
+type PunishType string
+
+const (
+	PunishTypeWarning    PunishType = "PunishTypeWarning"
+	PunishTypeBan        PunishType = "PunishTypeBan"
+	PunishTypeKick       PunishType = "PunishTypeKick"
+	PunishTypeBanAndKick PunishType = "PunishTypeBanAndKick"
+	PunishTypeRevoke     PunishType = "PunishTypeRevoke"
+)
+
+type BanTimeType string
+
+const (
+	BanTimeType1 BanTimeType = "BanTimeType1"
+	BanTimeType2 BanTimeType = "BanTimeType2"
+	BanTimeType3 BanTimeType = "BanTimeType3"
+	BanTimeType4 BanTimeType = "BanTimeType4"
+	BanTimeType5 BanTimeType = "BanTimeType5"
+	BanTimeType6 BanTimeType = "BanTimeType6"
+)
+
+type Punishment struct {
+	gorm.Model
+	Punish              PunishType
+	WarningCount        int
+	WarningAfterPunish  PunishType
+	BanTime             int
+	DeleteNotifyMsgTime int64
+}
+
+type NewMemberCheck struct {
+	gorm.Model
+	ChatId    int64 `gorm:"uniqueIndex"`
+	Uid       int64
+	Enable    bool
+	DelayTime int
+}
+
+type UserCheck struct {
+	gorm.Model
+	ChatId              int64 `gorm:"uniqueIndex"`
+	Uid                 int64
+	SetName             bool
+	SetUserName         bool
+	SetIcon             bool
+	SubScribe           bool
+	ChannelAddr         string
+	NameNotContainWord  string
+	Punish              PunishType
+	WarningCount        int
+	WarningAfterPunish  PunishType
+	BanTime             int
+	DeleteNotifyMsgTime int64
+}

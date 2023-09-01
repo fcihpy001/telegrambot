@@ -21,6 +21,11 @@ var GroupWelcomeMarkup tgbotapi.InlineKeyboardMarkup
 var InviteMenuMarkup tgbotapi.InlineKeyboardMarkup
 var ReplEnableyMenuMarkup tgbotapi.InlineKeyboardMarkup
 var ReplDisableMenuMarkup tgbotapi.InlineKeyboardMarkup
+var ProhibiteMenuMarkup tgbotapi.InlineKeyboardMarkup
+var PunishMenuMarkup tgbotapi.InlineKeyboardMarkup
+var PunishTimeMarkup tgbotapi.InlineKeyboardMarkup
+var MemberCheckMarkup tgbotapi.InlineKeyboardMarkup
+var UserCheckMenuMarkup tgbotapi.InlineKeyboardMarkup
 
 func InitConfig() {
 	// 读取配置文件

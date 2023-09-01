@@ -38,7 +38,7 @@ func SaveInviteSettings(setting *model.InviteSetting) {
 		return
 	}
 	//更新或者创建
-	if GetSettings(setting.ChatId).ChatId > 0 {
+	if GetInviteSettings(setting.ChatId).ChatId > 0 {
 		err := db.Save(setting)
 		if err != nil {
 			log.Println("update invite settings failed", err)
@@ -65,7 +65,7 @@ func SaveReplySettings(model *model.ReplySetting) {
 		return
 	}
 	//更新或者创建
-	if GetSettings(model.ChatId).ChatId > 0 {
+	if GetReplySettings(model.ChatId).ChatId > 0 {
 		err := db.Save(model)
 		if err != nil {
 			log.Println("update reply settings failed", err)
@@ -83,6 +83,60 @@ func GetReplySettings(chatId int64) model.ReplySetting {
 	err := db.Where("chat_id = ?", chatId).First(&setting)
 	if err != nil {
 		log.Println("get reply settings failed")
+	}
+	return setting
+}
+
+func SaveProhibitSettings(model *model.ProhibitedSetting) {
+	if model.ChatId < 1 {
+		return
+	}
+	//更新或者创建
+	if GetProhibitSettings(model.ChatId).ChatId > 0 {
+		err := db.Save(model)
+		if err != nil {
+			log.Println("update Prohibit settings failed", err)
+		}
+	} else {
+		err := db.Create(model)
+		if err != nil {
+			log.Println("create Prohibit settings failed", err)
+		}
+	}
+}
+
+func GetProhibitSettings(chatId int64) model.ProhibitedSetting {
+	var setting model.ProhibitedSetting
+	err := db.Where("chat_id = ?", chatId).First(&setting)
+	if err != nil {
+		log.Println("get Prohibit settings failed")
+	}
+	return setting
+}
+
+func SaveMemberSettings(model *model.NewMemberCheck) {
+	if model.ChatId < 1 {
+		return
+	}
+	//更新或者创建
+	if GetMemberSettings(model.ChatId).ChatId > 0 {
+		err := db.Save(model)
+		if err != nil {
+			log.Println("update Prohibit settings failed", err)
+		}
+	} else {
+		err := db.Create(model)
+		if err != nil {
+			log.Println("create Prohibit settings failed", err)
+		}
+	}
+}
+
+func GetMemberSettings(chatId int64) model.NewMemberCheck {
+	var setting model.NewMemberCheck
+	err := db.Where("chat_id = ?", chatId).First(&setting)
+	if err != nil {
+		log.Println("get Prohibit settings failed")
 	}
 	return setting
 }
