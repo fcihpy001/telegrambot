@@ -20,12 +20,17 @@ func (mgr *GroupManager) Mute(update *tgbotapi.Update) {
 	}
 	// parse until param from message text
 	seconds := parseUntilDate(update.Message.Text)
+
+	mgr.muteChatMember(chatId, fromId, seconds)
+}
+
+func (mgr *GroupManager) muteChatMember(chatId, userId, ts int64) {
 	msg := tgbotapi.RestrictChatMemberConfig{
 		ChatMemberConfig: tgbotapi.ChatMemberConfig{
 			ChatID: chatId,
-			UserID: fromId,
+			UserID: userId,
 		},
-		UntilDate: seconds,
+		UntilDate: ts,
 		Permissions: &tgbotapi.ChatPermissions{
 			CanSendMessages:       false,
 			CanSendMediaMessages:  false,

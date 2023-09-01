@@ -92,6 +92,9 @@ func createTable() {
 	if err := db.AutoMigrate(&model.UserCheck{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
+	if err := db.AutoMigrate(&model.UserCautions{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 	if err := db.AutoMigrate(&model.SpamSetting{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
