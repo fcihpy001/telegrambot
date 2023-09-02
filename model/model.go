@@ -282,3 +282,21 @@ type FloodSetting struct {
 	DeleteMsg  bool
 	PunishInfo Punishment
 }
+
+type DarkModelSetting struct {
+	gorm.Model
+	ChatId       int64 `gorm:"uniqueIndex"`
+	Uid          int64
+	Enable       bool
+	Notify       bool
+	BanType      BanType
+	BanTimeStart int
+	BanTimeEnd   int
+}
+
+type BanType string
+
+const (
+	BanTypeMessage BanType = "BanTypeMessage"
+	BanTypeMedia   BanType = "BanTypeMedia"
+)

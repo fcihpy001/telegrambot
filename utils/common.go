@@ -30,6 +30,7 @@ var (
 	UserCheckMenuMarkup    tgbotapi.InlineKeyboardMarkup
 	FloodSettingMenuMarkup tgbotapi.InlineKeyboardMarkup
 	SpamSettingMenuMarkup  tgbotapi.InlineKeyboardMarkup
+	DarkModelMenuMarkup    tgbotapi.InlineKeyboardMarkup
 
 	ActionMap = map[model.PunishType]string{
 		model.PunishTypeWarning:    "警告",

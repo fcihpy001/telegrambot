@@ -71,7 +71,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	}
 	btn71 := model.ButtonInfo{
 		Text:    "🌗夜晚模式",
-		Data:    "dark_mode",
+		Data:    "dark_model_setting",
 		BtnType: model.BtnTypeData,
 	}
 	btn72 := model.ButtonInfo{
