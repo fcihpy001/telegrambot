@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -246,6 +247,20 @@ func (mgr *GroupManager) sendText(chatId int64, text string) {
 	utils.SendText(chatId, text, mgr.bot)
 }
 
+// sendfile
+func (mgr *GroupManager) sendFile(chatId int64, fn, pth string) error {
+	rd, err := os.Open(pth)
+	if err != nil {
+		return err
+	}
+	doc := tgbotapi.NewDocument(chatId, tgbotapi.FileReader{
+		Name:   fn,
+		Reader: rd,
+	})
+	_, err = mgr.bot.Send(doc)
+	return err
+}
+
 //lint:ignore U1000 just for test
 func (mgr *GroupManager) inviteLink(update *tgbotapi.Update) {
 	msg := update.Message
@@ -288,7 +303,7 @@ func SendTestMentioned(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
 	// }
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID,
 		fmt.Sprintf("[%s](tg://user?id=6297349406)\nwhat's up\n下一页",
-			escapeText("Mm-hmm. Okay?")),
+			tgbotapi.EscapeText(tgbotapi.ModeMarkdownV2, "Mm-hmm. Okay?")),
 	)
 	msg.ParseMode = "MarkdownV2"
 	_, err := mgr.bot.Send(msg)
@@ -298,7 +313,7 @@ func SendTestMentioned(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
 }
 
 func mentionUser(username interface{}, userId int64) string {
-	return fmt.Sprintf("[%s](tg://user?id=%d)", escapeText(fmt.Sprint(username)), userId)
+	return fmt.Sprintf("[%s](tg://user?id=%d)", tgbotapi.EscapeText(tgbotapi.ModeMarkdownV2, fmt.Sprint(username)), userId)
 }
 
 // 获取chat 群用户数
@@ -342,9 +357,4 @@ func getWeekRange() (startDay, endDay string) {
 
 	return fmt.Sprintf("%d%02d%02d", now_7.Year(), now_7.Month(), now_7.Day()),
 		fmt.Sprintf("%d%02d%02d", now.Year(), now.Month(), now.Day())
-}
-
-// 转义 markdown
-func escapeText(s string) string {
-	return strings.Replace(strings.Replace(s, "-", "\\-", -1), ".", `\.`, -1)
 }

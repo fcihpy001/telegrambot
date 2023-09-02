@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -216,15 +218,30 @@ type UserCheck struct {
 	DeleteNotifyMsgTime int64
 }
 
+const (
+	SolitaireStatusActive = "active"
+	SolitaireStatusEnded  = "ended"
+)
+
 // 接龙
 type Solitaire struct {
 	gorm.Model
-	ChatId      int64
-	LimitUsers  int
-	LimitTime   int    // 截止时间
-	Creator     int64  // 创建用户 id
-	Description string `gorm:""`
-	Status      string
+	ChatId       int64
+	LimitUsers   int
+	LimitTime    int    // 截止时间
+	Creator      int64  // 创建用户 id
+	Description  string `gorm:""`
+	MsgCollected int    // 已接龙条数
+	Status       string
+}
+
+type SolitaireExported struct {
+	ChatId   int64
+	UserId   int64
+	UserName string
+	NickName string // first name + last name
+	Message  string
+	CreateAt time.Time
 }
 
 // 消息接龙 一个用户只能接一次 如果接了多次会覆盖上次内容
