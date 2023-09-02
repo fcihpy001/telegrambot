@@ -25,6 +25,8 @@ var (
 	ReplDisableMenuMarkup  tgbotapi.InlineKeyboardMarkup
 	ProhibiteMenuMarkup    tgbotapi.InlineKeyboardMarkup
 	PunishMenuMarkup       tgbotapi.InlineKeyboardMarkup
+	PunishMenuMarkup2      tgbotapi.InlineKeyboardMarkup
+	PunishMenuMarkup3      tgbotapi.InlineKeyboardMarkup
 	PunishTimeMarkup       tgbotapi.InlineKeyboardMarkup
 	MemberCheckMarkup      tgbotapi.InlineKeyboardMarkup
 	UserCheckMenuMarkup    tgbotapi.InlineKeyboardMarkup

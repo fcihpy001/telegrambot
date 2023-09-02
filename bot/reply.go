@@ -25,5 +25,11 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 
 	} else if strings.Contains(replyMsg, "请输入统计发送消息的间隔时间（秒）") {
 		setting.FloodIntervalResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "输入允许的姓名最大长度（例如：15") {
+		setting.SpamNameLengthReply(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "输入允许的消息最大长度") {
+		setting.SpamMsgLengthReply(update, bot.bot)
 	}
 }

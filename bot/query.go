@@ -202,11 +202,14 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if query == "flood_trigger_delete" {
 		setting.FloodDeleteMsg(update, bot.bot)
 
-	} else if query == "spam_setting" {
-		setting.SpamSettingMenu(update, bot.bot)
+	} else if strings.Contains(query, "spam_setting") {
+		setting.SpamSettingHandler(update, bot.bot)
 
 	} else if strings.HasPrefix(query, "dark_model") {
 		setting.DarkSettingHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "punish_setting") {
+		setting.PunishSettingHandler(update, bot.bot)
 
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")

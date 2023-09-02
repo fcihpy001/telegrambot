@@ -146,7 +146,7 @@ func GetMemberSettings(chatId int64) model.NewMemberCheck {
 }
 
 func SaveModel(model interface{}, chatId int64) {
-	fmt.Println("savemode chatid", chatId)
+	fmt.Println("save-mode chat-id", chatId)
 	if chatId == 0 {
 		fmt.Println("不符合存储条件")
 		return
@@ -160,6 +160,15 @@ func SaveModel(model interface{}, chatId int64) {
 func GetModelData(chatId int64, model interface{}) error {
 
 	err := db.Where("chat_id = ?", chatId).First(&model)
+	if err != nil {
+		log.Println("get Prohibit settings failed")
+		return err.Error
+	}
+	return nil
+}
+func GetModelDataWhere(chatId int64, model interface{}) error {
+
+	err := db.Where("spam_setting_id = ?", chatId).First(&model)
 	if err != nil {
 		log.Println("get Prohibit settings failed")
 		return err.Error

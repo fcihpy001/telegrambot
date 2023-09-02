@@ -155,15 +155,16 @@ type ProhibitedSetting struct {
 	WarningAfterPunish  PunishType
 	BanTime             int
 	DeleteNotifyMsgTime int64
+	Punishment          Punishment
 }
 type PunishType string
 
 const (
-	PunishTypeWarning    PunishType = "PunishTypeWarning"
-	PunishTypeBan        PunishType = "PunishTypeBan"
-	PunishTypeKick       PunishType = "PunishTypeKick"
-	PunishTypeBanAndKick PunishType = "PunishTypeBanAndKick"
-	PunishTypeRevoke     PunishType = "PunishTypeRevoke"
+	PunishTypeWarning    PunishType = "warning"
+	PunishTypeBan        PunishType = "ban"
+	PunishTypeKick       PunishType = "kick"
+	PunishTypeBanAndKick PunishType = "banAndKick"
+	PunishTypeRevoke     PunishType = "revoke"
 )
 
 type BanTimeType string
@@ -180,12 +181,14 @@ const (
 type Punishment struct {
 	gorm.Model
 	Punish              PunishType
+	PunishType          PunishType
 	WarningCount        int
 	WarningAfterPunish  PunishType
 	BanTime             int
 	DeleteNotifyMsgTime int64
-	FloodSettingID      uint
-	SpamSettingID       uint
+	FloodSettingID      uint `gorm:"uniqueIndex"`
+	SpamSettingID       uint `gorm:"uniqueIndex"`
+	ProhibitedSettingID uint `gorm:"uniqueIndex"`
 }
 
 type NewMemberCheck struct {
@@ -261,15 +264,16 @@ type SpamSetting struct {
 	ChannelCopy    bool
 	ChannelForward bool
 	UserForward    bool
-	AtGroupId      bool
-	AtUserId       bool
+	AtGroup        bool
+	AtUser         bool
 	EthAddr        bool
 	Command        bool
 	LongMsg        bool
 	MsgLength      int
 	LongName       bool
 	NameLength     int
-	PunishInfo     Punishment
+	Exception      string
+	Punishment     Punishment
 }
 
 type FloodSetting struct {
@@ -280,7 +284,7 @@ type FloodSetting struct {
 	MsgCount   int
 	Interval   int
 	DeleteMsg  bool
-	PunishInfo Punishment
+	Punishment Punishment
 }
 
 type DarkModelSetting struct {

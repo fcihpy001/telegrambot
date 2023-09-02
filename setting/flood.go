@@ -216,9 +216,9 @@ func updateFloodMsg() string {
 
 	setting_msg := fmt.Sprintf("当前设置：在 %d秒内发送 %d条消息触发反刷屏\n", floodSetting.Interval, floodSetting.MsgCount)
 
-	punish_msg := fmt.Sprintf("惩罚：%s %d \n", utils.ActionMap[floodSetting.PunishInfo.Punish], floodSetting.PunishInfo.BanTime)
+	punish_msg := fmt.Sprintf("惩罚：%s %d \n", utils.ActionMap[floodSetting.Punishment.Punish], floodSetting.Punishment.BanTime)
 
-	delete_msg := fmt.Sprintf("自动删除提醒消息：%d分钟", floodSetting.PunishInfo.DeleteNotifyMsgTime)
+	delete_msg := fmt.Sprintf("自动删除提醒消息：%d分钟", floodSetting.Punishment.DeleteNotifyMsgTime)
 
 	content = content + status_msg + setting_msg + punish_msg + delete_msg
 	services.SaveModel(&floodSetting, floodSetting.ChatId)
