@@ -1,9 +1,11 @@
 package group
 
 import (
+	"os"
 	"testing"
 	"time"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,4 +90,19 @@ func TestParseTime(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, item.tm, val)
 	}
+}
+
+func TestSendFile(t *testing.T) {
+	chatId := -1001916451498
+	fn := "202309022219117234.csv"
+	pth := "../doc/202309022219117234.csv"
+
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
+	if err != nil {
+		panic(err)
+	}
+
+	mgr := GroupManager{bot}
+	err = mgr.sendFile(int64(chatId), fn, pth)
+	assert.Nil(t, err)
 }
