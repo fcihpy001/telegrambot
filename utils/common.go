@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"telegramBot/model"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/rs/zerolog"
@@ -34,6 +35,8 @@ var (
 	SpamSettingMenuMarkup   tgbotapi.InlineKeyboardMarkup
 	DarkModelMenuMarkup     tgbotapi.InlineKeyboardMarkup
 	VerifySettingMenuMarkup tgbotapi.InlineKeyboardMarkup
+	ScheduleSettingMarkup   tgbotapi.InlineKeyboardMarkup
+	ScheduleMsgMenuMarkup   tgbotapi.InlineKeyboardMarkup
 
 	ActionMap = map[model.PunishType]string{
 		model.PunishTypeWarning:    "警告",
@@ -90,4 +93,9 @@ func (r RequestFile) UploadData() (name string, ioOut io.Reader, err error) {
 
 func (r RequestFile) SendData() string {
 	return "ok"
+}
+
+func CurrentTime() string {
+	currentTime := time.Now()
+	return currentTime.Format("2006/01/02 15:04")
 }

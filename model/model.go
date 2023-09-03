@@ -339,3 +339,34 @@ const (
 	VerifyTypeMath   VerifyType = "VerifyTypeMath"
 	VerifyTypeCode   VerifyType = "VerifyTypeCode"
 )
+
+type Schedule struct {
+	gorm.Model
+	ChatId int64 `gorm:"uniqueIndex"`
+	Uid    int64
+}
+
+type ScheduleMsg struct {
+	gorm.Model
+	ChatId int64 `gorm:"uniqueIndex"`
+	Uid    int64
+	Enable bool
+
+	StartDate     string
+	EndDate       string
+	StartHour     int
+	EndHour       int
+	Pin           bool
+	RepeatHour    int
+	RepeatMinute  int
+	DeletePrevMsg bool
+	Text          string
+	Media         string
+	Link          string
+}
+
+type SelectInfo struct {
+	Row    int
+	Column int
+	Text   string
+}

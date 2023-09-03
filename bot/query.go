@@ -214,6 +214,9 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if strings.HasPrefix(query, "verify_setting") { //入群验证
 		group.VerifySettingHandler(update, bot.bot)
 
+	} else if strings.HasPrefix(query, "schedule") { //定时消息
+		setting.ScheduleSettingHandler(update, bot.bot)
+
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")
 		msg.DisableNotification = false

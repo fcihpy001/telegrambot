@@ -36,7 +36,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	}
 	btn32 := model.ButtonInfo{
 		Text:    "🦊定时消息",
-		Data:    "timing_message",
+		Data:    "schedule_message",
 		BtnType: model.BtnTypeData,
 	}
 	btn41 := model.ButtonInfo{

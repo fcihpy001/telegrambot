@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"telegramBot/model"
 
@@ -60,5 +61,19 @@ func SendNotify(chatId int64, text string, bot *tgbotapi.BotAPI) {
 	_, err := bot.Send(msg)
 	if err != nil {
 		log.Println(err)
+	}
+}
+
+func SendEditMsgMarkup(
+	chatID int64,
+	messageID int,
+	content string,
+	replyMarkup tgbotapi.InlineKeyboardMarkup,
+	bot *tgbotapi.BotAPI,
+) {
+	msg := tgbotapi.NewEditMessageTextAndMarkup(chatID, messageID, content, replyMarkup)
+	_, err := bot.Send(msg)
+	if err != nil {
+		fmt.Println("darkModelSettingMenu", err)
 	}
 }

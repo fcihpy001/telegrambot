@@ -31,5 +31,15 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 
 	} else if strings.Contains(replyMsg, "输入允许的消息最大长度") {
 		setting.SpamMsgLengthReply(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "输入你想要设置内容：") {
+		setting.ScheduleAndContentResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "在开启状态下，到达设定时间才会发送消息，请回复开始时间") {
+		setting.ScheduleDateStartResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "到达设定时间后自动停止，请回复终止时间") {
+		setting.ScheduleDateEndResult(update, bot.bot)
+
 	}
 }

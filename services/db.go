@@ -113,6 +113,12 @@ func createTable() {
 	if err := db.AutoMigrate(&model.VerifySetting{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
+	if err := db.AutoMigrate(&model.ScheduleMsg{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.Schedule{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 	log.Println("数据表创建成功...")
 }
 
