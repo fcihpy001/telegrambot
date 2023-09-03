@@ -121,8 +121,8 @@ func sendEditMsgMarkup(
 }
 
 func DarkSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	calldata := update.CallbackQuery.Data
-	query := strings.Split(calldata, ":")
+	data := update.CallbackQuery.Data
+	query := strings.Split(data, ":")
 	cmd := query[0]
 	params := ""
 	if len(query) > 1 {

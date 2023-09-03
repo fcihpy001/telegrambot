@@ -26,8 +26,6 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	case "group_statistic":
 		fmt.Println("group_statistic")
 		mgr.statics(update)
-	case "group_verification":
-		fmt.Println("group_verification")
 
 	case "group_speechtodayranging":
 		mgr.speechRanging(update, "today")

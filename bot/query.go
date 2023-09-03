@@ -55,7 +55,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		if err != nil {
 			log.Println(err)
 		}
-	} else if query == "go_setting" {
+	} else if query == "go_setting" { //设置
 		bot.go_setting(update)
 
 	} else if query == "prohibited_words" { //违禁词
@@ -148,7 +148,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if query == "reply_status_disable" {
 		setting.AutoReplyStatus(update, bot.bot, false)
 
-	} else if query == "new_member_check" {
+	} else if query == "new_member_check" { //新成员检查
 		setting.MemberCheckMenu(update, bot.bot)
 
 	} else if query == "new_member_check_enable" {
@@ -160,7 +160,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if query == "new_member_check_time_menu" {
 		setting.MemberCheckTimeMenu(update, bot.bot)
 
-	} else if query == "user_check" {
+	} else if query == "user_check" { //用户检查
 		setting.UserCheckMenu(update, bot.bot)
 
 	} else if query == "check_name" {
@@ -184,7 +184,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if query == "go_user_check_setting" {
 		setting.UserCheckSetting(update, bot.bot)
 
-	} else if query == "flood_setting" {
+	} else if query == "flood_setting" { //刷屏设置
 		setting.FloodSettingMenu(update, bot.bot)
 
 	} else if query == "flood_status_enable" {
@@ -202,14 +202,17 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if query == "flood_trigger_delete" {
 		setting.FloodDeleteMsg(update, bot.bot)
 
-	} else if strings.Contains(query, "spam_setting") {
+	} else if strings.Contains(query, "spam_setting") { //垃圾设置
 		setting.SpamSettingHandler(update, bot.bot)
 
-	} else if strings.HasPrefix(query, "dark_model") {
+	} else if strings.HasPrefix(query, "dark_model") { //夜晚模式
 		setting.DarkSettingHandler(update, bot.bot)
 
-	} else if strings.HasPrefix(query, "punish_setting") {
+	} else if strings.HasPrefix(query, "punish_setting") { //惩罚设置
 		setting.PunishSettingHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "verify_setting") { //入群验证
+		group.VerifySettingHandler(update, bot.bot)
 
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")

@@ -41,7 +41,7 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 	}
 	btn41 := model.ButtonInfo{
 		Text:    "🌳入群验证",
-		Data:    "group_verification",
+		Data:    "verify_setting",
 		BtnType: model.BtnTypeData,
 	}
 	btn42 := model.ButtonInfo{

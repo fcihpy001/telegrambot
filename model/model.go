@@ -321,3 +321,21 @@ const (
 	BanTypeMessage BanType = "BanTypeMessage"
 	BanTypeMedia   BanType = "BanTypeMedia"
 )
+
+type VerifySetting struct {
+	gorm.Model
+	ChatId     int64 `gorm:"uniqueIndex"`
+	Uid        int64
+	Enable     bool
+	VerifyType string
+	VerifyTime int
+	PunishType string
+}
+
+type VerifyType string
+
+const (
+	VerifyTypeButton VerifyType = "VerifyTypeButton"
+	VerifyTypeMath   VerifyType = "VerifyTypeMath"
+	VerifyTypeCode   VerifyType = "VerifyTypeCode"
+)

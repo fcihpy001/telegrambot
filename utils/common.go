@@ -16,23 +16,24 @@ import (
 )
 
 var (
-	Config                 ConfigData
-	SettingMenuMarkup      tgbotapi.InlineKeyboardMarkup
-	StaticsMarkup          tgbotapi.InlineKeyboardMarkup
-	GroupWelcomeMarkup     tgbotapi.InlineKeyboardMarkup
-	InviteMenuMarkup       tgbotapi.InlineKeyboardMarkup
-	ReplEnableyMenuMarkup  tgbotapi.InlineKeyboardMarkup
-	ReplDisableMenuMarkup  tgbotapi.InlineKeyboardMarkup
-	ProhibiteMenuMarkup    tgbotapi.InlineKeyboardMarkup
-	PunishMenuMarkup       tgbotapi.InlineKeyboardMarkup
-	PunishMenuMarkup2      tgbotapi.InlineKeyboardMarkup
-	PunishMenuMarkup3      tgbotapi.InlineKeyboardMarkup
-	PunishTimeMarkup       tgbotapi.InlineKeyboardMarkup
-	MemberCheckMarkup      tgbotapi.InlineKeyboardMarkup
-	UserCheckMenuMarkup    tgbotapi.InlineKeyboardMarkup
-	FloodSettingMenuMarkup tgbotapi.InlineKeyboardMarkup
-	SpamSettingMenuMarkup  tgbotapi.InlineKeyboardMarkup
-	DarkModelMenuMarkup    tgbotapi.InlineKeyboardMarkup
+	Config                  ConfigData
+	SettingMenuMarkup       tgbotapi.InlineKeyboardMarkup
+	StaticsMarkup           tgbotapi.InlineKeyboardMarkup
+	GroupWelcomeMarkup      tgbotapi.InlineKeyboardMarkup
+	InviteMenuMarkup        tgbotapi.InlineKeyboardMarkup
+	ReplEnableyMenuMarkup   tgbotapi.InlineKeyboardMarkup
+	ReplDisableMenuMarkup   tgbotapi.InlineKeyboardMarkup
+	ProhibiteMenuMarkup     tgbotapi.InlineKeyboardMarkup
+	PunishMenuMarkup        tgbotapi.InlineKeyboardMarkup
+	PunishMenuMarkup2       tgbotapi.InlineKeyboardMarkup
+	PunishMenuMarkup3       tgbotapi.InlineKeyboardMarkup
+	PunishTimeMarkup        tgbotapi.InlineKeyboardMarkup
+	MemberCheckMarkup       tgbotapi.InlineKeyboardMarkup
+	UserCheckMenuMarkup     tgbotapi.InlineKeyboardMarkup
+	FloodSettingMenuMarkup  tgbotapi.InlineKeyboardMarkup
+	SpamSettingMenuMarkup   tgbotapi.InlineKeyboardMarkup
+	DarkModelMenuMarkup     tgbotapi.InlineKeyboardMarkup
+	VerifySettingMenuMarkup tgbotapi.InlineKeyboardMarkup
 
 	ActionMap = map[model.PunishType]string{
 		model.PunishTypeWarning:    "警告",

@@ -110,6 +110,9 @@ func createTable() {
 	if err := db.AutoMigrate(&model.SolitaireMessage{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
+	if err := db.AutoMigrate(&model.VerifySetting{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 	log.Println("数据表创建成功...")
 }
 
