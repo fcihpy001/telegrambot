@@ -1,7 +1,11 @@
 package utils
 
+import (
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+)
+
 type ConfigData struct {
-	botUserId   int64
+	botUserInfo *tgbotapi.User
 	Token       string `yaml:"token"`
 	WebhookUrl  string `yaml:"webhook_url"`
 	CertFile    string `yaml:"cert_file"`
@@ -27,5 +31,9 @@ type RequestFile struct {
 }
 
 func GetBotUserId() int64 {
-	return Config.botUserId
+	return Config.botUserInfo.ID
+}
+
+func GetBotUserName() string {
+	return Config.botUserInfo.UserName
 }

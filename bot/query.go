@@ -24,7 +24,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		group.GroupHandlerQuery(update, bot.bot)
 
 	} else if strings.HasPrefix(query, "settings") {
-		setting.Settings(update.CallbackQuery.Message.Chat.ID, bot.bot)
+		setting.Settings(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.Chat.Type, "", bot.bot)
 
 	} else if query == "join_group" {
 		fmt.Println("replay...")
@@ -217,6 +217,19 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if strings.HasPrefix(query, "schedule") { //定时消息
 		setting.ScheduleSettingHandler(update, bot.bot)
 
+		// } else if query == "solitaire_home" {
+		// 	group.SolitaireHome(update, bot.bot)
+	} else if strings.HasPrefix(query, "solitaire_create_step1?") {
+		param := query[len("solitaire_create_step1?"):]
+		// 创建接龙 step 1
+		group.SolitaireCreateStep1(update, bot.bot, param)
+	} else if strings.HasPrefix(query, "solitaire_create_limit_time?") {
+		param := query[len("solitaire_create_limit_time?"):]
+		group.SolitaireCreateStep2LimitTime(update, bot.bot, param)
+	} else if strings.HasPrefix(query, "solitaire_create_step2?") {
+		// step 2
+		param := query[len("solitaire_create_step2?"):]
+		group.SolitaireCreateLastStep(update, bot.bot, param)
 	} else if strings.HasPrefix(query, "permission_type") { //权限管理
 		setting.PermissionSelectHandler(update, bot.bot)
 

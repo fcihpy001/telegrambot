@@ -2,12 +2,9 @@ package utils
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"log"
 	"os"
-	"strconv"
-	"strings"
 	"telegramBot/model"
 	"time"
 
@@ -74,12 +71,16 @@ func InitConfig() {
 		log.Fatalf("Error unmarshalling config: %v", err)
 	}
 	log.Println("配置文件加载成功...:")
-	ss := strings.Split(Config.Token, ":")
-	botUid, err := strconv.ParseInt(ss[0], 10, 64)
+
+	bot, err := tgbotapi.NewBotAPI(Config.Token)
 	if err != nil {
-		panic(fmt.Sprintf("telegram token invalid: %s %v", Config.Token, err))
+		panic(err)
 	}
-	Config.botUserId = botUid
+	info, err := bot.GetMe()
+	if err != nil {
+		panic(err)
+	}
+	Config.botUserInfo = &info
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
