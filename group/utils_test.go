@@ -1,6 +1,7 @@
 package group
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -104,5 +105,28 @@ func TestSendFile(t *testing.T) {
 
 	mgr := GroupManager{bot}
 	err = mgr.sendFile(int64(chatId), fn, pth)
+	assert.Nil(t, err)
+}
+
+func TestSendSwitch(t *testing.T) {
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
+	if err != nil {
+		panic(err)
+	}
+	info, err := bot.GetMe()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(prettyJSON(info))
+
+	chatId := int64(-1001916451498)
+	msg := tgbotapi.NewMessage(chatId, "test inline")
+	row := tgbotapi.NewInlineKeyboardRow()
+	// btn := tgbotapi.
+	btn := tgbotapi.NewInlineKeyboardButtonURL("管理", fmt.Sprintf("https://t.me/goat2023_bot?start=%d", chatId))
+	row = append(row, btn)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+	msg.ReplyMarkup = keyboard
+	_, err = bot.Send(msg)
 	assert.Nil(t, err)
 }

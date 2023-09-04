@@ -2,7 +2,6 @@ package bot
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"strings"
 	"telegramBot/group"
@@ -10,6 +9,8 @@ import (
 	"telegramBot/model"
 	"telegramBot/setting"
 	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // 处理行内按钮事件
@@ -24,7 +25,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		group.GroupHandlerQuery(update, bot.bot)
 
 	} else if strings.HasPrefix(query, "settings") {
-		setting.Settings(update.CallbackQuery.Message.Chat.ID, bot.bot)
+		setting.Settings(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.Chat.Type, "", bot.bot)
 
 	} else if query == "join_group" {
 		fmt.Println("replay...")
@@ -217,6 +218,19 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if strings.HasPrefix(query, "schedule") { //定时消息
 		setting.ScheduleSettingHandler(update, bot.bot)
 
+		// } else if query == "solitaire_home" {
+		// 	group.SolitaireHome(update, bot.bot)
+	} else if strings.HasPrefix(query, "solitaire_create_step1?") {
+		param := query[len("solitaire_create_step1?"):]
+		// 创建接龙 step 1
+		group.SolitaireCreateStep1(update, bot.bot, param)
+	} else if strings.HasPrefix(query, "solitaire_create_limit_time?") {
+		param := query[len("solitaire_create_limit_time?"):]
+		group.SolitaireCreateStep2LimitTime(update, bot.bot, param)
+	} else if strings.HasPrefix(query, "solitaire_create_step2?") {
+		// step 2
+		param := query[len("solitaire_create_step2?"):]
+		group.SolitaireCreateLastStep(update, bot.bot, param)
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")
 		msg.DisableNotification = false

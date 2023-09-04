@@ -8,7 +8,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func Settings(chatId int64, bot *tgbotapi.BotAPI) {
+func Settings(chatId int64, chatType string, content string, bot *tgbotapi.BotAPI) {
 	_ = model.ButtonInfo{
 		Text:    "🌺抽奖活动",
 		Data:    "lucky_activity",
@@ -19,10 +19,19 @@ func Settings(chatId int64, bot *tgbotapi.BotAPI) {
 		Data:    "group_invite_setting",
 		BtnType: model.BtnTypeData,
 	}
+	// 当公共群组中时, 跳转私人聊天中
 	btn21 := model.ButtonInfo{
 		Text:    "👨‍🎓群接龙",
-		Data:    "group_solitaire",
-		BtnType: model.BtnTypeData,
+		Data:    fmt.Sprintf("https://t.me/%s?start=%d", utils.GetBotUserName(), chatId),
+		BtnType: model.BtnTypeUrl,
+	}
+	if chatType == "private" {
+		println()
+		btn21 = model.ButtonInfo{
+			Text:    "👨‍🎓群接龙",
+			Data:    fmt.Sprintf("group_solitaire?chatId=%d"),
+			BtnType: model.BtnTypeData,
+		}
 	}
 	btn22 := model.ButtonInfo{
 		Text:    "🧝‍群统计",

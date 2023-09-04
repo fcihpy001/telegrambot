@@ -21,6 +21,8 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		mgr.group_welcome_setting(update)
 	case "group_solitaire":
 		fmt.Println("group_solitaire")
+		mgr.SolitaireIndex(update)
+
 	case "group_record":
 		fmt.Println("group_record")
 	case "group_statistic":
