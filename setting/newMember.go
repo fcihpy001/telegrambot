@@ -13,56 +13,35 @@ import (
 var memberCheck model.NewMemberCheck
 
 func MemberCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	if update.Message != nil {
-		memberCheck = services.GetMemberSettings(update.CallbackQuery.Message.Chat.ID)
+
+	err := services.GetModelData(utils.GroupInfo.GroupId, &memberCheck)
+
+	var buttons [][]model.ButtonInfo
+	utils.Json2Button2("newMember.json", &buttons)
+	fmt.Println(&buttons)
+	var rows [][]model.ButtonInfo
+	for i := 0; i < len(buttons); i++ {
+		btnArr := buttons[i]
+		var row []model.ButtonInfo
+		for j := 0; j < len(btnArr); j++ {
+			row = append(row, btnArr[j])
+		}
+		rows = append(rows, row)
 	}
-
-	memberCheck.ChatId = update.CallbackQuery.Message.Chat.ID
-
-	btn12txt := "启用"
-	btn13txt := "✅关闭"
 	if memberCheck.Enable {
-		btn12txt = "✅启用"
-		btn13txt = "关闭"
+		rows[0][1].Text = "✅启用"
+		rows[0][2].Text = "关闭"
+	} else {
+		rows[0][1].Text = "启用"
+		rows[0][2].Text = "✅关闭"
 	}
-
-	btn11 := model.ButtonInfo{
-		Text:    "限制发消息",
-		Data:    "toast",
-		BtnType: model.BtnTypeData,
-	}
-	btn12 := model.ButtonInfo{
-		Text:    btn12txt,
-		Data:    "new_member_check_enable",
-		BtnType: model.BtnTypeData,
-	}
-	btn13 := model.ButtonInfo{
-		Text:    btn13txt,
-		Data:    "new_member_check_disable",
-		BtnType: model.BtnTypeData,
-	}
-	btn21 := model.ButtonInfo{
-		Text:    "设置限制时间",
-		Data:    "new_member_check_time_menu",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn31 := model.ButtonInfo{
-		Text:    "🏠返回",
-		Data:    "go_setting",
-		BtnType: model.BtnTypeData,
-	}
-	row1 := []model.ButtonInfo{btn11, btn12, btn13}
-	row2 := []model.ButtonInfo{btn21}
-	row3 := []model.ButtonInfo{btn31}
-	rows := [][]model.ButtonInfo{row1, row2, row3}
 	keyboard := utils.MakeKeyboard(rows)
 	utils.MemberCheckMarkup = keyboard
 
 	//要读取用户设置的数据
 	content := updateMemberSettingMsg()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard)
-	_, err := bot.Send(msg)
+	_, err = bot.Send(msg)
 	if err != nil {
 		log.Println(err)
 	}
@@ -155,6 +134,8 @@ func updateMemberSettingMsg() string {
 	limitTime := fmt.Sprintf("└ 新群员进群在设置时间 %s 内，不能发送消息", time)
 
 	content = content + enableMsg + limitTime
-	services.SaveMemberSettings(&memberCheck)
+
+	memberCheck.ChatId = utils.GroupInfo.GroupId
+	services.SaveModel(&memberCheck, utils.GroupInfo.GroupId)
 	return content
 }

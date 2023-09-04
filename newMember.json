@@ -1,0 +1,32 @@
+[
+  [{
+    "text": "限制发消息",
+    "data": "toast",
+    "btn_type": "data"
+  },
+    {
+      "text": "启用",
+      "data": "new_member_check_enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "✅关闭",
+      "data": "new_member_check_disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDD54设置限制时间",
+      "data": "new_member_check_time_menu",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83C\uDFE0返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]
