@@ -1,15 +1,15 @@
 package bot
 
 import (
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
+	"telegramBot/group"
 	"telegramBot/setting"
 )
 
-// 处理以/开头的指令消息,如/help  /status等
+// 处理需要用户回复的消息，如请输入名字。。。等
 func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
-	fmt.Println("reply---", update.Message.ReplyToMessage.Text)
+
 	replyMsg := update.Message.ReplyToMessage.Text
 	if strings.Contains(replyMsg, "输入添加的违禁词（一行一个") {
 		setting.ProhibitedAdd(update, bot.bot)
@@ -41,5 +41,7 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 	} else if strings.Contains(replyMsg, "到达设定时间后自动停止，请回复终止时间") {
 		setting.ScheduleDateEndResult(update, bot.bot)
 
+	} else if strings.Contains(replyMsg, "输入要设置的新成员入群欢迎内容，占位符中%s代替") {
+		group.WelcomeTextSettingResult(update, bot.bot)
 	}
 }

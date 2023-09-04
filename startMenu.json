@@ -1,0 +1,78 @@
+[
+  {
+    "text": "\uD83C\uDF3A抽奖活动",
+    "data": "lucky_activity",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83D\uDE0A专属邀请链接生成",
+    "data": "group_invite_setting",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83D\uDC09群接龙",
+    "data": "group_solitaire",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83E\uDDDD\u200D群统计",
+    "data": "group_statistic",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83D\uDC1E自动回复",
+    "data": "auto_reply",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83E\uDD8A定时消息",
+    "data": "schedule_message",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83C\uDF33入群验证",
+    "data": "verify_setting",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83E\uDD2A进群欢迎",
+    "data": "group_welcome_setting",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83E\uDDAC反垃圾",
+    "data": "spam_setting",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83C\uDF13反刷屏",
+    "data": "flood_setting",
+    "btn_type": "data"
+  },
+  {
+    "text": "⛄\uFE0F违禁词",
+    "data": "prohibited_words",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83C\uDF3D用户检查",
+    "data": "user_check",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83C\uDF17夜晚模式",
+    "data": "dark_model_setting",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83C\uDF30新群员限制",
+    "data": "new_member_check",
+    "btn_type": "data"
+  },
+  {
+    "text": "⚙\uFE0F  控制权限管理",
+    "data": "permission",
+    "btn_type": "data"
+  }
+
+]

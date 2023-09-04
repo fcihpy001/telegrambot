@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"telegramBot/group"
 	"telegramBot/setting"
@@ -36,14 +37,30 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	case "mention":
 		group.SendTestMentioned(bot.bot, &update)
 
+	case "test":
+		// 创建投票参数
+		poll := tgbotapi.NewPoll(update.Message.Chat.ID, "toplink 发起投票", "选项1", "选项2", "选项3")
+
+		// 添加投票选项
+		poll.Question = "这是一个投票qfqgq"
+
+		poll.Options = []string{"选项11", "选项12", "选项13"}
+
+		poll.AllowSendingWithoutReply = true // 允许在没有回复的情况下发送投票
+		poll.ChannelUsername = "toplink"     // 投票频道的用户名
+
+		// 设置其他投票参数
+		poll.IsAnonymous = false           // 是否匿名投票
+		poll.AllowsMultipleAnswers = false // 是否允许多选
+		poll.OpenPeriod = 30               // 投票持续时间（以秒为单位）
+
+		// 发送投票
+		_, err := bot.bot.Send(poll)
+		if err != nil {
+			log.Println(err)
+		}
 	default:
 		fmt.Println("i dont't know this command")
 		return
 	}
-	//	todo: 保存用户信息
-	// u := model.User{
-	// 	Uid:       update.Message.From.ID,
-	// 	FirstName: update.Message.Chat.FirstName,
-	// }
-	// services.SaveUser(&u)
 }

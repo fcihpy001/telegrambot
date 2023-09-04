@@ -1,8 +1,8 @@
 package group
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-
 	"telegramBot/model"
 	"telegramBot/services"
 )
@@ -14,21 +14,20 @@ func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 		if user.IsBot {
 			continue
 		}
-		msg := tgbotapi.NewMessage(message.Chat.ID, "👏👏👏 欢迎 "+user.FirstName+" 加入"+message.Chat.Title)
+		//读取库里的欢迎语
+		welcomeSetting := model.WelcomeSetting{}
+		err := services.GetModelData(message.Chat.ID, &welcomeSetting)
+		if err != nil {
+			logger.Err(err)
+			continue
+		}
+		content := fmt.Sprintf(welcomeSetting.WelcomeText, user.FirstName, message.Chat.Title)
+
+		msg := tgbotapi.NewMessage(message.Chat.ID, content)
 		if _, err := mgr.bot.Send(msg); err != nil {
 			logger.Err(err)
 			continue
 		}
-		//	保存用户信息
-		// u := model.User{
-		// 	Uid:          message.Chat.ID, // 这里有问题 chat.ID 是群组id
-		// 	FirstName:    user.FirstName,
-		// 	Username:     user.UserName,
-		// 	LastName:     user.LastName,
-		// 	LanguageCode: user.LanguageCode,
-		// 	IsBot:        user.IsBot,
-		// }
-		// services.SaveUser(&u)
 	}
 }
 

@@ -217,6 +217,12 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if strings.HasPrefix(query, "schedule") { //定时消息
 		setting.ScheduleSettingHandler(update, bot.bot)
 
+	} else if strings.HasPrefix(query, "permission_type") { //权限管理
+		setting.PermissionSelectHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "permission") { //权限管理
+		setting.PermissionHandler(update, bot.bot)
+
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")
 		msg.DisableNotification = false

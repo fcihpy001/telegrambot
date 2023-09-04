@@ -17,8 +17,8 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	fmt.Println("group query --", query)
 	switch query {
 	case "group_welcome_setting":
-		fmt.Println("group_setting")
 		mgr.group_welcome_setting(update)
+
 	case "group_solitaire":
 		fmt.Println("group_solitaire")
 	case "group_record":
@@ -114,7 +114,10 @@ func GroupHandlerMessage(message *tgbotapi.Message, bot *tgbotapi.BotAPI) {
 	mgr := GroupManager{
 		bot: bot,
 	}
-	mgr.welcomeNewMember(message)
+	if message.NewChatMembers != nil {
+		mgr.welcomeNewMember(message)
+		return
+	}
 }
 
 func (mgr *GroupManager) getInviteLink(receiver int64, name string) {

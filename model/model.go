@@ -51,9 +51,9 @@ type ChatGroup struct {
 }
 
 type ButtonInfo struct {
-	Text    string
-	Data    string
-	BtnType BtnType
+	Text    string  `json:"text"`
+	Data    string  `json:"data"`
+	BtnType BtnType `json:"btn_type"`
 }
 
 type BtnType string
@@ -369,4 +369,11 @@ type SelectInfo struct {
 	Row    int
 	Column int
 	Text   string
+}
+
+type GroupInfo struct {
+	GroupId   int64
+	GroupName string
+	GroupType string
+	Uid       int64
 }

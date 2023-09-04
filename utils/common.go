@@ -37,6 +37,7 @@ var (
 	VerifySettingMenuMarkup tgbotapi.InlineKeyboardMarkup
 	ScheduleSettingMarkup   tgbotapi.InlineKeyboardMarkup
 	ScheduleMsgMenuMarkup   tgbotapi.InlineKeyboardMarkup
+	PermissionMenuMarkup    tgbotapi.InlineKeyboardMarkup
 
 	ActionMap = map[model.PunishType]string{
 		model.PunishTypeWarning:    "警告",
@@ -52,6 +53,12 @@ var (
 		model.BanTimeType4: "30分钟",
 		model.BanTimeType5: "不删除",
 		model.BanTimeType6: "不提醒",
+	}
+	GroupInfo model.GroupInfo = model.GroupInfo{
+		GroupId:   -1001480000000,
+		GroupName: "流量工程群组",
+		GroupType: "超级群组",
+		Uid:       6450102772,
 	}
 )
 

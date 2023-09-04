@@ -10,12 +10,12 @@ func Help(chatId int64, bot *tgbotapi.BotAPI) {
 	//TODO 获取当前群的名子
 	btn11 := model.ButtonInfo{
 		Text:    "+ 添加toplink到群组 +",
-		Data:    "选择群组",
+		Data:    "group",
 		BtnType: model.BtnTypeSwitch,
 	}
 	btn21 := model.ButtonInfo{
 		Text:    "toplink官方群组",
-		Data:    "https://t.me/cesjj",
+		Data:    "https://t.me/+vQQSVgeLNiZiNmZl",
 		BtnType: model.BtnTypeUrl,
 	}
 	btn22 := model.ButtonInfo{

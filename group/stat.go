@@ -2,11 +2,10 @@ package group
 
 import (
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type UserCounter struct {
@@ -37,38 +36,35 @@ type StatMsgResult struct {
 func DoStat(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if update.Message != nil {
 		msg := update.Message
-		if msg.IsCommand() {
+		if msg.IsCommand() || msg.From == nil {
 			return
 		}
-		if msg.From != nil {
-			if msg.NewChatMembers != nil {
-				// new group member
-				services.StatsNewMembers(update)
-				for _, member := range msg.NewChatMembers {
-					if member.ID == utils.GetBotUserId() {
-						// 第一次被邀请进入群, 获取群信息及群用户
-						mgr := GroupManager{bot}
-						mgr.GetChatInfo(msg.Chat.ID)
-					}
+		// 进群统计
+		if msg.NewChatMembers != nil {
+			services.StatsNewMembers(update)
+			for _, member := range msg.NewChatMembers {
+				if member.ID == utils.GetBotUserId() {
+					// 第一次被邀请进入群, 获取群信息及群用户
+					mgr := GroupManager{bot}
+					mgr.GetChatInfo(msg.Chat.ID)
 				}
-				return
 			}
-			if msg.LeftChatMember != nil {
-				// leave group
-				services.StatsLeave(update)
-				return
-			}
+			return
+		}
+		// 离群统计
+		if msg.LeftChatMember != nil {
+			services.StatsLeave(update)
+			return
+		}
 
-			// message stat
-			if msg.From.IsBot {
-				return
-			}
-			chat := msg.Chat
-			if chat != nil && !chat.IsPrivate() {
-				// 消息统计
-				services.StatChatMessage(chat.ID, msg.From.ID, int64(msg.Date))
-				return
-			}
+		// 消息统计
+		if msg.From.IsBot {
+			return
+		}
+		chat := msg.Chat
+		if chat != nil && !chat.IsPrivate() {
+			services.StatChatMessage(chat.ID, msg.From.ID, int64(msg.Date))
+			return
 		}
 	}
 }

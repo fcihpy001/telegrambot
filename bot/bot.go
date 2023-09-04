@@ -19,7 +19,7 @@ func StartBot(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("Authorized on account %s", bot.bot.Self.UserName)
+	log.Printf("Authorized on account %s--%d", bot.bot.Self.UserName, bot.bot.Self.ID)
 
 	bot.setupBotWithPool()
 	//	bot.setupBotWithWebhook()
@@ -37,31 +37,35 @@ func (bot *SmartBot) setupBotWithPool() {
 	updateConfig.Timeout = timeout
 	updatesChannel := bot.bot.GetUpdatesChan(updateConfig)
 
+	// 机器人与用户的交互逻辑
 	for update := range updatesChannel {
 		s, _ := json.Marshal(update)
 		log.Println("update:", string(s))
 		// 统计
 		group.DoStat(&update, bot.bot)
 
-		if update.Message != nil && update.Message.IsCommand() {
+		if update.Message != nil && update.Message.IsCommand() { // 以/开头的指令消息
 			bot.handleCommand(update)
-		} else if update.Message != nil && update.Message.ReplyToMessage != nil {
+
+		} else if update.Message != nil && update.Message.ReplyToMessage != nil { // 要求用户回复的消息
 			bot.handleReply(&update)
 
-		} else if update.Message != nil && update.Message.NewChatMembers != nil {
-			bot.SendText(update.Message.Chat.ID, "欢迎进群。。。")
+		} else if update.Message != nil && update.Message.NewChatMembers != nil { // 新用户加入群组
 			group.GroupHandlerMessage(update.Message, bot.bot)
-		} else if update.Message != nil && update.Message.LeftChatMember != nil {
-			bot.SendText(update.Message.Chat.ID, "有人离开了群组。。。")
-			group.GroupHandlerMessage(update.Message, bot.bot)
-		} else if update.Message != nil {
+
+		} else if update.Message != nil && update.Message.LeftChatMember != nil { // 用户离开群组，只统计
+
+		} else if update.Message != nil { // 普通消息，要重点监控自定义关键词的处理
 			bot.handleMessage(&update)
-		} else if update.CallbackQuery != nil {
+
+		} else if update.CallbackQuery != nil { // 按钮回调
 			bot.handleQuery(&update)
+
 		} else if update.InlineQuery != nil {
 			fmt.Println("inline query")
+
 		} else {
-			if update.Message != nil && update.Message.Chat != nil {
+			if update.Message != nil && update.Message.Chat != nil { // 未定义消息的处理
 				// if chat is nil, panic
 				bot.SendText(update.Message.Chat.ID, "这个问题，暂时无法处理")
 			}
