@@ -19,6 +19,8 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 		setting.Help(update.Message.Chat.ID, bot.bot)
 
 	case "start":
+		setting.StartHandler(&update, bot.bot)
+	case "setting":
 		setting.Settings(update.Message.Chat.ID, update.Message.Chat.Type, update.Message.Text, bot.bot)
 
 	case "create":

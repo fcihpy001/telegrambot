@@ -236,6 +236,11 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if strings.HasPrefix(query, "permission") { //权限管理
 		setting.PermissionHandler(update, bot.bot)
 
+	} else if query == "start" {
+		setting.StartHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "manager_group") {
+		setting.ManagerGroupHandler(update, bot.bot)
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")
 		msg.DisableNotification = false

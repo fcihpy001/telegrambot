@@ -12,7 +12,7 @@ import (
 func Settings(chatId int64, chatType string, content string, bot *tgbotapi.BotAPI) {
 
 	var buttons []model.ButtonInfo
-	utils.Json2Button("startMenu.json", &buttons)
+	utils.Json2Button("setting.json", &buttons)
 
 	var row []model.ButtonInfo
 	var rows [][]model.ButtonInfo
@@ -38,30 +38,6 @@ func Settings(chatId int64, chatType string, content string, bot *tgbotapi.BotAP
 			row = []model.ButtonInfo{}
 		}
 	}
-	//func Settings(chatId int64, chatType string, content string, bot *tgbotapi.BotAPI) {
-	//	_ = model.ButtonInfo{
-	//		Text:    "🌺抽奖活动",
-	//		Data:    "lucky_activity",
-	//		BtnType: model.BtnTypeData,
-	//	}
-	//	btn12 := model.ButtonInfo{
-	//		Text:    "😊专属邀请链接生成",
-	//		Data:    "group_invite_setting",
-	//		BtnType: model.BtnTypeData,
-	//	}
-	//	// 当公共群组中时, 跳转私人聊天中
-	//	btn21 := model.ButtonInfo{
-	//		Text:    "👨‍🎓群接龙",
-	//		Data:    fmt.Sprintf("https://t.me/%s?start=%d", utils.GetBotUserName(), chatId),
-	//		BtnType: model.BtnTypeUrl,
-	//	}
-	//	if chatType == "private" {
-	//		println()
-	//		btn21 = model.ButtonInfo{
-	//			Text:    "👨‍🎓群接龙",
-	//			Data:    fmt.Sprintf("group_solitaire?chatId=%d"),
-	//			BtnType: model.BtnTypeData,
-	//		}
 
 	if len(buttons)%2 != 0 {
 		rows = append(rows, row)

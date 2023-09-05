@@ -118,33 +118,6 @@ func GetProhibitSettings(chatId int64) model.ProhibitedSetting {
 	return setting
 }
 
-func SaveMemberSettings(model *model.NewMemberCheck) {
-	if model.ChatId < 1 {
-		return
-	}
-	//更新或者创建
-	if GetMemberSettings(model.ChatId).ChatId > 0 {
-		err := db.Save(model).Error
-		if err != nil {
-			log.Println("update Prohibit settings failed", err)
-		}
-	} else {
-		err := db.Create(model).Error
-		if err != nil {
-			log.Println("create Prohibit settings failed", err)
-		}
-	}
-}
-
-func GetMemberSettings(chatId int64) model.NewMemberCheck {
-	var setting model.NewMemberCheck
-	err := db.Where("chat_id = ?", chatId).First(&setting).Error
-	if err != nil {
-		log.Println("get Prohibit settings failed")
-	}
-	return setting
-}
-
 func SaveModel(model interface{}, chatId int64) {
 	fmt.Println("save-mode chat-id", chatId)
 	if chatId == 0 {
@@ -166,6 +139,21 @@ func GetModelData(chatId int64, model interface{}) error {
 	}
 	return nil
 }
+func GetModels(model []interface{}) error {
+
+	err := db.Find(&model)
+	if err != nil {
+		log.Println("get models  failed")
+		return err.Error
+	}
+	return nil
+}
+func GetAllGroups() ([]model.GroupInfo, error) {
+	var items []model.GroupInfo
+	err := db.Find(&items).Error
+	return items, err
+}
+
 func GetModelDataWhere(chatId int64, model interface{}) error {
 
 	err := db.Where("spam_setting_id = ?", chatId).First(&model)

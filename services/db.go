@@ -33,7 +33,7 @@ func InitDB() {
 		utils.Config.Mysql.Database)
 	// fmt.Println(dsn)
 	InitMysql(dsn)
-	// createTable()
+	createTable()
 
 	initRedis(utils.Config.RedisURL)
 }
@@ -117,6 +117,9 @@ func createTable() {
 		logger.Error().Stack().Err(err)
 	}
 	if err := db.AutoMigrate(&model.Schedule{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.GroupInfo{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
 	log.Println("数据表创建成功...")

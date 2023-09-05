@@ -19,8 +19,9 @@ func StartBot(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("Authorized on account %s--%d", bot.bot.Self.UserName, bot.bot.Self.ID)
-
+	log.Printf("Authorized on account %s--%d-%s-%s", bot.bot.Self.UserName, bot.bot.Self.ID, bot.bot.Self.FirstName, bot.bot.Self.UserName)
+	//记录bot信息
+	fmt.Println(utils.GetBotUserId(), utils.GetBotUserName())
 	bot.setupBotWithPool()
 	//	bot.setupBotWithWebhook()
 }

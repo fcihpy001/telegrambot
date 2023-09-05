@@ -372,7 +372,8 @@ type SelectInfo struct {
 }
 
 type GroupInfo struct {
-	GroupId   int64
+	gorm.Model
+	GroupId   int64 `gorm:"uniqueIndex"`
 	GroupName string
 	GroupType string
 	Uid       int64

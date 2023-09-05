@@ -37,3 +37,7 @@ func GetBotUserId() int64 {
 func GetBotUserName() string {
 	return Config.botUserInfo.UserName
 }
+
+func GetBotName() string {
+	return Config.botUserInfo.FirstName
+}

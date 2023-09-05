@@ -1,11 +1,11 @@
 [
   {
-    "text": "\uD83C\uDF3A抽奖活动",
+    "text": "\uD83C\uDF81抽奖活动",
     "data": "lucky_activity",
     "btn_type": "data"
   },
   {
-    "text": "\uD83D\uDE0A专属邀请链接生成",
+    "text": "\uD83D\uDD17专属邀请链接生成",
     "data": "group_invite_setting",
     "btn_type": "data"
   },
@@ -20,53 +20,58 @@
     "btn_type": "data"
   },
   {
-    "text": "\uD83D\uDC1E自动回复",
+    "text": "\uD83E\uDD16自动回复",
     "data": "auto_reply",
     "btn_type": "data"
   },
   {
-    "text": "\uD83E\uDD8A定时消息",
+    "text": "\uD83D\uDD51定时消息",
     "data": "schedule_message",
     "btn_type": "data"
   },
   {
-    "text": "\uD83C\uDF33入群验证",
+    "text": "\uD83E\uDEAC入群验证",
     "data": "verify_setting",
     "btn_type": "data"
   },
   {
-    "text": "\uD83E\uDD2A进群欢迎",
+    "text": "\uD83C\uDF89进群欢迎",
     "data": "group_welcome_setting",
     "btn_type": "data"
   },
   {
-    "text": "\uD83E\uDDAC反垃圾",
+    "text": "\uD83D\uDCE8反垃圾",
     "data": "spam_setting",
     "btn_type": "data"
   },
   {
-    "text": "\uD83C\uDF13反刷屏",
+    "text": "\uD83D\uDDA53反刷屏",
     "data": "flood_setting",
     "btn_type": "data"
   },
   {
-    "text": "⛄\uFE0F违禁词",
+    "text": "\uD83D\uDEAB违禁词",
     "data": "prohibited_words",
     "btn_type": "data"
   },
   {
-    "text": "\uD83C\uDF3D用户检查",
+    "text": "\uD83D\uDD26用户检查",
     "data": "user_check",
     "btn_type": "data"
   },
   {
-    "text": "\uD83C\uDF17夜晚模式",
+    "text": "\uD83C\uDF17夜间模式",
     "data": "dark_model_setting",
     "btn_type": "data"
   },
   {
-    "text": "\uD83C\uDF30新群员限制",
+    "text": "\uD83D\uDC64新群员限制",
     "data": "new_member_check",
+    "btn_type": "data"
+  },
+  {
+    "text": "\uD83D\uDD01切换其它群",
+    "data": "switch_group",
     "btn_type": "data"
   },
   {
