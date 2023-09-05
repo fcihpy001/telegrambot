@@ -15,13 +15,13 @@
     "btn_type": "data"
   },
   {
-    "text": "\uD83E\uDDDD\u200D群统计",
+    "text": "\uD83D\uDCCA群统计",
     "data": "group_statistic",
     "btn_type": "data"
   },
   {
     "text": "\uD83E\uDD16自动回复",
-    "data": "auto_reply",
+    "data": "auto_reply_menu",
     "btn_type": "data"
   },
   {
@@ -56,7 +56,7 @@
   },
   {
     "text": "\uD83D\uDD26用户检查",
-    "data": "user_check",
+    "data": "user_check_menu",
     "btn_type": "data"
   },
   {
@@ -66,7 +66,7 @@
   },
   {
     "text": "\uD83D\uDC64新群员限制",
-    "data": "new_member_check",
+    "data": "new_member_check_menu",
     "btn_type": "data"
   },
   {

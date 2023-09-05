@@ -304,9 +304,9 @@ func BanTimeReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 func getBackActionMsg() string {
 	backAction := ""
 	if class == "flood" {
-		backAction = "flood_setting"
+		backAction = "flood_setting_menu"
 	} else if class == "spam" {
-		backAction = "spam_setting"
+		backAction = "spam_setting_menu"
 	} else if class == "prohibited" {
 		backAction = "prohibited_setting"
 	}

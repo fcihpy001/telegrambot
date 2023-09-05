@@ -1,0 +1,119 @@
+[
+  [
+    {
+      "text": "AI屏蔽垃圾消息[强劲版]",
+      "data": "spam_setting_type:ai",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "反洪水攻击",
+      "data": "spam_setting_type:ddos",
+      "btn_type": "data"
+    },
+    {
+      "text": "屏蔽被封禁账号",
+      "data": "spam_setting_type:blackUser",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "屏蔽链接",
+      "data": "spam_setting_type:link",
+      "btn_type": "data"
+    },
+    {
+      "text": "屏蔽频道马甲发言",
+      "data": "spam_setting_type:channelCopy",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "屏蔽来自频道转发",
+      "data": "spam_setting_type:channelForward",
+      "btn_type": "data"
+    },
+    {
+      "text": "屏蔽来自用户转发",
+      "data": "spam_setting_type:userForward",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "屏蔽@群组ID",
+      "data": "spam_setting_type:atGroup",
+      "btn_type": "data"
+    },
+    {
+      "text": "屏蔽@用户ID",
+      "data": "spam_setting_type:atUser",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "屏蔽以太坊地址",
+      "data": "spam_setting_type:ethAddress",
+      "btn_type": "data"
+    },
+    {
+      "text": "清除命令消息",
+      "data": "spam_setting_type:command",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "屏蔽超长消息",
+      "data": "spam_setting_type:longMsg",
+      "btn_type": "data"
+    },
+    {
+      "text": "设置消息最大长度",
+      "data": "spam_setting_msg_length",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "屏蔽超长名字",
+      "data": "spam_setting_type:longName",
+      "btn_type": "data"
+    },
+    {
+      "text": "设置姓名最大长度",
+      "data": "spam_setting_name_length",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "惩罚设置",
+      "data": "punish_setting_class:spam",
+      "btn_type": "data"
+    },
+    {
+      "text": "例外管理",
+      "data": "spam_setting_exception",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "自动删除提醒消息",
+      "data": "spam_setting_delete_msg",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDD19返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]

@@ -29,7 +29,7 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 			group.PlaySolitaire(&update, bot.bot, args)
 			return
 		}
-		setting.Settings(update.Message.Chat.ID, update.Message.Chat.Type, update.Message.Text, bot.bot)
+		setting.Settings(&update, bot.bot)
 
 	case "create":
 

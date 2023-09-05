@@ -16,128 +16,24 @@ var (
 )
 
 func spamSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	err = services.GetModelData(update.CallbackQuery.Message.Chat.ID, &spamsSetting)
+	err = services.GetModelData(utils.GroupInfo.GroupId, &spamsSetting)
 	fmt.Println("spamsSetting-query", spamsSetting)
-	spamsSetting.ChatId = update.CallbackQuery.Message.Chat.ID
+	spamsSetting.ChatId = utils.GroupInfo.GroupId
 
-	btn01 := model.ButtonInfo{
-		Text:    "AI屏蔽垃圾消息[强劲版]",
-		Data:    "spam_setting_type:ai",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn11 := model.ButtonInfo{
-		Text:    "反洪水攻击",
-		Data:    "spam_setting_type:ddos",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn12 := model.ButtonInfo{
-		Text:    "屏蔽被封禁账号",
-		Data:    "spam_setting_type:blackUser",
-		BtnType: model.BtnTypeData,
+	var buttons [][]model.ButtonInfo
+	utils.Json2Button2("spam.json", &buttons)
+	fmt.Println(&buttons)
+	var rows [][]model.ButtonInfo
+	for i := 0; i < len(buttons); i++ {
+		btnArr := buttons[i]
+		var row []model.ButtonInfo
+		for j := 0; j < len(btnArr); j++ {
+			btn := btnArr[j]
+			row = append(row, btn)
+		}
+		rows = append(rows, row)
 	}
 
-	btn21 := model.ButtonInfo{
-		Text:    "屏蔽链接",
-		Data:    "spam_setting_type:link",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn22 := model.ButtonInfo{
-		Text:    "屏蔽频道马甲发言",
-		Data:    "spam_setting_type:channelCopy",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn31 := model.ButtonInfo{
-		Text:    "屏蔽来自频道转发",
-		Data:    "spam_setting_type:channelForward",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn32 := model.ButtonInfo{
-		Text:    "屏蔽来自用户转发",
-		Data:    "spam_setting_type:userForward",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn41 := model.ButtonInfo{
-		Text:    "屏蔽@群组ID",
-		Data:    "spam_setting_type:atGroup",
-		BtnType: model.BtnTypeData,
-	}
-	btn42 := model.ButtonInfo{
-		Text:    "屏蔽@用户ID",
-		Data:    "spam_setting_type:atUser",
-		BtnType: model.BtnTypeData,
-	}
-	btn51 := model.ButtonInfo{
-		Text:    "屏蔽以太坊地址",
-		Data:    "spam_setting_type:ethAddress",
-		BtnType: model.BtnTypeData,
-	}
-	btn52 := model.ButtonInfo{
-		Text:    "清除命令消息",
-		Data:    "spam_setting_type:command",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn61 := model.ButtonInfo{
-		Text:    "屏蔽超长消息",
-		Data:    "spam_setting_type:longMsg",
-		BtnType: model.BtnTypeData,
-	}
-	btn62 := model.ButtonInfo{
-		Text:    "设置消息最大长度",
-		Data:    "spam_setting_msg_length",
-		BtnType: model.BtnTypeData,
-	}
-	btn71 := model.ButtonInfo{
-		Text:    "屏蔽超长名字",
-		Data:    "spam_setting_type:longName",
-		BtnType: model.BtnTypeData,
-	}
-	btn72 := model.ButtonInfo{
-		Text:    "设置姓名最大长度",
-		Data:    "spam_setting_name_length",
-		BtnType: model.BtnTypeData,
-	}
-	btn81 := model.ButtonInfo{
-		Text:    "惩罚设置",
-		Data:    "punish_setting_class:spam",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn82 := model.ButtonInfo{
-		Text:    "例外管理",
-		Data:    "spam_setting_exception",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn91 := model.ButtonInfo{
-		Text:    "自动删除提醒消息",
-		Data:    "spam_setting_delete_msg",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn10 := model.ButtonInfo{
-		Text:    "返回",
-		Data:    "go_setting",
-		BtnType: model.BtnTypeData,
-	}
-	row0 := []model.ButtonInfo{btn01}
-	row1 := []model.ButtonInfo{btn11, btn12}
-	row2 := []model.ButtonInfo{btn21, btn22}
-	row3 := []model.ButtonInfo{btn31, btn32}
-	row4 := []model.ButtonInfo{btn41, btn42}
-	row5 := []model.ButtonInfo{btn51, btn52}
-	row6 := []model.ButtonInfo{btn61, btn62}
-	row7 := []model.ButtonInfo{btn71, btn72}
-	row8 := []model.ButtonInfo{btn81, btn82}
-	row9 := []model.ButtonInfo{btn91}
-	row10 := []model.ButtonInfo{btn10}
-	rows := [][]model.ButtonInfo{row0, row1, row2, row3, row4, row5, row6, row7, row8, row9, row10}
 	keyboard := utils.MakeKeyboard(rows)
 	utils.SpamSettingMenuMarkup = keyboard
 
@@ -170,9 +66,6 @@ func SpamSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	} else if cmd == "spam_setting_name_length" {
 		nameLengthHandler(update, bot)
-
-		//} else if cmd == "spam_setting_punish" {
-		//	PunishMenu(update, bot, "spam")
 	}
 }
 

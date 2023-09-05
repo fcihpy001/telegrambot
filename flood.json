@@ -1,0 +1,57 @@
+[
+  [
+    {
+      "text": "\uD83D\uDCE7发送消息条数",
+      "data": "flood_setting_count",
+      "btn_type": "data"
+    },
+    {
+      "text": "⏱检查时间间隔",
+      "data": "flood_setting_interval",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "状态",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "启用",
+      "data": "flood_setting_status:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "关闭",
+      "data": "flood_setting_status:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "违规后清理消息",
+      "data": "flood_setting_delete",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDCDB惩罚设置",
+      "data": "punish_setting_class:flood",
+      "btn_type": "data"
+    },
+    {
+      "text": "\uD83D\uDD5F自动删除提醒消息",
+      "data": "delete_notify_menu:flood",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDD19返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]

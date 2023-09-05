@@ -12,7 +12,36 @@ import (
 
 var userCheckSetting model.UserCheck
 
-func UserCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func UserCheckHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	data := update.CallbackQuery.Data
+	query := strings.Split(data, ":")
+	cmd := query[0]
+
+	if cmd == "user_check_menu" {
+		userCheckMenu(update, bot)
+
+	} else if cmd == "user_check_name" {
+		nameCheck(update, bot)
+
+	} else if cmd == "user_check_username" {
+		userNameCheck(update, bot)
+
+	} else if cmd == "user_check_icon" {
+		iconCheck(update, bot)
+
+	} else if cmd == "user_check_subscribe" {
+		subScribeCheck(update, bot)
+
+	} else if cmd == "user_check_black_list" {
+		blackUserList(update, bot)
+
+	} else if cmd == "ser_check_black_add" {
+		blackUserAdd(update, bot)
+
+	}
+}
+
+func userCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	err := services.GetModelData(utils.GroupInfo.GroupId, &userCheckSetting)
 	fmt.Println("userCheckSetting-query", userCheckSetting)
 
@@ -42,7 +71,7 @@ func UserCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func NameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func nameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	userCheckSetting.NameCheck = !userCheckSetting.NameCheck
 	if userCheckSetting.NameCheck {
 		utils.UserCheckMenuMarkup.InlineKeyboard[0][0].Text = "✅必须设置名字"
@@ -58,7 +87,7 @@ func NameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func UserNameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func userNameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	userCheckSetting.UserNameCheck = !userCheckSetting.UserNameCheck
 	if userCheckSetting.UserNameCheck {
 		utils.UserCheckMenuMarkup.InlineKeyboard[0][1].Text = "✅必须设置用户名"
@@ -74,7 +103,7 @@ func UserNameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func IconCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func iconCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	userCheckSetting.IconCheck = !userCheckSetting.IconCheck
 	if userCheckSetting.IconCheck {
 		utils.UserCheckMenuMarkup.InlineKeyboard[1][0].Text = "✅必须设置头像"
@@ -90,7 +119,7 @@ func IconCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func SubScribeCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func subScribeCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	userCheckSetting.SubScribe = !userCheckSetting.SubScribe
 	if userCheckSetting.SubScribe {
 		utils.UserCheckMenuMarkup.InlineKeyboard[1][1].Text = "✅必须订阅频道"
@@ -106,7 +135,8 @@ func SubScribeCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func BlackUserList(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+// 黑名单用户处理
+func blackUserList(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	words := strings.Split(userCheckSetting.BlackUserList, "&")
 	fmt.Println("black user", words)
 	fmt.Println("black user count", len(words))
@@ -136,7 +166,7 @@ func BlackUserList(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func BlackUserAdd(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func blackUserAdd(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "🔇 黑名单\\n\\n👉请输入要禁止的名字（一行一个）")
 	keybord := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -186,38 +216,6 @@ func BlackUserAddResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-//func NameContainWordMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-//
-//	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard)
-//	_, err := bot.Send(msg)
-//	if err != nil {
-//		log.Println(err)
-//	}
-//
-//	words := strings.Split(userCheckSetting.NameNotContainWord, "&")
-//
-//	content := fmt.Sprintf("🔦 用户检查\n\n⛔️ 禁止包含名字   已添加禁止名单：%d条\n\n", len(words))
-//	for _, word := range words {
-//		content = content + fmt.Sprintf("- %s\n", word)
-//	}
-//	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, content)
-//	keybord := tgbotapi.NewReplyKeyboard(
-//		tgbotapi.NewKeyboardButtonRow(
-//			tgbotapi.NewKeyboardButton("返回"),
-//		))
-//
-//	msg.ReplyMarkup = keybord
-//	msg.ReplyMarkup = tgbotapi.ForceReply{
-//		ForceReply: true,
-//	}
-//
-//	bot.Send(msg)
-//}
-
-func NameContainWord(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-
-}
-
 func updateUserSettingMsg() string {
 	content := "🔦 用户检查\n\n在用户进入群组和发送消息时进行检查和屏蔽。\n\n惩罚：警告 3 次后禁言 60 分钟\n\n自动删除提醒消息：10分钟"
 	//if replySetting.Enable == false {
@@ -237,14 +235,14 @@ func updateUserSettingMsg() string {
 	return content
 }
 
-func UserCheckSetting(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	content := updateUserSettingMsg()
-	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.UserCheckMenuMarkup)
-	bot.Send(msg)
-}
-
-func GoUserPunishSetting(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	content := updateUserSettingMsg()
-	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.UserCheckMenuMarkup)
-	bot.Send(msg)
-}
+//func UserCheckSetting(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+//	content := updateUserSettingMsg()
+//	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.UserCheckMenuMarkup)
+//	bot.Send(msg)
+//}
+//
+//func GoUserPunishSetting(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+//	content := updateUserSettingMsg()
+//	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.UserCheckMenuMarkup)
+//	bot.Send(msg)
+//}

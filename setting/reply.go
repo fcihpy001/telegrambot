@@ -4,6 +4,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
+	"strings"
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
@@ -11,7 +12,25 @@ import (
 
 var replySetting model.ReplySetting
 
-func AutoReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func ReplyHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	data := update.CallbackQuery.Data
+	query := strings.Split(data, ":")
+	cmd := query[0]
+	params := ""
+	if len(query) > 1 {
+		params = query[1]
+	}
+
+	if cmd == "auto_reply_menu" {
+		replyMenu(update, bot)
+
+	} else if cmd == "auto_reply_status" {
+		replyStatusHandler(update, bot, params == "enable")
+
+	}
+}
+
+func replyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	kkk := model.Reply{
 		ChatId:     999,
 		KeyWorld:   "hello",
@@ -146,18 +165,17 @@ func AutoReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func AutoReplyStatus(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bool) {
+func replyStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bool) {
 
+	replySetting.Enable = enable
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
 	if enable {
 		utils.ReplEnableyMenuMarkup.InlineKeyboard[0][1].Text = "✅启用"
 		utils.ReplEnableyMenuMarkup.InlineKeyboard[0][2].Text = "关闭"
-		replySetting.Enable = true
 		keyboard = utils.ReplEnableyMenuMarkup
 	} else {
 		utils.ReplDisableMenuMarkup.InlineKeyboard[0][1].Text = "启用"
 		utils.ReplDisableMenuMarkup.InlineKeyboard[0][2].Text = "✅关闭"
-		replySetting.Enable = false
 		keyboard = utils.ReplDisableMenuMarkup
 	}
 
@@ -176,7 +194,6 @@ func updateReplySettingMsg() string {
 		return content
 	}
 	fmt.Println("reply_keyworld", replySetting.KeywordReply)
-	//enableMsg := "- " + replySetting.KeywordReply[0].KeyWorld
 
 	enableMsg := "* match world"
 

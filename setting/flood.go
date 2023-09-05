@@ -5,6 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"strconv"
+	"strings"
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
@@ -13,83 +14,60 @@ import (
 var floodSetting model.FloodSetting
 
 func FloodSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	data := update.CallbackQuery.Data
+	query := strings.Split(data, ":")
+	cmd := query[0]
+	params := ""
+	if len(query) > 1 {
+		params = query[1]
+	}
 
+	if cmd == "flood_setting_menu" {
+		floodSettingMenu(update, bot)
+
+	} else if cmd == "flood_setting_status" {
+		floodStatusHandler(update, bot, params == "enable")
+
+	} else if cmd == "flood_setting_count" {
+		floodMsgCountMenu(update, bot)
+
+	} else if cmd == "flood_setting_interval" {
+		floodIntervalMenu(update, bot)
+
+	} else if cmd == "flood_setting_delete" {
+		floodDeleteMsgHandler(update, bot)
+
+	}
 }
 
-func FloodSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	err := services.GetModelData(update.CallbackQuery.Message.Chat.ID, &floodSetting)
-	floodSetting.ChatId = update.CallbackQuery.Message.Chat.ID
-	btn22text := "启用"
-	btn23text := "✅关闭"
-	if floodSetting.Enable {
-		btn22text = "✅启用"
-		btn23text = "关闭"
+func floodSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	err := services.GetModelData(utils.GroupInfo.GroupId, &floodSetting)
+	floodSetting.ChatId = utils.GroupInfo.GroupId
+
+	var buttons [][]model.ButtonInfo
+	utils.Json2Button2("flood.json", &buttons)
+	fmt.Println(&buttons)
+	var rows [][]model.ButtonInfo
+	for i := 0; i < len(buttons); i++ {
+		btnArr := buttons[i]
+		var row []model.ButtonInfo
+		for j := 0; j < len(btnArr); j++ {
+			btn := btnArr[j]
+			if btn.Text == "启用" && floodSetting.Enable {
+				btn.Text = "✅启用"
+			} else if btn.Text == "关闭" && !floodSetting.Enable {
+				btn.Text = "✅关闭"
+			}
+			if btn.Text == "违规后清理消息" && floodSetting.DeleteMsg {
+				btn.Text = "✅违规后清理消息"
+			} else if btn.Text == "违规后清理消息" && !floodSetting.DeleteMsg {
+				btn.Text = "❌违规后清理消息"
+			}
+			row = append(row, btn)
+		}
+		rows = append(rows, row)
 	}
 
-	btn31text := "❌违规后清理消息"
-	if floodSetting.DeleteMsg {
-		btn31text = "✅违规后清理消息"
-	}
-
-	btn11 := model.ButtonInfo{
-		Text:    "发送消息条数",
-		Data:    "flood_msg_count",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn12 := model.ButtonInfo{
-		Text:    "检查时间间隔",
-		Data:    "flood_interval",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn21 := model.ButtonInfo{
-		Text:    "状态",
-		Data:    "toast",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn22 := model.ButtonInfo{
-		Text:    btn22text,
-		Data:    "flood_status_enable",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn23 := model.ButtonInfo{
-		Text:    btn23text,
-		Data:    "flood_status_disable",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn31 := model.ButtonInfo{
-		Text:    btn31text,
-		Data:    "flood_trigger_delete",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn41 := model.ButtonInfo{
-		Text:    "惩罚设置",
-		Data:    "flood_punish_setting",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn42 := model.ButtonInfo{
-		Text:    "自动删除提醒消息",
-		Data:    "flood_delete_notify",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn51 := model.ButtonInfo{
-		Text:    "返回",
-		Data:    "go_setting",
-		BtnType: model.BtnTypeData,
-	}
-	row1 := []model.ButtonInfo{btn11, btn12}
-	row2 := []model.ButtonInfo{btn21, btn22, btn23}
-	row3 := []model.ButtonInfo{btn31}
-	row4 := []model.ButtonInfo{btn41, btn42}
-	row5 := []model.ButtonInfo{btn51}
-	rows := [][]model.ButtonInfo{row1, row2, row3, row4, row5}
 	keyboard := utils.MakeKeyboard(rows)
 	utils.FloodSettingMenuMarkup = keyboard
 
@@ -101,7 +79,7 @@ func FloodSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func FloodIntervalMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func floodIntervalMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	content := fmt.Sprintf("当前设置：在 %d秒内发送 %d条消息触发反刷屏\n\n👉 请输入统计发送消息的间隔时间（秒）", floodSetting.Interval, floodSetting.MsgCount)
 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, content)
 	keybord := tgbotapi.NewReplyKeyboard(
@@ -116,7 +94,7 @@ func FloodIntervalMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	bot.Send(msg)
 }
 
-func FloodMsgCountMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func floodMsgCountMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	content := fmt.Sprintf("当前设置：在 %d秒内发送 %d条消息触发反刷屏\n\n👉 请输入时间内发送消息的最大条数：", floodSetting.Interval, floodSetting.MsgCount)
 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, content)
 	keybord := tgbotapi.NewReplyKeyboard(
@@ -138,7 +116,7 @@ func FloodIntervalResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	content := "添加完成"
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "flood_setting",
+		Data:    "flood_setting_menu",
 		BtnType: model.BtnTypeData,
 	}
 	row1 := []model.ButtonInfo{btn1}
@@ -161,7 +139,7 @@ func FloodMsgCountResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	content := "添加完成"
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "flood_setting",
+		Data:    "flood_setting_menu",
 		BtnType: model.BtnTypeData,
 	}
 	row1 := []model.ButtonInfo{btn1}
@@ -177,7 +155,7 @@ func FloodMsgCountResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func FloodStatus(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bool) {
+func floodStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bool) {
 	if enable {
 		utils.FloodSettingMenuMarkup.InlineKeyboard[1][1].Text = "✅启用"
 		utils.FloodSettingMenuMarkup.InlineKeyboard[1][2].Text = "关闭"
@@ -194,7 +172,7 @@ func FloodStatus(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bool) {
 	}
 }
 
-func FloodDeleteMsg(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func floodDeleteMsgHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	floodSetting.DeleteMsg = !floodSetting.DeleteMsg
 	if floodSetting.DeleteMsg {
 		utils.FloodSettingMenuMarkup.InlineKeyboard[2][0].Text = "✅违规后清理消息"

@@ -9,8 +9,9 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func Settings(chatId int64, chatType string, content string, bot *tgbotapi.BotAPI) {
-
+func Settings(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	chatId := update.CallbackQuery.Message.Chat.ID
+	chatType := update.CallbackQuery.Message.Chat.Type
 	var buttons []model.ButtonInfo
 	utils.Json2Button("setting.json", &buttons)
 
@@ -21,10 +22,10 @@ func Settings(chatId int64, chatType string, content string, bot *tgbotapi.BotAP
 		if strings.Contains(btn.Data, "群接龙") {
 			btn.Data = fmt.Sprintf("https://t.me/%s?start=%d", &bot.Self.UserName, chatId)
 			btn.BtnType = model.BtnTypeUrl
-			//if chatType == "private" {
-			//	btn.Data = fmt.Sprintf("group_solitaire?chatId=%d")
-			//	btn.BtnType = model.BtnTypeData
-			//}
+			if chatType == "private" {
+				btn.Data = fmt.Sprintf("group_solitaire?chatId=%d")
+				btn.BtnType = model.BtnTypeData
+			}
 
 			row = []model.ButtonInfo{btn}
 			rows = append(rows, row)
@@ -46,6 +47,6 @@ func Settings(chatId int64, chatType string, content string, bot *tgbotapi.BotAP
 	keyboard := utils.MakeKeyboard(rows)
 	utils.SettingMenuMarkup = keyboard
 
-	content = fmt.Sprintf("设置【%s】群组，选择要更改的项目", utils.GroupInfo.GroupName)
+	content := fmt.Sprintf("设置【%s】群组，选择要更改的项目", utils.GroupInfo.GroupName)
 	utils.SendMenu(chatId, content, keyboard, bot)
 }

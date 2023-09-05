@@ -2,43 +2,43 @@
   [
     {
       "text": "必须设置名字",
-      "data": "check_name",
+      "data": "user_check_name",
       "btn_type": "data"
     },
     {
       "text": "必须设置用户名",
-      "data": "check_username",
+      "data": "user_check_username",
       "btn_type": "data"
     }
   ],
   [
     {
       "text": "必须设置头像",
-      "data": "check_icon",
+      "data": "user_check_icon",
       "btn_type": "data"
     },
     {
       "text": "必须设置用订阅频道",
-      "data": "check_channel",
+      "data": "user_check_channel",
       "btn_type": "data"
     }
   ],
   [
     {
       "text": "黑名单列表",
-      "data": "black_user_add",
+      "data": "user_check_black_list",
       "btn_type": "data"
     }
   ],
   [
     {
       "text": "\uD83D\uDCDB惩罚设置",
-      "data": "prohibited_punish_setting",
+      "data": "punish_setting_class:user",
       "btn_type": "data"
     },
     {
       "text": "\uD83D\uDD52自动删除提醒消息",
-      "data": "prohibited_ban_time",
+      "data": "delete_notify_menu:user",
       "btn_type": "data"
     }
   ],

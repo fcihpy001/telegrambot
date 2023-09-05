@@ -102,5 +102,5 @@ func managerGroupDetail(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params st
 		return
 	}
 	utils.GroupInfo.GroupName = params
-	Settings(update.CallbackQuery.Message.Chat.ID, "public", update.CallbackQuery.Message.Text, bot)
+	Settings(update, bot)
 }

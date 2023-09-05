@@ -20,14 +20,17 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	if strings.HasPrefix(query, "lucky") {
 		lucky.LuckyHandler(update, bot.bot)
 
-	} else if strings.HasPrefix(query, "group") { //群组设置
-		group.GroupHandlerQuery(update, bot.bot)
+	} else if query == "start" { //开始界面
+		setting.StartHandler(update, bot.bot)
 
 	} else if strings.HasPrefix(query, "settings") { //设置
-		setting.Settings(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.Chat.Type, "", bot.bot)
+		setting.Settings(update, bot.bot)
 
 	} else if query == "go_setting" { //设置主菜单
 		bot.go_setting(update)
+
+	} else if strings.HasPrefix(query, "group") { //群组设置
+		group.GroupHandlerQuery(update, bot.bot)
 
 	} else if strings.HasPrefix(query, "prohibited") { //违禁词
 		setting.ProhibitedSettingHandler(update, bot.bot)
@@ -35,68 +38,8 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if strings.Contains(query, "flood_setting") { //刷屏
 		setting.FloodSettingHandler(update, bot.bot)
 
-	} else if query == "auto_reply" { //回复消息
-		setting.AutoReply(update, bot.bot)
-
-	} else if query == "reply_status_enable" {
-		setting.AutoReplyStatus(update, bot.bot, true)
-
-	} else if query == "reply_status_disable" {
-		setting.AutoReplyStatus(update, bot.bot, false)
-
-	} else if query == "new_member_check" { //新成员检查
-		setting.MemberCheckMenu(update, bot.bot)
-
-	} else if query == "new_member_check_enable" {
-		setting.MemberCheckStatus(update, bot.bot, true)
-
-	} else if query == "new_member_check_disable" {
-		setting.MemberCheckStatus(update, bot.bot, false)
-
-	} else if query == "new_member_check_time_menu" {
-		setting.MemberCheckTimeMenu(update, bot.bot)
-
-	} else if query == "user_check" { //用户检查
-		setting.UserCheckMenu(update, bot.bot)
-
-	} else if query == "check_name" {
-		setting.NameCheck(update, bot.bot)
-
-	} else if query == "check_username" {
-		setting.UserNameCheck(update, bot.bot)
-
-	} else if query == "check_icon" {
-		setting.IconCheck(update, bot.bot)
-
-	} else if query == "check_channel" {
-		setting.SubScribeCheck(update, bot.bot)
-
-	} else if query == "black_user_list" {
-		setting.BlackUserList(update, bot.bot)
-
-	} else if query == "black_user_add" {
-		setting.BlackUserAdd(update, bot.bot)
-
-	} else if query == "go_user_check_setting" {
-		setting.UserCheckSetting(update, bot.bot)
-
-		//} else if query == "flood_setting" { //刷屏设置
-		//	setting.FloodSettingMenu(update, bot.bot)
-		//
-		//} else if query == "flood_status_enable" {
-		//	setting.FloodStatus(update, bot.bot, true)
-		//
-		//} else if query == "flood_status_disable" {
-		//	setting.FloodStatus(update, bot.bot, false)
-		//
-		//} else if query == "flood_msg_count" {
-		//	setting.FloodMsgCountMenu(update, bot.bot)
-		//
-		//} else if query == "flood_interval" {
-		//	setting.FloodIntervalMenu(update, bot.bot)
-		//
-		//} else if query == "flood_trigger_delete" {
-		//	setting.FloodDeleteMsg(update, bot.bot)
+	} else if strings.HasPrefix(query, "auto_reply") { //回复消息
+		setting.ReplyHandler(update, bot.bot)
 
 	} else if strings.Contains(query, "spam_setting") { //垃圾设置
 		setting.SpamSettingHandler(update, bot.bot)
@@ -112,6 +55,24 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 
 	} else if strings.HasPrefix(query, "schedule") { //定时消息
 		setting.ScheduleSettingHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "permission_type") { //权限管理
+		setting.PermissionSelectHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "permission") { //权限管理
+		setting.PermissionHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "manager_group") { //群组管理
+		setting.ManagerGroupHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "delete_notify") { //删除通知
+		setting.DeleteNotifyHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "user_check") { //用户检查
+		setting.UserCheckHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "new_member_check") { //新成员检查
+		setting.MemberCheckHandler(update, bot.bot)
 
 	} else if query == "solitaire_home" {
 		group.SolitaireHome(update, bot.bot)
@@ -136,20 +97,6 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if strings.HasPrefix(query, "solitaire_confirm_delete?") {
 		param := query[len("solitaire_confirm_delete?"):]
 		group.SolitaireConfirmDelete(update, bot.bot, param)
-	} else if strings.HasPrefix(query, "permission_type") { //权限管理
-		setting.PermissionSelectHandler(update, bot.bot)
-
-	} else if strings.HasPrefix(query, "permission") { //权限管理
-		setting.PermissionHandler(update, bot.bot)
-
-	} else if query == "start" {
-		setting.StartHandler(update, bot.bot)
-
-	} else if strings.HasPrefix(query, "manager_group") {
-		setting.ManagerGroupHandler(update, bot.bot)
-
-	} else if strings.HasPrefix(query, "delete_notify") {
-		setting.DeleteNotifyHandler(update, bot.bot)
 
 	} else {
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")

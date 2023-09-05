@@ -6,12 +6,12 @@
   },
     {
       "text": "启用",
-      "data": "new_member_check_enable",
+      "data": "new_member_check_status:enable",
       "btn_type": "data"
     },
     {
       "text": "✅关闭",
-      "data": "new_member_check_disable",
+      "data": "new_member_check_status:disable",
       "btn_type": "data"
     }
   ],

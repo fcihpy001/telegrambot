@@ -5,6 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"strconv"
+	"strings"
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
@@ -12,7 +13,26 @@ import (
 
 var memberCheck model.NewMemberCheck
 
-func MemberCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func MemberCheckHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	data := update.CallbackQuery.Data
+	query := strings.Split(data, ":")
+	cmd := query[0]
+	params := ""
+	if len(query) > 1 {
+		params = query[1]
+	}
+	if cmd == "new_member_check_menu" {
+		memberCheckMenu(update, bot)
+
+	} else if cmd == "new_member_check_status" {
+		memberCheckStatusHandler(update, bot, params == "enable")
+
+	} else if cmd == "new_member_check_time_menu" {
+		memberCheckTimeMenu(update, bot)
+	}
+}
+
+func memberCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	err := services.GetModelData(utils.GroupInfo.GroupId, &memberCheck)
 
@@ -47,7 +67,7 @@ func MemberCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func MemberCheckStatus(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bool) {
+func memberCheckStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bool) {
 	if enable {
 		utils.MemberCheckMarkup.InlineKeyboard[0][1].Text = "✅启用"
 		utils.MemberCheckMarkup.InlineKeyboard[0][2].Text = "关闭"
@@ -65,7 +85,7 @@ func MemberCheckStatus(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable boo
 	}
 }
 
-func MemberCheckTimeMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func memberCheckTimeMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	time := ""
 	if memberCheck.DelayTime < 61 {
 		time = fmt.Sprintf("%d秒", memberCheck.DelayTime)
@@ -83,7 +103,6 @@ func MemberCheckTimeMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	msg.ReplyMarkup = tgbotapi.ForceReply{
 		ForceReply: true,
 	}
-
 	bot.Send(msg)
 }
 
@@ -92,7 +111,7 @@ func isNumeric(str string) bool {
 	return err == nil
 }
 
-func MemberCheckTimeAction(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func MemberCheckTimeResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	content := "⚠️ 仅支持数字，请重新输入\n\n👉 请输入新群员限制时间（秒，例如：600）："
 	if !isNumeric(update.Message.Text) {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
@@ -102,7 +121,7 @@ func MemberCheckTimeAction(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	content = "✅ 设置成功，点击按钮返回。"
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "new_member_check",
+		Data:    "new_member_check_menu",
 		BtnType: model.BtnTypeData,
 	}
 	memberCheck.DelayTime, _ = strconv.Atoi(update.Message.Text)
