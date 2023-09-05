@@ -16,89 +16,33 @@ var (
 )
 
 func darkModelSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	err = services.GetModelData(update.CallbackQuery.Message.Chat.ID, &darkModelSetting)
-	darkModelSetting.ChatId = update.CallbackQuery.Message.Chat.ID
+	err = services.GetModelData(utils.GroupInfo.GroupId, &darkModelSetting)
+	var btns [][]model.ButtonInfo
+	utils.Json2Button2("dark.json", &btns)
+	var rows [][]model.ButtonInfo
+	for i := 0; i < len(btns); i++ {
+		btnArray := btns[i]
+		var row []model.ButtonInfo
+		for j := 0; j < len(btnArray); j++ {
+			btn := btnArray[j]
+			if btn.Data == "dark_model_status:enable" && darkModelSetting.Enable {
+				btn.Text = "✅启用"
+			} else if btn.Data == "dark_model_status:disable" && !darkModelSetting.Enable {
+				btn.Text = "✅关闭"
+			} else if btn.Data == "dark_model_ban:message" && darkModelSetting.BanType == model.BanTypeMessage {
+				btn.Text = "✅全员禁言"
+			} else if btn.Data == "dark_model_ban:media" && darkModelSetting.BanType == model.BanTypeMedia {
+				btn.Text = "✅禁止媒体"
+			} else if btn.Data == "dark_model_notify:enable" && darkModelSetting.Notify {
+				btn.Text = "✅通知"
+			} else if btn.Data == "dark_model_notify:disable" && !darkModelSetting.Notify {
+				btn.Text = "✅不通知"
+			}
+			row = append(row, btn)
+		}
+		rows = append(rows, row)
+	}
 
-	btn12txt := "启用"
-	btn13txt := "✅关闭"
-	if darkModelSetting.Enable {
-		btn12txt = "✅启用"
-		btn13txt = "关闭"
-	}
-	btn22txt := "✅全员禁言"
-	btn23txt := "禁止媒体"
-	if darkModelSetting.BanType == model.BanTypeMedia {
-		btn22txt = "全员禁言"
-		btn23txt = "✅禁止媒体"
-	}
-	btn32txt := "通知"
-	btn33txt := "✅不通知"
-	if darkModelSetting.Notify {
-		btn32txt = "✅通知"
-		btn33txt = "不通知"
-	}
-
-	btn11 := model.ButtonInfo{
-		Text:    "状态",
-		Data:    "tost",
-		BtnType: model.BtnTypeData,
-	}
-	btn12 := model.ButtonInfo{
-		Text:    btn12txt,
-		Data:    "dark_model_status:enable",
-		BtnType: model.BtnTypeData,
-	}
-	btn13 := model.ButtonInfo{
-		Text:    btn13txt,
-		Data:    "dark_model_status:disable",
-		BtnType: model.BtnTypeData,
-	}
-	btn21 := model.ButtonInfo{
-		Text:    "模式",
-		Data:    "check_icon",
-		BtnType: model.BtnTypeData,
-	}
-	btn22 := model.ButtonInfo{
-		Text:    btn22txt,
-		Data:    "dark_model_ban:message",
-		BtnType: model.BtnTypeData,
-	}
-	btn23 := model.ButtonInfo{
-		Text:    btn23txt,
-		Data:    "dark_model_ban:media",
-		BtnType: model.BtnTypeData,
-	}
-	btn31 := model.ButtonInfo{
-		Text:    "通知",
-		Data:    "toast",
-		BtnType: model.BtnTypeData,
-	}
-	btn32 := model.ButtonInfo{
-		Text:    btn32txt,
-		Data:    "dark_model_notify:enable",
-		BtnType: model.BtnTypeData,
-	}
-	btn33 := model.ButtonInfo{
-		Text:    btn33txt,
-		Data:    "dark_model_notify:disable",
-		BtnType: model.BtnTypeData,
-	}
-	btn41 := model.ButtonInfo{
-		Text:    "设置时间段",
-		Data:    "dark_model_time_setting",
-		BtnType: model.BtnTypeData,
-	}
-	btn51 := model.ButtonInfo{
-		Text:    "返回",
-		Data:    "go_setting",
-		BtnType: model.BtnTypeData,
-	}
-	row1 := []model.ButtonInfo{btn11, btn12, btn13}
-	row2 := []model.ButtonInfo{btn21, btn22, btn23}
-	row3 := []model.ButtonInfo{btn31, btn32, btn33}
-	row4 := []model.ButtonInfo{btn41}
-	row5 := []model.ButtonInfo{btn51}
-	rows := [][]model.ButtonInfo{row1, row2, row3, row4, row5}
 	keyboard := utils.MakeKeyboard(rows)
 	utils.DarkModelMenuMarkup = keyboard
 	content := updateDarkSettingMsg()
@@ -153,7 +97,6 @@ func DarkSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	} else if cmd == "dark_model_time_end" {
 		timeSettingStartHandler(update, bot)
 	}
-
 }
 
 func statusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
@@ -325,6 +268,7 @@ func updateDarkSettingMsg() string {
 	if !darkModelSetting.Notify {
 		notifyMsg = "└开始和结束通知：❌\n"
 	}
+	darkModelSetting.ChatId = utils.GroupInfo.GroupId
 	services.SaveModel(&darkModelSetting, darkModelSetting.ChatId)
 	content = content + enableMsg + banModelMsg + notifyMsg
 	return content

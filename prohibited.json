@@ -1,0 +1,57 @@
+[
+  [
+    {
+      "text": "是否启用",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "启用",
+      "data": "prohibited_status:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "关闭",
+      "data": "prohibited_status:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDCDD添加违禁词",
+      "data": "prohibited_add",
+      "btn_type": "data"
+    },
+    {
+      "text": "\uD83D\uDDD1删除违禁词",
+      "data": "prohibited_delete",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDCCB列表",
+      "data": "prohibited_list",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDEB7惩罚设置",
+      "data": "punish_setting_class:prohibited",
+      "btn_type": "data"
+    },
+    {
+      "text": "♻\uFE0F自动除提醒消息",
+      "data": "delete_notify_menu",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDD19返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]

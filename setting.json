@@ -45,13 +45,13 @@
     "btn_type": "data"
   },
   {
-    "text": "\uD83D\uDDA53反刷屏",
-    "data": "flood_setting",
+    "text": "\uD83D\uDDA5反刷屏",
+    "data": "flood_setting_menu",
     "btn_type": "data"
   },
   {
     "text": "\uD83D\uDEAB违禁词",
-    "data": "prohibited_words",
+    "data": "prohibited_setting",
     "btn_type": "data"
   },
   {

@@ -12,6 +12,10 @@ import (
 
 var floodSetting model.FloodSetting
 
+func FloodSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+
+}
+
 func FloodSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	err := services.GetModelData(update.CallbackQuery.Message.Chat.ID, &floodSetting)
 	floodSetting.ChatId = update.CallbackQuery.Message.Chat.ID

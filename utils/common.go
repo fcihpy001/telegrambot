@@ -35,6 +35,7 @@ var (
 	ScheduleSettingMarkup   tgbotapi.InlineKeyboardMarkup
 	ScheduleMsgMenuMarkup   tgbotapi.InlineKeyboardMarkup
 	PermissionMenuMarkup    tgbotapi.InlineKeyboardMarkup
+	DeleteNotifyMenuMarkup  tgbotapi.InlineKeyboardMarkup
 
 	ActionMap = map[model.PunishType]string{
 		model.PunishTypeWarning:    "警告",

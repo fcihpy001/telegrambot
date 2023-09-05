@@ -13,119 +13,15 @@ import (
 
 var punishment = model.Punishment{}
 var class string
-
-func punishMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	err := services.GetModelDataWhere(update.CallbackQuery.Message.Chat.ID, &punishment)
-
-	punishType := []string{"警告", "禁言", "踢出", "踢出+封禁", "仅撤回消息+不惩罚"}
-	punishTypeEn := []string{"warning", "ban", "kick", "banAndKick", "revoke"}
-	warningCounts := []string{"1", "2", "3", "4", "5"}
-	warningAfterActions := []string{"禁言", "踢出", "踢出+封禁"}
-	warningAfterActionsEn := []string{"ban", "kick", "banAndKick"}
-
-	//惩罚方法
-	typeRow := []model.ButtonInfo{}
-	rows := [][]model.ButtonInfo{}
-	rows2 := [][]model.ButtonInfo{}
-	rows3 := [][]model.ButtonInfo{}
-	for i := 0; i < 5; i++ {
-		btn := model.ButtonInfo{
-			Text:    punishType[i],
-			Data:    "punish_setting_type:" + punishTypeEn[i],
-			BtnType: model.BtnTypeData,
-		}
-		typeRow = append(typeRow, btn)
-		if i == 2 {
-			rows = append(rows, typeRow)
-			typeRow = []model.ButtonInfo{}
-		}
-	}
-	rows = append(rows, typeRow)
-	rows2 = rows
-	rows3 = rows
-
-	//警告次数
-	tip1 := model.ButtonInfo{
-		Text:    "警告次数",
-		Data:    "toast",
-		BtnType: model.BtnTypeData,
-	}
-	tip1Row := []model.ButtonInfo{tip1}
-	warningRow := []model.ButtonInfo{}
-	for i := 0; i < len(warningCounts); i++ {
-		btn := model.ButtonInfo{
-			Text:    warningCounts[i],
-			Data:    "punish_setting_count:" + warningCounts[i],
-			BtnType: model.BtnTypeData,
-		}
-		warningRow = append(warningRow, btn)
-	}
-	rows = append(rows, tip1Row)
-	rows = append(rows, warningRow)
-
-	//达到警告次数后动作
-	tip2 := model.ButtonInfo{
-		Text:    "达到警告次数后动作",
-		Data:    "toast",
-		BtnType: model.BtnTypeData,
-	}
-	tip2Row := []model.ButtonInfo{tip2}
-	actionRow := []model.ButtonInfo{}
-	for i := 0; i < len(warningAfterActions); i++ {
-		btn := model.ButtonInfo{
-			Text:    warningAfterActions[i],
-			Data:    "punish_setting_action:" + warningAfterActionsEn[i],
-			BtnType: model.BtnTypeData,
-		}
-		actionRow = append(actionRow, btn)
-	}
-	rows = append(rows, tip2Row)
-	rows = append(rows, actionRow)
-
-	backMenu := ""
-	if class == "flood" {
-		backMenu = "flood_setting"
-	} else if class == "spam" {
-		backMenu = "spam_setting"
-	}
-
-	timeRow := model.ButtonInfo{
-		Text:    "设置禁言时长",
-		Data:    "punish_setting_time",
-		BtnType: model.BtnTypeData,
-	}
-	timeRows := []model.ButtonInfo{timeRow}
-	rows2 = append(rows2, timeRows)
-
-	rows = append(rows, timeRows)
-	btn71 := model.ButtonInfo{
-		Text:    "返回",
-		Data:    backMenu,
-		BtnType: model.BtnTypeData,
-	}
-	backRows := []model.ButtonInfo{btn71}
-	rows = append(rows, backRows)
-	keyboard := utils.MakeKeyboard(rows)
-	utils.PunishMenuMarkup = keyboard
-
-	//禁言键盘  类型+时长
-	rows2 = append(rows2, backRows)
-	keyboard2 := utils.MakeKeyboard(rows2)
-	utils.PunishMenuMarkup2 = keyboard2
-
-	//仅动作键盘
-	//type3_rows := typeRows
-	rows3 = append(rows3, backRows)
-	keyboard3 := utils.MakeKeyboard(rows3)
-	utils.PunishMenuMarkup3 = keyboard3
-
-	//要读取用户设置的数据
-	content := updatePunishSetting()
-	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.PunishMenuMarkup)
-	_, err = bot.Send(msg)
-	if err != nil {
-		log.Println(err)
-	}
+var warningSelection = model.SelectInfo{
+	Row:    0,
+	Column: 0,
+	Text:   "1",
+}
+var actionSelection = model.SelectInfo{
+	Row:    5,
+	Column: 0,
+	Text:   "禁言",
 }
 
 func PunishSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
@@ -136,7 +32,8 @@ func PunishSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if len(query) > 1 {
 		params = query[1]
 	}
-
+	fmt.Println("cmd", cmd)
+	fmt.Println("params", params)
 	if cmd == "punish_setting_class" {
 		class = params
 		punishMenu(update, bot)
@@ -149,16 +46,62 @@ func PunishSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		warningCountHandler(update, bot, count)
 
 	} else if cmd == "punish_setting_action" {
-		warningActionHandler(update, bot, params)
-	} else if cmd == "punish_setting_time" {
+		warningActionHandler(update, bot)
 
+	} else if cmd == "punish_setting_time" {
+		banTimeMenu(update, bot)
+	}
+}
+
+func punishMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	err := services.GetModelDataWhere(utils.GroupInfo.GroupId, &punishment)
+
+	var btns [][]model.ButtonInfo
+	utils.Json2Button2("punish.json", &btns)
+
+	var rows [][]model.ButtonInfo
+	for i := 0; i < len(btns); i++ {
+		btnArray := btns[i]
+		var row []model.ButtonInfo
+		for j := 0; j < len(btnArray); j++ {
+			//返回键盘选项特殊处理
+			btn := btnArray[j]
+			if btn.Text == "返回" {
+				//返回键盘选项
+				btn.Data = getBackActionMsg()
+			} else {
+				btn.Data = btn.Data + ":" + strconv.Itoa(i) + "&" + strconv.Itoa(j)
+			}
+			row = append(row, btn)
+		}
+		rows = append(rows, row)
 	}
 
+	keyboard := utils.MakeKeyboard(rows)
+	utils.PunishMenuMarkup = keyboard
+
+	//禁言键盘  类型+时长
+	rows2 := append(rows[:2], rows[6:]...)
+	keyboard2 := utils.MakeKeyboard(rows2)
+	utils.PunishMenuMarkup2 = keyboard2
+
+	//仅动作键盘
+	rows3 := append(rows[:2], rows[7:]...)
+	keyboard3 := utils.MakeKeyboard(rows3)
+	utils.PunishMenuMarkup3 = keyboard3
+
+	//要读取用户设置的数据
+	content := updatePunishSetting()
+	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.PunishMenuMarkup)
+	_, err = bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func punishTypeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
 	switch params {
-	case "warning":
+	case "warn":
 		punishment.PunishType = model.PunishTypeWarning
 		utils.PunishMenuMarkup.InlineKeyboard[0][0].Text = "✅警告"
 		utils.PunishMenuMarkup.InlineKeyboard[0][1].Text = "禁言"
@@ -226,47 +169,20 @@ func punishTypeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 		if err != nil {
 			fmt.Println("statusHandel", err)
 		}
-
 	}
 }
 
 func warningCountHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, count int) {
-	if count == 1 {
-		utils.PunishMenuMarkup.InlineKeyboard[3][0].Text = "✅1"
-		utils.PunishMenuMarkup.InlineKeyboard[3][1].Text = "2"
-		utils.PunishMenuMarkup.InlineKeyboard[3][2].Text = "3"
-		utils.PunishMenuMarkup.InlineKeyboard[3][3].Text = "4"
-		utils.PunishMenuMarkup.InlineKeyboard[3][4].Text = "5"
 
-	} else if count == 2 {
-		utils.PunishMenuMarkup.InlineKeyboard[3][0].Text = "1"
-		utils.PunishMenuMarkup.InlineKeyboard[3][1].Text = "✅2"
-		utils.PunishMenuMarkup.InlineKeyboard[3][2].Text = "3"
-		utils.PunishMenuMarkup.InlineKeyboard[3][3].Text = "4"
-		utils.PunishMenuMarkup.InlineKeyboard[3][4].Text = "5"
+	//取消以前的选中
+	utils.PunishMenuMarkup.InlineKeyboard[3][warningSelection.Column].Text = warningSelection.Text
+	//更新选中
+	utils.PunishMenuMarkup.InlineKeyboard[3][count-1].Text = "✅" + strconv.Itoa(count)
+	//更新选中信息
+	warningSelection.Column = count - 1
+	warningSelection.Text = strconv.Itoa(count)
 
-	} else if count == 3 {
-		utils.PunishMenuMarkup.InlineKeyboard[3][0].Text = "1"
-		utils.PunishMenuMarkup.InlineKeyboard[3][1].Text = "2"
-		utils.PunishMenuMarkup.InlineKeyboard[3][2].Text = "✅3"
-		utils.PunishMenuMarkup.InlineKeyboard[3][3].Text = "4"
-		utils.PunishMenuMarkup.InlineKeyboard[3][4].Text = "5"
-
-	} else if count == 4 {
-		utils.PunishMenuMarkup.InlineKeyboard[3][0].Text = "1"
-		utils.PunishMenuMarkup.InlineKeyboard[3][1].Text = "2"
-		utils.PunishMenuMarkup.InlineKeyboard[3][2].Text = "3"
-		utils.PunishMenuMarkup.InlineKeyboard[3][3].Text = "✅4"
-		utils.PunishMenuMarkup.InlineKeyboard[3][4].Text = "5"
-
-	} else if count == 5 {
-		utils.PunishMenuMarkup.InlineKeyboard[3][0].Text = "1"
-		utils.PunishMenuMarkup.InlineKeyboard[3][1].Text = "2"
-		utils.PunishMenuMarkup.InlineKeyboard[3][2].Text = "3"
-		utils.PunishMenuMarkup.InlineKeyboard[3][3].Text = "4"
-		utils.PunishMenuMarkup.InlineKeyboard[3][4].Text = "✅5"
-	}
-	prohibitedSetting.WarningCount = count
+	punishment.WarningCount = count
 	content := updatePunishSettingMsg()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.PunishMenuMarkup)
 	_, err := bot.Send(msg)
@@ -276,25 +192,26 @@ func warningCountHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, count in
 }
 
 // 达到警告次数后动作
-func warningActionHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
-	if params == "ban" {
-		utils.PunishMenuMarkup.InlineKeyboard[5][0].Text = "✅禁言"
-		utils.PunishMenuMarkup.InlineKeyboard[5][1].Text = "踢出"
-		utils.PunishMenuMarkup.InlineKeyboard[5][2].Text = "踢出+封禁"
-		punishment.WarningAfterPunish = model.PunishTypeBan
+func warningActionHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
-	} else if params == "kick" {
-		utils.PunishMenuMarkup.InlineKeyboard[5][0].Text = "禁言"
-		utils.PunishMenuMarkup.InlineKeyboard[5][1].Text = "✅踢出"
-		utils.PunishMenuMarkup.InlineKeyboard[5][2].Text = "踢出+封禁"
-		punishment.WarningAfterPunish = model.PunishTypeKick
+	//todo 垃圾命名方式，需要修改
+	data := update.CallbackQuery.Data
+	query := strings.Split(data, ":")
+	text := query[1]
+	dd := query[2]
+	cc := strings.Split(dd, "&")
+	col, _ := strconv.Atoi(cc[1])
 
-	} else if params == "banAndKick" {
-		utils.PunishMenuMarkup.InlineKeyboard[5][0].Text = "禁言"
-		utils.PunishMenuMarkup.InlineKeyboard[5][1].Text = "踢出"
-		utils.PunishMenuMarkup.InlineKeyboard[5][2].Text = "✅踢出+封禁"
-		punishment.WarningAfterPunish = model.PunishTypeBanAndKick
-	}
+	//取消以前的选中
+	utils.PunishMenuMarkup.InlineKeyboard[actionSelection.Row][actionSelection.Column].Text = actionSelection.Text
+	//更新选中
+	utils.PunishMenuMarkup.InlineKeyboard[5][col].Text = "✅" + text
+	//更新选中信息
+	actionSelection.Column = col
+	actionSelection.Text = text
+
+	//更新model数据
+	punishment.WarningAfterPunish = text
 
 	content := updatePunishSetting()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.PunishMenuMarkup)
@@ -306,8 +223,11 @@ func warningActionHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params 
 
 func updatePunishSetting() string {
 	content := "🔇 反垃圾 \n\n惩罚："
-	actionMsg := "警告"
-
+	if class == "prohibited" {
+		content = "🔇 违禁词 \n\n惩罚："
+	}
+	//todo 根据class类型分别处理
+	actionMsg := "警告 "
 	if punishment.PunishType == model.PunishTypeBan {
 		actionMsg = "禁言"
 	} else if punishment.PunishType == model.PunishTypeKick {
@@ -317,7 +237,13 @@ func updatePunishSetting() string {
 	} else if punishment.PunishType == model.PunishTypeRevoke {
 		actionMsg = "仅撤回消息+不惩罚"
 	} else if punishment.PunishType == model.PunishTypeWarning {
-		actionMsg = fmt.Sprintf("警告%d次后 %s", prohibitedSetting.WarningCount, actionMap[prohibitedSetting.WarningAfterPunish])
+		afterMsg := "禁言"
+		if punishment.WarningAfterPunish == "kick" {
+			afterMsg = "踢出"
+		} else if punishment.WarningAfterPunish == "banAndKick" {
+			afterMsg = "踢出+禁言"
+		}
+		actionMsg = fmt.Sprintf("警告%d次后 %s", punishment.WarningCount, afterMsg)
 	}
 
 	content = content + actionMsg
@@ -325,10 +251,64 @@ func updatePunishSetting() string {
 	case "spam":
 		spamsSetting.Punishment = punishment
 		updateSpamMsg()
-	case "prohibit":
+	case "prohibited":
 		prohibitedSetting.Punishment = punishment
 		updateProhibitedSettingMsg()
-
 	}
 	return content
+}
+
+func banTimeMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	content := fmt.Sprintf("🔇 违禁词\n\n当前设置：%d分钟 \n👉 输入处罚禁言的时长（分钟，例如：60）：", punishment.BanTime)
+	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, content)
+	keybord := tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("返回"),
+			tgbotapi.NewKeyboardButton("返回2"),
+		))
+
+	msg.ReplyMarkup = keybord
+	msg.ReplyMarkup = tgbotapi.ForceReply{
+		ForceReply: true,
+	}
+	bot.Send(msg)
+}
+
+func BanTimeReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	time, _ := strconv.Atoi(update.Message.Text)
+	punishment.BanTime = time
+	content := "设置成功\n禁言的时长为：" + update.Message.Text + "分钟"
+	btn1 := model.ButtonInfo{
+		Text:    "️️️⛔️删除已经设置的文本",
+		Data:    "group_welcome_text_remove",
+		BtnType: model.BtnTypeData,
+	}
+	btn2 := model.ButtonInfo{
+		Text:    "返回",
+		Data:    getBackActionMsg(),
+		BtnType: model.BtnTypeData,
+	}
+	row1 := []model.ButtonInfo{btn1, btn2}
+	rows := [][]model.ButtonInfo{row1}
+	keyboard := utils.MakeKeyboard(rows)
+
+	//updateMsg()
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
+	msg.ReplyMarkup = keyboard
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func getBackActionMsg() string {
+	backAction := ""
+	if class == "flood" {
+		backAction = "flood_setting"
+	} else if class == "spam" {
+		backAction = "spam_setting"
+	} else if class == "prohibited" {
+		backAction = "prohibited_setting"
+	}
+	return backAction
 }

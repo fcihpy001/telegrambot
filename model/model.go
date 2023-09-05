@@ -185,7 +185,7 @@ type Punishment struct {
 	Punish              PunishType
 	PunishType          PunishType
 	WarningCount        int
-	WarningAfterPunish  PunishType
+	WarningAfterPunish  string
 	BanTime             int
 	DeleteNotifyMsgTime int64
 	FloodSettingID      uint `gorm:"uniqueIndex"`

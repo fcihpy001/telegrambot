@@ -156,51 +156,6 @@ func (mgr *GroupManager) welcomeTextSetting(update *tgbotapi.Update) {
 		ForceReply: true,
 	}
 	mgr.bot.Send(msg)
-
-	//content := "👉 输入要设置的新成员入群欢迎内容，占位符中%s代替，如：👏👏👏 热烈欢迎 %s 加入 %s"
-	//if len(welcomeSetting.WelcomeText) > 0 {
-	//	content = fmt.Sprintf("当前设置的文本(长按下方文字复制)：\n%s\n\n\n👉 输入要设置的新成员入群欢迎内容，占位符中%s代替，如：👏👏👏 热烈欢迎 %s 加入 %s", welcomeSetting.WelcomeText)
-	//	rows = [][]model.ButtonInfo{row1, row2}
-	//}
-	//msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, content)
-	//keybord := tgbotapi.NewReplyKeyboard(
-	//	tgbotapi.NewKeyboardButtonRow(
-	//		tgbotapi.NewKeyboardButton("⛔️删除已经设置的文本"),
-	//		tgbotapi.NewKeyboardButton("返回"),
-	//	))
-	//
-	//msg.ReplyMarkup = keybord
-	//msg.ReplyMarkup = tgbotapi.ForceReply{
-	//	ForceReply: true,
-	//}
-	//mgr.bot.Send(msg)
-
-	//btn11 := model.ButtonInfo{
-	//	Text:    "⛔️删除已经设置的文本",
-	//	Data:    "group_welcome_text_remove",
-	//	BtnType: model.BtnTypeData,
-	//}
-	//btn21 := model.ButtonInfo{
-	//	Text:    "返回",
-	//	Data:    "group_welcome_setting",
-	//	BtnType: model.BtnTypeData,
-	//}
-	//
-	//row1 := []model.ButtonInfo{btn11}
-	//row2 := []model.ButtonInfo{btn21}
-	//rows := [][]model.ButtonInfo{row2}
-	//content := "👉 输入要设置的新成员入群欢迎内容，占位符中%s代替，如：👏👏👏 热烈欢迎 %s 加入 %s"
-	//if len(welcomeSetting.WelcomeText) > 0 {
-	//	content = fmt.Sprintf("当前设置的文本(长按下方文字复制)：\n%s\n\n\n👉 输入要设置的新成员入群欢迎内容，占位符中%s代替，如：👏👏👏 热烈欢迎 %s 加入 %s", welcomeSetting.WelcomeText)
-	//	rows = [][]model.ButtonInfo{row1, row2}
-	//}
-	//keyboard := utils.MakeKeyboard(rows)
-	//msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard)
-	//
-	//_, err := mgr.bot.Send(msg)
-	//if err != nil {
-	//	log.Println(err)
-	//}
 }
 
 func WelcomeTextSettingResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {

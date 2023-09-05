@@ -12,7 +12,7 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 
 	replyMsg := update.Message.ReplyToMessage.Text
 	if strings.Contains(replyMsg, "输入添加的违禁词（一行一个") {
-		setting.ProhibitedAdd(update, bot.bot)
+		setting.ProhibitedAddResult(update, bot.bot)
 
 	} else if strings.Contains(replyMsg, "请输入新群员限制时间") {
 		setting.MemberCheckTimeAction(update, bot.bot)
@@ -43,5 +43,11 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 
 	} else if strings.Contains(replyMsg, "输入要设置的新成员入群欢迎内容，占位符中%s代替") {
 		group.WelcomeTextSettingResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "👉 输入处罚禁言的时长（分钟，例如：60") {
+		setting.BanTimeReply(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "请输入要删除的违禁词（一行一个）") {
+		setting.ProhibitedDeleteResult(update, bot.bot)
 	}
 }

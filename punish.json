@@ -1,0 +1,103 @@
+[
+  [
+    {
+      "text": "警告",
+      "data": "punish_setting_type:warn",
+      "btn_type": "data"
+    },
+    {
+      "text": "禁言",
+      "data": "punish_setting_type:ban",
+      "btn_type": "data"
+    },
+    {
+      "text": "踢出",
+      "data": "punish_setting_type:kick",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "踢出+封禁",
+      "data": "punish_setting_type:banAndKick",
+      "btn_type": "data"
+    },
+    {
+      "text": "仅撤回消息+不惩罚",
+      "data": "punish_setting_type:revoke",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "警告次数",
+      "data": "toast",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "1",
+      "data": "punish_setting_count:1",
+      "btn_type": "data"
+    },
+    {
+      "text": "2",
+      "data": "punish_setting_count:2",
+      "btn_type": "data"
+    },
+    {
+      "text": "3",
+      "data": "punish_setting_count:3",
+      "btn_type": "data"
+    },
+    {
+      "text": "4",
+      "data": "punish_setting_count:4",
+      "btn_type": "data"
+    },
+    {
+      "text": "5",
+      "data": "punish_setting_count:5",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "达到警告次数后动作",
+      "data": "toast",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "禁言",
+      "data": "punish_setting_action:ban",
+      "btn_type": "data"
+    },
+    {
+      "text": "踢出",
+      "data": "punish_setting_action:kick",
+      "btn_type": "data"
+    },
+    {
+      "text": "踢出+封禁",
+      "data": "punish_setting_action:banAndKick",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "设置禁言时长",
+      "data": "punish_setting_time",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]
