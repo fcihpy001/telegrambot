@@ -23,6 +23,7 @@ var (
 func Init(ctx context.Context) {
 	InitDB()
 	go StatsRoutine(ctx)
+	go CheckSolitaireEnded(ctx)
 }
 
 func InitDB() {
@@ -33,7 +34,9 @@ func InitDB() {
 		utils.Config.Mysql.Database)
 	// fmt.Println(dsn)
 	InitMysql(dsn)
-	createTable()
+	if utils.Config.Debug {
+		createTable()
+	}
 
 	initRedis(utils.Config.RedisURL)
 }

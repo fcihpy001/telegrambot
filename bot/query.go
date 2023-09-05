@@ -2,13 +2,14 @@ package bot
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"strings"
 	"telegramBot/group"
 	"telegramBot/lucky"
 	"telegramBot/setting"
 	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // 处理行内按钮事件
@@ -112,19 +113,29 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	} else if strings.HasPrefix(query, "schedule") { //定时消息
 		setting.ScheduleSettingHandler(update, bot.bot)
 
-		// } else if query == "solitaire_home" {
-		// 	group.SolitaireHome(update, bot.bot)
+	} else if query == "solitaire_home" {
+		group.SolitaireHome(update, bot.bot)
 	} else if strings.HasPrefix(query, "solitaire_create_step1?") {
 		param := query[len("solitaire_create_step1?"):]
 		// 创建接龙 step 1
 		group.SolitaireCreateStep1(update, bot.bot, param)
+	} else if strings.HasPrefix(query, "solitaire_create_step2?") {
+		param := query[len("solitaire_create_step2?"):]
+		group.SolitaireCreateStep2(update, bot.bot, param)
 	} else if strings.HasPrefix(query, "solitaire_create_limit_time?") {
 		param := query[len("solitaire_create_limit_time?"):]
 		group.SolitaireCreateStep2LimitTime(update, bot.bot, param)
-	} else if strings.HasPrefix(query, "solitaire_create_step2?") {
-		// step 2
-		param := query[len("solitaire_create_step2?"):]
+	} else if strings.HasPrefix(query, "solitaire_create_last_step?") {
+		// last step
+		param := query[len("solitaire_create_last_step?"):]
 		group.SolitaireCreateLastStep(update, bot.bot, param)
+	} else if strings.HasPrefix(query, "solitaire_delete?") {
+		// delete solitaire
+		param := query[len("solitaire_delete?"):]
+		group.SolitaireDelete(update, bot.bot, param)
+	} else if strings.HasPrefix(query, "solitaire_confirm_delete?") {
+		param := query[len("solitaire_confirm_delete?"):]
+		group.SolitaireConfirmDelete(update, bot.bot, param)
 	} else if strings.HasPrefix(query, "permission_type") { //权限管理
 		setting.PermissionSelectHandler(update, bot.bot)
 

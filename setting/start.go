@@ -2,11 +2,12 @@ package setting
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 var startInfo model.GroupInfo
@@ -68,7 +69,7 @@ func StartHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		"•  邀请 @%s 进入群组\n •  设置为管理员\n "+
 		"•  在机器人私聊中发送 /start 打开设置菜单。\n\n"+
 		"/help 查看我的功能\n\n\n👉 "+
-		"选择下面群组进行设置：", utils.GetBotName(), utils.GetBotUserName())
+		"选择下面群组进行设置：", bot.Self.FirstName, bot.Self.UserName)
 	utils.SendMenu(update.Message.Chat.ID, content, keyboard, bot)
 }
 

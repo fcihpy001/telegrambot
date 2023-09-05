@@ -73,15 +73,10 @@ func InitConfig() {
 	}
 	log.Println("配置文件加载成功...:")
 
-	bot, err := tgbotapi.NewBotAPI(Config.Token)
+	_, err = tgbotapi.NewBotAPI(Config.Token)
 	if err != nil {
 		panic(err)
 	}
-	info, err := bot.GetMe()
-	if err != nil {
-		panic(err)
-	}
-	Config.botUserInfo = &info
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)

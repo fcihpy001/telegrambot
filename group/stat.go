@@ -2,10 +2,10 @@ package group
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"telegramBot/model"
 	"telegramBot/services"
-	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type UserCounter struct {
@@ -43,7 +43,7 @@ func DoStat(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		if msg.NewChatMembers != nil {
 			services.StatsNewMembers(update)
 			for _, member := range msg.NewChatMembers {
-				if member.ID == utils.GetBotUserId() {
+				if member.ID == bot.Self.ID {
 					// 第一次被邀请进入群, 获取群信息及群用户
 					mgr := GroupManager{bot}
 					mgr.GetChatInfo(msg.Chat.ID)
@@ -179,11 +179,25 @@ func (mgr *GroupManager) getUserNames(chatId int64, ids []int64) map[int64]strin
 			//
 			user, err := mgr.fetchAndSaveMember(chatId, id)
 			if err == nil {
-				names[id] = user.Username
+				names[id] = getDisplayName(&user)
 			}
 		}
 	}
 	return names
+}
+
+func (mgr *GroupManager) getUserName(chatId int64, id int64) string {
+	users := services.GetUserNames([]int64{id})
+	if len(users) > 0 {
+		user := users[id]
+		return getDisplayName(&user)
+	}
+	user, err := mgr.fetchAndSaveMember(chatId, id)
+	if err != nil {
+		logger.Err(err).Int64("userId", id).Msg("fetch user info failed")
+		return fmt.Sprint(id)
+	}
+	return getDisplayName(&user)
 }
 
 func getDisplayName(u *model.User) string {
