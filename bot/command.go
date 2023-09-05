@@ -19,6 +19,14 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 		setting.Help(update.Message.Chat.ID, bot.bot)
 
 	case "start":
+		// 这里如果有参数, 进入对应的处理逻辑; 否则展示管理界面
+		println(update.Message.Text)
+		// 如果参数中有solitaire: 开头 且在私有聊天中, 是用户接龙
+		args := strings.TrimSpace(strings.Replace(update.Message.Text, "/start", "", -1))
+		if strings.HasPrefix(args, "solitaire-") && update.Message != nil && update.Message.Chat.Type == "private" {
+			group.PlaySolitaire(&update, bot.bot, args)
+			return
+		}
 		setting.Settings(update.Message.Chat.ID, update.Message.Chat.Type, update.Message.Text, bot.bot)
 
 	case "create":

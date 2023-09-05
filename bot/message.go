@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"telegramBot/group"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -13,6 +14,11 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 	// 获取用户发送的消息文本
 	messageText := update.Message.Text
 	fmt.Println("message handler:", messageText)
+
+	if group.HandleAdminConversation(update, bot.bot) {
+		// 如果消息被拦截 不需要后续处理
+		return
+	}
 
 	if strings.HasPrefix(messageText, "统计") { //获取违禁词库
 		reply := "今天活跃统计功能"

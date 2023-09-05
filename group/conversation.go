@@ -1,6 +1,8 @@
 package group
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+import (
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+)
 
 // 记录那个聊天会话的状态以及后续动作
 
@@ -8,31 +10,39 @@ type ConversationStatus string
 
 const (
 	ConversationStart              ConversationStatus = "start"
-	ConversationWaitSolitaireInput ConversationStatus = "waitSolitaireInput"
+	ConversationWaitSolitaireDesc  ConversationStatus = "waitSolitaireDesc"
+	ConversationWaitSolitaireUsers ConversationStatus = "waitSolitaireUsers" // limitUser
+	ConversationPlaySolitaire      ConversationStatus = "playSolitaire"      // limitUser
 )
 
-type botAdminSession struct {
+type botConversation struct {
 	groupChatId int64 // supergroup chat ID
 	chatId      int64 // private conversation chat ID
 	userId      int64
+	messageId   int64
 	status      ConversationStatus
+	data        interface{}
 }
 
 var (
-	adminSessions = map[int64]*botAdminSession{}
+	sessions = map[int64]*botConversation{}
 )
 
-func startAdminConversation(groupChatId, chatId, userId int64) {
-	adminSessions[groupChatId] = &botAdminSession{
+func StartAdminConversation(groupChatId, chatId, userId, messageId int64,
+	status ConversationStatus,
+	data interface{}) {
+	sessions[groupChatId] = &botConversation{
 		groupChatId: groupChatId,
 		chatId:      chatId,
 		userId:      userId,
-		status:      ConversationStart,
+		messageId:   messageId,
+		status:      status,
+		data:        data,
 	}
 }
 
-func updateAdminConversation(chatId int64, status ConversationStatus) {
-	sess := adminSessions[chatId]
+func UpdateAdminConversation(chatId int64, status ConversationStatus) {
+	sess := sessions[chatId]
 	if sess == nil {
 		logger.Error().Int64("chatId", chatId).Msg("not found admin conversation")
 		return
@@ -40,7 +50,44 @@ func updateAdminConversation(chatId int64, status ConversationStatus) {
 	sess.status = status
 }
 
-// 最后的输入
-func handleAdminConversation(update *tgbotapi.Update) {
+func RemoveConversation(chatId int64) {
+	delete(sessions, chatId)
+}
 
+// 最后的输入
+func HandleAdminConversation(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
+	// println("handleAdminConversation:" + prettyJSON(update))
+	msg := update.Message
+	userId := msg.From.ID
+	chat := msg.Chat
+	chatId := chat.ID
+	conversion, ok := sessions[chatId]
+	if !ok {
+		//
+		return false
+	}
+	if conversion.userId != userId {
+		return false
+	}
+	mgr := GroupManager{bot}
+	switch conversion.status {
+	case ConversationWaitSolitaireDesc:
+		logger.Info().Int64("chatId", chatId).Msg("solitaire create completed")
+		mgr.onSolitaireCreated(update, conversion)
+		RemoveConversation(chatId)
+		return true
+
+	case ConversationWaitSolitaireUsers:
+		logger.Info().Int64("chatId", chatId).Msg("solitaire limit users")
+		mgr.onSolitaireLimitUser(update, conversion)
+		// RemoveConversation(chatId)
+		return true
+
+	case ConversationPlaySolitaire:
+		logger.Info().Int64("chatId", chatId).Msg("play solitaire message")
+		mgr.onPlaySolitaireComplete(update, conversion)
+		RemoveConversation(chatId)
+		return true
+	}
+	return false
 }

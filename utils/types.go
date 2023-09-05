@@ -1,11 +1,6 @@
 package utils
 
-import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-)
-
 type ConfigData struct {
-	botUserInfo *tgbotapi.User
 	Token       string `yaml:"token"`
 	WebhookUrl  string `yaml:"webhook_url"`
 	CertFile    string `yaml:"cert_file"`
@@ -28,12 +23,4 @@ type Mysql struct {
 
 type RequestFile struct {
 	FileName string
-}
-
-func GetBotUserId() int64 {
-	return Config.botUserInfo.ID
-}
-
-func GetBotUserName() string {
-	return Config.botUserInfo.UserName
 }
