@@ -358,3 +358,22 @@ func getWeekRange() (startDay, endDay string) {
 	return fmt.Sprintf("%d%02d%02d", now_7.Year(), now_7.Month(), now_7.Day()),
 		fmt.Sprintf("%d%02d%02d", now.Year(), now.Month(), now.Day())
 }
+
+func toBool(s string) bool {
+	s = strings.ToLower(s)
+	if s == "1" || s == "true" {
+		return true
+	}
+	if s == "0" || s == "false" {
+		return false
+	}
+	logger.Warn().Stack().Str("s", s).Msg("invalid bool value")
+	return false
+}
+
+func radioOpenEmojj(isOpen bool, text string) string {
+	if isOpen {
+		return "✅" + text
+	}
+	return text
+}

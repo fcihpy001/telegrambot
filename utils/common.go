@@ -71,7 +71,7 @@ func InitConfig() {
 	if err := yaml.Unmarshal(data, &Config); err != nil {
 		log.Fatalf("Error unmarshalling config: %v", err)
 	}
-	log.Println("配置文件加载成功...:")
+	log.Println("配置文件加载成功...")
 
 	_, err = tgbotapi.NewBotAPI(Config.Token)
 	if err != nil {

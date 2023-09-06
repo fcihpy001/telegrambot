@@ -20,6 +20,12 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 		return
 	}
 
+	if messageText == "webapp" {
+		// 只能在私有聊天中使用
+		group.SendTestWebApp(update, bot.bot)
+		return
+	}
+
 	if strings.HasPrefix(messageText, "统计") { //获取违禁词库
 		reply := "今天活跃统计功能"
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)

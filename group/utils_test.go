@@ -1,6 +1,7 @@
 package group
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -113,11 +114,6 @@ func TestSendSwitch(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	info, err := bot.GetMe()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(prettyJSON(info))
 
 	chatId := int64(-1001916451498)
 	msg := tgbotapi.NewMessage(chatId, "test inline")
@@ -129,4 +125,53 @@ func TestSendSwitch(t *testing.T) {
 	msg.ReplyMarkup = keyboard
 	_, err = bot.Send(msg)
 	assert.Nil(t, err)
+}
+
+func TestWebapp(t *testing.T) {
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
+	if err != nil {
+		panic(err)
+	}
+	chatId := int64(-1001916451498)
+	// msg := MessageEx{
+	// 	Message: tgbotapi.Message{
+	// 		Chat: &tgbotapi.Chat{ID: chatId},
+	// 		Text: "webapp test",
+	// 	},
+	// } // (chatId, "test inline")
+	// row := tgbotapi.NewInlineKeyboardRow()
+	// // btn := tgbotapi.
+	// btn := InlineKeyboardButtonEx{
+	// 	InlineKeyboardButton: tgbotapi.InlineKeyboardButton{Text: "webapp"},
+	// 	WebApp:               &WebAppInfo{URL: "https://python-telegram-bot.org/static/webappbot"},
+	// }
+	// row := InlineKeyboardMarkupEx{
+	// 	InlineKeyboard: [][]InlineKeyboardButtonEx{
+	// 		{btn},
+	// 	},
+	// }
+	// // row = append(row, btn)
+	// msg.ReplyMarkup = &row
+
+	// _, err = bot.Send(msg)
+	buf, _ := json.Marshal(map[string]interface{}{
+		"inline_keyboard": [][]interface{}{
+			{
+				map[string]interface{}{
+					"text": "webapp",
+					"web_app": map[string]string{
+						"url": "https://python-telegram-bot.org/static/webappbot",
+					},
+				},
+			},
+		},
+	})
+	params := map[string]string{
+		"chat_id":      fmt.Sprint(chatId),
+		"text":         "webapp test",
+		"reply_markup": string(buf), //
+	}
+	resp, err := bot.MakeRequest("sendMessage", params)
+	assert.Nil(t, err)
+	println(prettyJSON(resp))
 }

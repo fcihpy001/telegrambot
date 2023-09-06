@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 	"telegramBot/group"
-	"telegramBot/lucky"
 	"telegramBot/setting"
 	"telegramBot/utils"
 
@@ -17,10 +16,10 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	query := update.CallbackQuery.Data
 	fmt.Println("query command--", query)
 
-	if strings.HasPrefix(query, "lucky") {
-		lucky.LuckyHandler(update, bot.bot)
-
-	} else if query == "start" { //开始界面
+	// if strings.HasPrefix(query, "lucky") {
+	// 	group.LuckyHandler(update, bot.bot)
+	// } else
+	if query == "start" { //开始界面
 		setting.StartHandler(update, bot.bot)
 
 	} else if strings.HasPrefix(query, "settings") { //设置
@@ -99,6 +98,10 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		group.SolitaireConfirmDelete(update, bot.bot, param)
 
 	} else {
+		if group.CallbackHandler(update, bot.bot) {
+			return
+		}
+
 		msg := tgbotapi.NewMessage(6401399435, "测试推送事件")
 		msg.DisableNotification = false
 		_, err := bot.bot.Send(msg)

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"telegramBot/bot"
+	"telegramBot/group"
 	"telegramBot/services"
 	"telegramBot/utils"
 )
@@ -17,6 +18,7 @@ func main() {
 	// 2. 初始化数据库
 	ctx, cancel := context.WithCancel(context.Background())
 	services.Init(ctx)
+	group.Init()
 
 	//=======================================================
 	// 3. 启动 Bot

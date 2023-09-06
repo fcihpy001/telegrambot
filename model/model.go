@@ -232,15 +232,15 @@ type Solitaire struct {
 	Creator      int64  // 创建用户 id
 	Description  string `gorm:""`
 	MsgCollected int    // 已接龙条数
-	Status       string
+	Status       string `gorm:"type:varchar(30)"`
 }
 
 type SolitaireExported struct {
 	ChatId   int64
 	UserId   int64
-	UserName string
-	NickName string // first name + last name
-	Message  string
+	UserName string `gorm:"type:varchar(30)"`
+	NickName string `gorm:"type:varchar(30)"` // first name + last name
+	Message  string `gorm:"type:varchar(2000)"`
 	CreateAt time.Time
 }
 
@@ -250,7 +250,7 @@ type SolitaireMessage struct {
 	ChatId      int64
 	SolitaireId int64
 	UserId      int64
-	Message     string
+	Message     string `gorm:"type:varchar(2000)"`
 }
 
 // 用户警告记录
@@ -377,4 +377,45 @@ type GroupInfo struct {
 	GroupName string
 	GroupType string
 	Uid       int64
+}
+
+// 抽奖总体设置
+type LuckySetting struct {
+	gorm.Model
+	ChatId       int64 `gorm:"uniqueIndex"`
+	StartPinned  bool
+	ResultPinned bool
+	DeleteToken  bool // 删除口令? 什么意思
+}
+
+const (
+	LuckyTypeCommon   = "common"   // 通用抽奖
+	LuckyTypeChatJoin = "chatJoin" // 指定群组报道
+	LuckyTypeInvite   = "invite"   // 邀请抽奖
+	LuckyTypeHot      = "hot"      // 群活跃抽奖
+	LuckyTypeFun      = "fun"      // 娱乐抽奖
+	LuckyTypePoints   = "points"   // 积分抽奖
+	LuckyTypeAnswer   = "answer"   // 答题抽奖
+)
+
+// 抽奖活动
+type LuckyActivity struct {
+	gorm.Model
+	ChatId       int64
+	LuckyType    string `gorm:"type:varchar(20)"`
+	LuckySubType string `gorm:"type:varchar(20)"`
+	LuckyCond    string // 配置信息 json
+	TotalReward  string `gorm:"type:varchar(30)"`
+	Status       string `gorm:"type:varchar(20)"`
+	RewardDetail string // 奖励信息 json
+	StartTime    int64  // 开始时间
+	EndTime      int64  // 开奖时间
+	PushChannel  bool   // 是否推送到频道
+}
+
+type LuckyRecord struct {
+	gorm.Model
+	LuckyId int64
+	ChatId  int64
+	UserId  int64
 }
