@@ -29,10 +29,10 @@ func Settings(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	for i := 1; i <= len(buttons); i++ {
 		btn := buttons[i-1]
 		if strings.Contains(btn.Data, "群接龙") {
-			btn.Data = fmt.Sprintf("https://t.me/%s?start=%d", &bot.Self.UserName, chatId)
+			btn.Data = fmt.Sprintf("https://t.me/%s?start=%d", bot.Self.UserName, chatId)
 			btn.BtnType = model.BtnTypeUrl
 			if chatType == "private" {
-				btn.Data = fmt.Sprintf("group_solitaire?chatId=%d")
+				btn.Data = fmt.Sprintf("group_solitaire?chatId=%d", chatId)
 				btn.BtnType = model.BtnTypeData
 			}
 
