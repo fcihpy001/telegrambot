@@ -10,8 +10,17 @@ import (
 )
 
 func Settings(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	chatId := update.CallbackQuery.Message.Chat.ID
-	chatType := update.CallbackQuery.Message.Chat.Type
+	var (
+		chatId   int64
+		chatType string
+	)
+	if update.CallbackQuery != nil {
+		chatId = update.CallbackQuery.Message.Chat.ID
+		chatType = update.CallbackQuery.Message.Chat.Type
+	} else if update.Message != nil {
+		chatId = update.Message.Chat.ID
+		chatType = update.Message.Chat.Type
+	}
 	var buttons []model.ButtonInfo
 	utils.Json2Button("setting.json", &buttons)
 
