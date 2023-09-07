@@ -24,12 +24,12 @@
     },
     {
       "text": "启用",
-      "data": "invite_setting_generate:enable",
+      "data": "invite_setting_autogenerate:enable",
       "btn_type": "data"
     },
     {
       "text": "关闭",
-      "data": "invite_setting_generate:disable",
+      "data": "invite_setting_autogenerate:disable",
       "btn_type": "data"
     }
   ],

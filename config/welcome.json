@@ -7,12 +7,12 @@
     },
     {
       "text": "启用",
-      "data": "dark_model_status:enable",
+      "data": "welcome_setting_status:enable",
       "btn_type": "data"
     },
     {
       "text": "关闭",
-      "data": "dark_model_status:disable",
+      "data": "welcome_setting_status:disable",
       "btn_type": "data"
     }
   ],
@@ -24,12 +24,12 @@
     },
     {
       "text": "删除",
-      "data": "dark_model_ban:message",
+      "data": "welcome_setting_delete_prev:enable",
       "btn_type": "data"
     },
     {
       "text": "不删除",
-      "data": "dark_model_ban:media",
+      "data": "welcome_setting_delete_prev:disable",
       "btn_type": "data"
     }
   ],
@@ -43,17 +43,17 @@
   [
     {
       "text": " \uD83D\uDCC4文本内容",
-      "data": "toast",
+      "data": "welcome_setting_type:text",
       "btn_type": "data"
     },
     {
       "text": "\uD83D\uDCF8媒体图片",
-      "data": "dark_model_notify:enable",
+      "data": "welcome_setting_type:media",
       "btn_type": "data"
     },
     {
       "text": "\uD83D\uDCCE链接按钮",
-      "data": "dark_model_notify:disable",
+      "data": "welcome_setting_type:link",
       "btn_type": "data"
     }
   ],

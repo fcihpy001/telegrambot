@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"telegramBot/model"
+	"telegramBot/utils"
 
 	"gorm.io/gorm/clause"
 )
@@ -164,6 +165,12 @@ func GetAllReply(chat_id int64) ([]model.Reply, error) {
 func DeleteReply(keyword string, chat_id int64) error {
 	var item model.Reply
 	err := db.Where("chat_id = ? and key_world = ?", chat_id, keyword).Delete(&item).Error
+	return err
+}
+
+func DeleteInviteData() error {
+	var item model.InviteSetting
+	err := db.Where("chat_id =?", utils.GroupInfo.GroupId).Delete(&item).Error
 	return err
 }
 

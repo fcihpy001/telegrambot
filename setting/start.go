@@ -103,7 +103,9 @@ func managerGroupDetail(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params st
 	if len(params) == 0 {
 		return
 	}
-	utils.GroupInfo.GroupName = params
+
+	where := fmt.Sprintf("group_name = '%s'", params)
+	_ = services.GetModelWhere(where, &utils.GroupInfo)
 	Settings(update, bot)
 }
 

@@ -53,7 +53,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		setting.PunishSettingHandler(update, bot.bot)
 
 	} else if strings.HasPrefix(query, "verify_setting") { //入群验证
-		group.VerifySettingHandler(update, bot.bot)
+		setting.VerifySettingHandler(update, bot.bot)
 
 	} else if strings.HasPrefix(query, "schedule") { //定时消息
 		setting.ScheduleSettingHandler(update, bot.bot)
