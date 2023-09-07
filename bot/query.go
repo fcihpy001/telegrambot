@@ -16,9 +16,6 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 	query := update.CallbackQuery.Data
 	fmt.Println("query command--", query)
 
-	// if strings.HasPrefix(query, "lucky") {
-	// 	group.LuckyHandler(update, bot.bot)
-	// } else
 	if query == "start" { //开始界面
 		setting.StartHandler(update, bot.bot)
 
@@ -27,6 +24,12 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 
 	} else if query == "go_setting" { //设置主菜单
 		bot.go_setting(update)
+
+	} else if strings.HasPrefix(query, "invite_setting") { //邀请设置
+		setting.InviteHandler(update, bot.bot)
+
+	} else if strings.HasPrefix(query, "welcome_setting") { //欢迎设置
+		setting.WelcomeHandler(update, bot.bot)
 
 	} else if strings.HasPrefix(query, "group") { //群组设置
 		group.GroupHandlerQuery(update, bot.bot)

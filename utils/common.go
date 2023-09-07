@@ -52,12 +52,7 @@ var (
 		model.BanTimeType5: "不删除",
 		model.BanTimeType6: "不提醒",
 	}
-	GroupInfo model.GroupInfo = model.GroupInfo{
-		GroupId:   -1001480000000,
-		GroupName: "流量工程群组",
-		GroupType: "超级群组",
-		Uid:       6450102772,
-	}
+	GroupInfo model.GroupInfo
 )
 
 func InitConfig() {

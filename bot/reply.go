@@ -49,5 +49,14 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 
 	} else if strings.Contains(replyMsg, "请输入要删除的违禁词（一行一个）") {
 		setting.ProhibitedDeleteResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "第一步 请输入关键词") {
+		setting.AddKeywordResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "第二步 请输入关键词") {
+		setting.AddKeywordReplyResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "输入要删除的关键词，一次只能删除一个，回复关键词") {
+		setting.DeleteKeywordResult(update, bot.bot)
 	}
 }

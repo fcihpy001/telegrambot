@@ -45,7 +45,7 @@ func floodSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	floodSetting.ChatId = utils.GroupInfo.GroupId
 
 	var buttons [][]model.ButtonInfo
-	utils.Json2Button2("flood.json", &buttons)
+	utils.Json2Button2("./config/flood.json", &buttons)
 	fmt.Println(&buttons)
 	var rows [][]model.ButtonInfo
 	for i := 0; i < len(buttons); i++ {

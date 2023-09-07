@@ -57,7 +57,7 @@ func punishMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	err := services.GetModelDataWhere(utils.GroupInfo.GroupId, &punishment)
 
 	var btns [][]model.ButtonInfo
-	utils.Json2Button2("punish.json", &btns)
+	utils.Json2Button2("./config/punish.json", &btns)
 
 	var rows [][]model.ButtonInfo
 	for i := 0; i < len(btns); i++ {

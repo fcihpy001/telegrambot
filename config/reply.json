@@ -1,0 +1,72 @@
+[
+  [
+    {
+      "text": "是否启用",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "启用",
+      "data": "auto_reply_status:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "关闭",
+      "data": "auto_reply_status:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "自动删除回复消息时间(分钟)⤵\uFE0F",
+      "data": "toast",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "否",
+      "data": "auto_reply_delete_time:0&0",
+      "btn_type": "data"
+    },
+    {
+      "text": "1",
+      "data": "auto_reply_delete_time:1&1",
+      "btn_type": "data"
+    },
+    {
+      "text": "5",
+      "data": "auto_reply_delete_time:5&2",
+      "btn_type": "data"
+    },
+    {
+      "text": "10",
+      "data": "auto_reply_delete_time:10&3",
+      "btn_type": "data"
+    },
+    {
+      "text": "30",
+      "data": "auto_reply_delete_time:30&4",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "➕添加关键词",
+      "data": "auto_reply_keyword_add",
+      "btn_type": "data"
+    },
+    {
+      "text": "\uD83D\uDEAE删除关键词",
+      "data": "auto_reply_keyword_delete",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDD19返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]

@@ -18,7 +18,7 @@ var (
 func darkModelSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	err = services.GetModelData(utils.GroupInfo.GroupId, &darkModelSetting)
 	var btns [][]model.ButtonInfo
-	utils.Json2Button2("dark.json", &btns)
+	utils.Json2Button2("./config/dark.json", &btns)
 	var rows [][]model.ButtonInfo
 	for i := 0; i < len(btns); i++ {
 		btnArray := btns[i]

@@ -37,7 +37,7 @@ func memberCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	err := services.GetModelData(utils.GroupInfo.GroupId, &memberCheck)
 
 	var buttons [][]model.ButtonInfo
-	utils.Json2Button2("newMember.json", &buttons)
+	utils.Json2Button2("./config/newMember.json", &buttons)
 	fmt.Println(&buttons)
 	var rows [][]model.ButtonInfo
 	for i := 0; i < len(buttons); i++ {

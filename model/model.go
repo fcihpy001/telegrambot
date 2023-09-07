@@ -133,14 +133,14 @@ type ReplySetting struct {
 	ChatId          int64 `gorm:"uniqueIndex"`
 	Uid             int64
 	Enable          bool
-	KeywordReply    []Reply
+	ReplyList       []Reply
 	DeleteReplyTime int
 }
 
 type Reply struct {
 	gorm.Model
-	ChatId         int64
-	KeyWorld       string `gorm:"uniqueIndex"`
+	ChatId         int64  `gorm:"primaryKey"`
+	KeyWorld       string `gorm:"type:varchar(20);primaryKey" `
 	ReplyWorld     string
 	MatchAll       bool
 	ReplySettingID uint
@@ -191,6 +191,16 @@ type Punishment struct {
 	FloodSettingID      uint `gorm:"uniqueIndex"`
 	SpamSettingID       uint `gorm:"uniqueIndex"`
 	ProhibitedSettingID uint `gorm:"uniqueIndex"`
+}
+
+type PunishRecord struct {
+	gorm.Model
+	ChatId       int64
+	UserId       int64
+	Reason       string
+	Punish       PunishType
+	WarningCount int
+	BanTime      int
 }
 
 type NewMemberCheck struct {

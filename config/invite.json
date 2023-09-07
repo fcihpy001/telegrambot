@@ -1,0 +1,93 @@
+[
+  [
+    {
+      "text": "是否启用",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "启用",
+      "data": "invite_setting_status:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "关闭",
+      "data": "invite_setting_status:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "入群自动生成",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "启用",
+      "data": "invite_setting_generate:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "关闭",
+      "data": "invite_setting_generate:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "邀请成功提醒",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "启用",
+      "data": "invite_setting_notify:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "关闭",
+      "data": "invite_setting_notify:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "⚙️设置链接过期时间",
+      "data": "invite_setting_expire_time",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "⚙\uFE0F设置单链接取大邀请数",
+      "data": "invite_setting_limit_people",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "⚙\uFE0F设置链接生成数量上限",
+      "data": "invite_setting_limit_link",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDDA8导出邀请统计",
+      "data": "invite_setting_export",
+      "btn_type": "data"
+    },
+    {
+    "text": "\uD83D\uDDD1清空所有邀请数据",
+    "data": "invite_setting_clear",
+    "btn_type": "data"
+  }
+  ],
+  [
+    {
+      "text": "\uD83D\uDD19返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]

@@ -34,9 +34,9 @@ func InitDB() {
 		utils.Config.Mysql.Database)
 	// fmt.Println(dsn)
 	InitMysql(dsn)
-	if utils.Config.Debug {
-		createTable()
-	}
+	//if utils.Config.Debug {
+	createTable()
+	//}
 
 	initRedis(utils.Config.RedisURL)
 }

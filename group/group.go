@@ -55,21 +55,6 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		mgr.welcomeSettingDeletePrevMsg(update, false)
 	case "group_welcome_setting_text":
 		mgr.welcomeTextSetting(update)
-	case "group_invite_setting":
-		mgr.inviteSetting(update)
-	case "group_invite_status_enable":
-		mgr.group_invite_status(update, true)
-	case "group_invite_status_disable":
-		mgr.group_invite_status(update, false)
-	case "group_invite_autogenerate_enable":
-		mgr.group_invite_autogenerate(update, true)
-	case "group_invite_autogenerate_disable":
-		mgr.group_invite_autogenerate(update, false)
-
-	case "group_invite_notify_enable":
-		mgr.group_invite_notify(update, true)
-	case "group_invite_notify_disable":
-		mgr.group_invite_notify(update, false)
 	case "toast":
 		fmt.Println("请选择")
 	}

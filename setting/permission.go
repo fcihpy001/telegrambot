@@ -18,7 +18,7 @@ var permission_selectInfo = model.SelectInfo{
 func PermissionHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	var buttons []model.ButtonInfo
-	utils.Json2Button("permission.json", &buttons)
+	utils.Json2Button("./config/permission.json", &buttons)
 
 	var row []model.ButtonInfo
 	var rows [][]model.ButtonInfo
