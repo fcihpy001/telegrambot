@@ -377,3 +377,19 @@ func radioOpenEmojj(isOpen bool, text string) string {
 	}
 	return text
 }
+
+func sendText(bot *tgbotapi.BotAPI, chatId int64, text string) {
+	msg := tgbotapi.NewMessage(chatId, text)
+	_, err := bot.Send(msg)
+	if err != nil {
+		logger.Err(err).Stack().Str("content", text).Msg("send message failed")
+	}
+}
+
+func sendEditText(bot *tgbotapi.BotAPI, chatId int64, msgId int, text string) {
+	msg := tgbotapi.NewEditMessageText(chatId, msgId, text)
+	_, err := bot.Send(msg)
+	if err != nil {
+		logger.Err(err).Stack().Str("content", text).Msg("send message failed")
+	}
+}

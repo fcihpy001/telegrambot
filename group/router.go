@@ -53,12 +53,12 @@ func CallbackHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 		param.query = ""
 		param.param = url.Values{}
 	} else {
-		_, fn, ok = router.Root().LongestPrefix([]byte(data))
+		ss := strings.Split(data, "?")
+		fn, ok = router.Get([]byte(ss[0]))
 		if !ok {
 			return false
 		}
 
-		ss := strings.Split(data, "?")
 		if len(ss) == 2 {
 			param.query = ss[1]
 			param.param, err = url.ParseQuery(ss[1])
@@ -87,12 +87,12 @@ func RegisterCallback(data string, fn CallbackFn) {
 	// }
 	var ok bool
 	if strings.HasSuffix(data, "$") {
-		router, _, ok = router.Insert([]byte(data[0:len(data)-1]), fn)
+		router, _, _ = router.Insert([]byte(data[0:len(data)-1]), fn)
 	} else {
 		router, _, ok = router.Insert([]byte(data), fn)
 	}
-	if !ok {
-		logger.Error().Str("route", data).Msg("insert callback route failed")
+	if ok {
+		logger.Error().Str("route", data).Msg("insert callback route already exists")
 	}
 }
 
@@ -101,4 +101,10 @@ func InitCallbackRouters() {
 
 	RegisterCallback("lucky$", luckyIndex)
 	RegisterCallback("luckysetting", toggleLuckySetting)
+	RegisterCallback("lucky_create_index$", luckyCreateIndex)
+	RegisterCallback("lucky_create", luckyCreate)
+	RegisterCallback("lucky_create_general", luckyCreateGeneral)
+	RegisterCallback("lucky_create_keywords", luckyCreateKeywords)
+	RegisterCallback("lucky_push", luckyCreatePush)
+	RegisterCallback("lucky_publish", luckyCreatePublish)
 }
