@@ -37,6 +37,8 @@ func StartAdminConversation(groupChatId, chatId, userId, messageId int64,
 	status ConversationStatus,
 	data interface{},
 	fn ConversationFn) {
+	logger.Info().Msgf("new session: group=%d chatId=%d userId=%d msgId=%d",
+		groupChatId, chatId, userId, messageId)
 	sessions[groupChatId] = &botConversation{
 		groupChatId: groupChatId,
 		chatId:      chatId,
@@ -68,6 +70,7 @@ func HandleAdminConversation(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool
 	userId := msg.From.ID
 	chat := msg.Chat
 	chatId := chat.ID
+	logger.Info().Msgf("message: chatId=%d userId=%d", chatId, userId)
 	conversion, ok := sessions[chatId]
 	if !ok {
 		//
@@ -77,7 +80,10 @@ func HandleAdminConversation(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool
 		return false
 	}
 
-	// conversion.fn(update, bot, conversion)
+	if conversion.fn != nil {
+		conversion.fn(update, bot, conversion)
+		return true
+	}
 
 	mgr := GroupManager{bot}
 	switch conversion.status {

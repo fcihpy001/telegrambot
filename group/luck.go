@@ -59,6 +59,7 @@ func (mgr *GroupManager) luckyrecord(update *tgbotapi.Update) {
 }
 
 func luckyIndex(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	println("luckyIndex")
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("📎发起抽奖活动", "lucky_create_index"),
@@ -81,7 +82,8 @@ func luckyIndex(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackPa
 
 // 发起抽奖首页: 选择抽奖类型
 func luckyCreateIndex(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
-	content := "🎁 群发起抽奖\n\n" +
+	println("luckyCreateIndex")
+	content := "🎁 群抽奖类型:\n\n" +
 		"🔥 通用抽奖：群员在群内回复指定关键词参与抽奖\n\n" +
 		"🙋‍♂️ 指定群报道抽奖：A群成员进入B群回复指定关键词参与抽奖\n\n" +
 		"🪁 邀请人数抽奖：群成员用[专属链接]或[添加成员]拉人进群，到指定人数后参与抽奖\n\n" +
@@ -328,7 +330,7 @@ func luckyCreateGeneralSteps(update *tgbotapi.Update, bot *tgbotapi.BotAPI, sess
 		}
 		data.Rewards = append(data.Rewards, reward)
 		content := buildRewardContent(data)
-		content += "\n请输入1000USDT的奖品有多少份：\n"
+		content += "\n请输入该奖品有多少份：\n"
 		sendText(bot, update.Message.Chat.ID, content)
 
 	case ConversationLuckyCreateGeneralStep3: // 奖品多少份
@@ -406,7 +408,7 @@ func luckyCreateKeywords(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *C
 
 // callback 满人抽奖: 是否推送
 func luckyCreatePush(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
-	push := param.param["push"]
+	push := param.param["result"]
 	println("push:", push[0])
 
 	cb := update.CallbackQuery
@@ -436,7 +438,7 @@ func luckyCreatePush(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Callb
 	return nil
 }
 
-// 是否发布
+// callback 是否发布
 func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
 	if len(param.param["result"]) == 0 {
 		logger.Error().Stack().Msg("invalid param result")
@@ -466,8 +468,8 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 			tgbotapi.NewInlineKeyboardButtonData("查看抽奖记录", "lucky_records"),
 		),
 	)
-	reply := tgbotapi.NewMessage(sess.chatId, content)
-	reply.ReplyMarkup = inlineKeyboard
+	reply := tgbotapi.NewEditMessageTextAndMarkup(sess.chatId, cb.Message.MessageID, content, inlineKeyboard)
+	// reply.ReplyMarkup = inlineKeyboard
 	if _, err := bot.Send(reply); err != nil {
 		logger.Err(err).Stack().Msg("send msg failed")
 	}
