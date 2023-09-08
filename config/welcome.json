@@ -1,0 +1,67 @@
+[
+  [
+    {
+      "text": "状态",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "启用",
+      "data": "welcome_setting_status:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "关闭",
+      "data": "welcome_setting_status:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "册除上条消息",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "删除",
+      "data": "welcome_setting_delete_prev:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "不删除",
+      "data": "welcome_setting_delete_prev:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "⬇\uFE0F\uD83D\uDD8C自定义欢迎内容⬇\uFE0F",
+      "data": "toast",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": " \uD83D\uDCC4文本内容",
+      "data": "welcome_setting_type:text",
+      "btn_type": "data"
+    },
+    {
+      "text": "\uD83D\uDCF8媒体图片",
+      "data": "welcome_setting_type:media",
+      "btn_type": "data"
+    },
+    {
+      "text": "\uD83D\uDCCE链接按钮",
+      "data": "welcome_setting_type:link",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDD19返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]

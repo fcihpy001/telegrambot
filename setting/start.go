@@ -85,6 +85,8 @@ func ManagerGroupHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		mangerGroupAdd()
 	} else if cmd == "manager_group_detail" {
 		managerGroupDetail(update, bot, params)
+	} else if cmd == "manager_group_switch" {
+		managerGroupSwitch(update, bot)
 	}
 }
 
@@ -101,6 +103,43 @@ func managerGroupDetail(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params st
 	if len(params) == 0 {
 		return
 	}
-	utils.GroupInfo.GroupName = params
+
+	where := fmt.Sprintf("group_name = '%s'", params)
+	_ = services.GetModelWhere(where, &utils.GroupInfo)
 	Settings(update, bot)
+}
+
+func managerGroupSwitch(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	groups, err := services.GetAllGroups()
+	if err != nil {
+		return
+	}
+	var managerRow []model.ButtonInfo
+	var rows [][]model.ButtonInfo
+	for i := 1; i <= len(groups); i++ {
+		btn := model.ButtonInfo{
+			Text:    groups[i-1].GroupName,
+			Data:    "manager_group_detail:" + groups[i-1].GroupName,
+			BtnType: model.BtnTypeData,
+		}
+		managerRow = append(managerRow, btn)
+		if i%2 == 0 && i != 0 { //每两个一组，进行换行
+			rows = append(rows, managerRow)
+			managerRow = []model.ButtonInfo{}
+		}
+	}
+	if len(groups)%2 != 0 {
+		rows = append(rows, managerRow)
+	}
+	//TODO 添加完群组后，需要将信息入库
+	addBtn := model.ButtonInfo{
+		Text:    "+ 添加toplink到群组 +",
+		Data:    "manager_group_add",
+		BtnType: model.BtnTypeData,
+	}
+	addRow := []model.ButtonInfo{addBtn}
+	rows = append(rows, addRow)
+	keyboard := utils.MakeKeyboard(rows)
+	content := "🔁切换到其它群组\n\n\n👉 选择你要管理的群组："
+	utils.SendMenu(update.CallbackQuery.Message.Chat.ID, content, keyboard, bot)
 }

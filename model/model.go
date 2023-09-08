@@ -98,7 +98,7 @@ type UserAction struct {
 
 type WelcomeSetting struct {
 	gorm.Model
-	ChatId        int64 `gorm:"index:user_chat_idx"`
+	ChatId        int64 `gorm:"index:uniqueIndex"`
 	Uid           int64
 	Enable        bool
 	WelcomeType   string
@@ -110,12 +110,12 @@ type WelcomeSetting struct {
 
 type InviteSetting struct {
 	gorm.Model
-	ChatId            int64 `gorm:"index:user_chat_idx"`
+	ChatId            int64 `gorm:"index:uniqueIndex; primaryKey"`
 	Uid               int64
 	Enable            bool
 	AutoGenerate      bool
-	Remind            bool
-	LinkExpireTime    int64
+	Notify            bool
+	LinkExpireTime    string
 	InviteLinkLimit   int
 	InvitePeopleLimit int
 	InviteCount       int
@@ -123,7 +123,7 @@ type InviteSetting struct {
 
 type Invite struct {
 	gorm.Model
-	Uid         int64 `gorm:"index:invite_idx"`
+	Uid         int64 `gorm:"index:uniqueIndex"`
 	InviteLink  string
 	InviteCount int
 }
@@ -133,14 +133,14 @@ type ReplySetting struct {
 	ChatId          int64 `gorm:"uniqueIndex"`
 	Uid             int64
 	Enable          bool
-	KeywordReply    []Reply
+	ReplyList       []Reply
 	DeleteReplyTime int
 }
 
 type Reply struct {
 	gorm.Model
-	ChatId         int64
-	KeyWorld       string `gorm:"uniqueIndex"`
+	ChatId         int64  `gorm:"primaryKey"`
+	KeyWorld       string `gorm:"type:varchar(20);primaryKey" `
 	ReplyWorld     string
 	MatchAll       bool
 	ReplySettingID uint
@@ -191,6 +191,16 @@ type Punishment struct {
 	FloodSettingID      uint `gorm:"uniqueIndex"`
 	SpamSettingID       uint `gorm:"uniqueIndex"`
 	ProhibitedSettingID uint `gorm:"uniqueIndex"`
+}
+
+type PunishRecord struct {
+	gorm.Model
+	ChatId       int64
+	UserId       int64
+	Reason       string
+	Punish       PunishType
+	WarningCount int
+	BanTime      int
 }
 
 type NewMemberCheck struct {
@@ -373,10 +383,11 @@ type SelectInfo struct {
 
 type GroupInfo struct {
 	gorm.Model
-	GroupId   int64 `gorm:"uniqueIndex"`
-	GroupName string
-	GroupType string
-	Uid       int64
+	GroupId    int64 `gorm:"uniqueIndex; primaryKey"`
+	GroupName  string
+	GroupType  string
+	Uid        int64
+	Permission string
 }
 
 // 抽奖总体设置

@@ -2,11 +2,11 @@ package bot
 
 import (
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"strings"
 	"telegramBot/group"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"telegramBot/setting"
 )
 
 // 处理普通消息
@@ -25,6 +25,14 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 		group.SendTestWebApp(update, bot.bot)
 		return
 	}
+	//违禁词处理
+	setting.HandlerProhibited(update, bot.bot)
+
+	//自动回复处理
+	setting.HandlerAutoReply(update, bot.bot)
+
+	return
+	//处理自动回复
 
 	if strings.HasPrefix(messageText, "统计") { //获取违禁词库
 		reply := "今天活跃统计功能"

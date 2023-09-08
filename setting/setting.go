@@ -22,7 +22,7 @@ func Settings(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		chatType = update.Message.Chat.Type
 	}
 	var buttons []model.ButtonInfo
-	utils.Json2Button("setting.json", &buttons)
+	utils.Json2Button("./config/setting.json", &buttons)
 
 	var row []model.ButtonInfo
 	var rows [][]model.ButtonInfo

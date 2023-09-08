@@ -1,4 +1,4 @@
-package group
+package setting
 
 import (
 	"fmt"
@@ -13,12 +13,7 @@ var verifySetting model.VerifySetting
 
 // 入群验证
 func VerifySettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	_ = services.GetModelData(update.CallbackQuery.Message.Chat.ID, &verifySetting)
-	verifySetting.ChatId = update.CallbackQuery.Message.Chat.ID
 
-	mgr := GroupManager{
-		bot: bot,
-	}
 	data := update.CallbackQuery.Data
 	query := strings.Split(data, ":")
 	cmd := query[0]
@@ -27,174 +22,50 @@ func VerifySettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		params = query[1]
 	}
 	fmt.Println(query)
-	if cmd == "verify_setting" {
-		mgr.verifySettingMenu(update)
+	if cmd == "verify_setting_menu" {
+		verifySettingMenu(update, bot)
 
 	} else if cmd == "verify_setting_status" {
-		mgr.verifyStatusHandler(update, params)
+		verifyStatusHandler(update, bot, params)
 
 	} else if cmd == "verify_setting_method" {
-		mgr.verifyMethodHandler(update, params)
+		verifyMethodHandler(update, bot, params)
 
 	} else if cmd == "verify_setting_time" {
-		mgr.verifyTimeHandler(update, params)
+		verifyTimeHandler(update, bot, params)
 
 	} else if cmd == "verify_setting_punish" {
-		mgr.verifyPunishHandler(update, params)
-
+		verifyPunishHandler(update, bot, params)
 	}
-
 }
 
-func (mgr *GroupManager) verifySettingMenu(update *tgbotapi.Update) {
+func verifySettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	_ = services.GetModelData(utils.GroupInfo.GroupId, &verifySetting)
+	verifySetting.ChatId = utils.GroupInfo.GroupId
 
-	btn12txt := "启用"
-	btn13txt := "✅关闭"
-	if verifySetting.Enable {
-		btn12txt = "✅启用"
-		btn13txt = "关闭"
-	}
-
-	btn22txt := "按钮"
-	btn23txt := "✅数学题"
-	btn24txt := "验证码"
-	if verifySetting.VerifyType == "按钮" {
-		btn22txt = "✅按钮"
-		btn23txt = "数学题"
-		btn24txt = "验证码"
-	} else if verifySetting.VerifyType == "数学题" {
-		btn22txt = "按钮"
-		btn23txt = "✅数学题"
-		btn24txt = "验证码"
-	} else if verifySetting.VerifyType == "验证码" {
-		btn22txt = "按钮"
-		btn23txt = "数学题"
-		btn24txt = "✅验证码"
+	var buttons [][]model.ButtonInfo
+	utils.Json2Button2("./config/verify.json", &buttons)
+	fmt.Println(&buttons)
+	var rows [][]model.ButtonInfo
+	for i := 0; i < len(buttons); i++ {
+		btnArr := buttons[i]
+		var row []model.ButtonInfo
+		for j := 0; j < len(btnArr); j++ {
+			btn := btnArr[j]
+			updateVerifyButtonStatus(&btn)
+			row = append(row, btn)
+		}
+		rows = append(rows, row)
 	}
 
-	btn32txt := "1分"
-	btn33txt := "5分"
-	btn34txt := "10分"
-	if verifySetting.VerifyTime == 1 {
-		btn32txt = "✅1分"
-		btn33txt = "5分"
-		btn34txt = "10分"
-	} else if verifySetting.VerifyTime == 5 {
-		btn32txt = "1分"
-		btn33txt = "✅5分"
-		btn34txt = "10分"
-	} else if verifySetting.VerifyTime == 10 {
-		btn32txt = "1分"
-		btn33txt = "5分"
-		btn34txt = "✅10分"
-	}
-
-	btn42txt := "禁言"
-	btn43txt := "✅踢出"
-	if verifySetting.PunishType == "禁言" {
-		btn42txt = "✅禁言"
-		btn43txt = "踢出"
-	} else if verifySetting.PunishType == "踢出" {
-		btn42txt = "禁言"
-		btn43txt = "✅踢出"
-	}
-
-	btn11 := model.ButtonInfo{
-		Text:    "是否启用",
-		Data:    "toast",
-		BtnType: model.BtnTypeData,
-	}
-	btn12 := model.ButtonInfo{
-		Text:    btn12txt,
-		Data:    "verify_setting_status:enable",
-		BtnType: model.BtnTypeData,
-	}
-	btn13 := model.ButtonInfo{
-		Text:    btn13txt,
-		Data:    "verify_setting_status:disable",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn21 := model.ButtonInfo{
-		Text:    "模式",
-		Data:    "toast",
-		BtnType: model.BtnTypeData,
-	}
-	btn22 := model.ButtonInfo{
-		Text:    btn22txt,
-		Data:    "verify_setting_method:按钮",
-		BtnType: model.BtnTypeData,
-	}
-	btn23 := model.ButtonInfo{
-		Text:    btn23txt,
-		Data:    "verify_setting_method:数学题",
-		BtnType: model.BtnTypeData,
-	}
-	btn24 := model.ButtonInfo{
-		Text:    btn24txt,
-		Data:    "verify_setting_method:验证码",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn31 := model.ButtonInfo{
-		Text:    "验证时间",
-		Data:    "toast",
-		BtnType: model.BtnTypeData,
-	}
-	btn32 := model.ButtonInfo{
-		Text:    btn32txt,
-		Data:    "verify_setting_time:1",
-		BtnType: model.BtnTypeData,
-	}
-	btn33 := model.ButtonInfo{
-		Text:    btn33txt,
-		Data:    "verify_setting_time:5",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn34 := model.ButtonInfo{
-		Text:    btn34txt,
-		Data:    "verify_setting_time:10",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn41 := model.ButtonInfo{
-		Text:    "超时处理",
-		Data:    "toast",
-		BtnType: model.BtnTypeData,
-	}
-	btn42 := model.ButtonInfo{
-		Text:    btn42txt,
-		Data:    "verify_setting_punish:禁言",
-		BtnType: model.BtnTypeData,
-	}
-	btn43 := model.ButtonInfo{
-		Text:    btn43txt,
-		Data:    "verify_setting_punish:踢出",
-		BtnType: model.BtnTypeData,
-	}
-
-	btn51 := model.ButtonInfo{
-		Text:    "返回",
-		Data:    "go_setting",
-		BtnType: model.BtnTypeData,
-	}
-
-	row1 := []model.ButtonInfo{btn11, btn12, btn13}
-	row2 := []model.ButtonInfo{btn21, btn22, btn23, btn24}
-	row3 := []model.ButtonInfo{btn31, btn32, btn33, btn34}
-	row4 := []model.ButtonInfo{btn41, btn42, btn43}
-	row5 := []model.ButtonInfo{btn51}
-
-	rows := [][]model.ButtonInfo{row1, row2, row3, row4, row5}
 	keyboard := utils.MakeKeyboard(rows)
 	utils.VerifySettingMenuMarkup = keyboard
-	content := updateGroupVerifySetting()
+	content := updateVerifySetting()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard)
-	mgr.bot.Send(msg)
+	bot.Send(msg)
 }
 
-func (mgr *GroupManager) verifyStatusHandler(update *tgbotapi.Update, params string) {
+func verifyStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
 	if len(params) == 0 {
 		return
 	}
@@ -208,13 +79,13 @@ func (mgr *GroupManager) verifyStatusHandler(update *tgbotapi.Update, params str
 		utils.VerifySettingMenuMarkup.InlineKeyboard[0][2].Text = "✅关闭"
 	}
 
-	content := updateGroupVerifySetting()
+	content := updateVerifySetting()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.VerifySettingMenuMarkup)
-	mgr.bot.Send(msg)
+	bot.Send(msg)
 
 }
 
-func (mgr *GroupManager) verifyMethodHandler(update *tgbotapi.Update, params string) {
+func verifyMethodHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
 	if len(params) == 0 {
 		return
 	}
@@ -236,16 +107,16 @@ func (mgr *GroupManager) verifyMethodHandler(update *tgbotapi.Update, params str
 		utils.VerifySettingMenuMarkup.InlineKeyboard[1][3].Text = "✅验证码"
 
 	}
-
-	content := updateGroupVerifySetting()
+	content := updateVerifySetting()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.VerifySettingMenuMarkup)
-	mgr.bot.Send(msg)
+	bot.Send(msg)
 
 }
-func (mgr *GroupManager) verifyTimeHandler(update *tgbotapi.Update, params string) {
+func verifyTimeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
 	if len(params) == 0 {
 		return
 	}
+
 	if params == "1" {
 		verifySetting.VerifyTime = 1
 		utils.VerifySettingMenuMarkup.InlineKeyboard[2][1].Text = "✅1分"
@@ -265,12 +136,12 @@ func (mgr *GroupManager) verifyTimeHandler(update *tgbotapi.Update, params strin
 		utils.VerifySettingMenuMarkup.InlineKeyboard[2][3].Text = "✅10分"
 	}
 
-	content := updateGroupVerifySetting()
+	content := updateVerifySetting()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.VerifySettingMenuMarkup)
-	mgr.bot.Send(msg)
+	bot.Send(msg)
 
 }
-func (mgr *GroupManager) verifyPunishHandler(update *tgbotapi.Update, params string) {
+func verifyPunishHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
 	if len(params) == 0 {
 		return
 	}
@@ -283,13 +154,12 @@ func (mgr *GroupManager) verifyPunishHandler(update *tgbotapi.Update, params str
 		utils.VerifySettingMenuMarkup.InlineKeyboard[3][2].Text = "✅踢出"
 	}
 
-	content := updateGroupVerifySetting()
+	content := updateVerifySetting()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.VerifySettingMenuMarkup)
-	mgr.bot.Send(msg)
-
+	bot.Send(msg)
 }
 
-func updateGroupVerifySetting() string {
+func updateVerifySetting() string {
 	content := "🤖 入群验证\n启用后，用户进入群组需要验证才能发送消息\n\n"
 	if verifySetting.Enable {
 		content += "当前状态：✅已启用\n"
@@ -303,4 +173,28 @@ func updateGroupVerifySetting() string {
 	content += "超时处理: " + verifySetting.PunishType + "\n"
 	services.SaveModel(&verifySetting, verifySetting.ChatId)
 	return content
+}
+
+func updateVerifyButtonStatus(btn *model.ButtonInfo) {
+	if btn.Text == "启用" && verifySetting.Enable {
+		btn.Text = "✅启用"
+	} else if btn.Text == "关闭" && !verifySetting.Enable {
+		btn.Text = "✅关闭"
+	} else if btn.Text == "按钮" && verifySetting.VerifyType == "按钮" {
+		btn.Text = "✅按钮"
+	} else if btn.Text == "数学题" && verifySetting.VerifyType == "数学题" {
+		btn.Text = "✅数学题"
+	} else if btn.Text == "验证码" && verifySetting.VerifyType == "验证码" {
+		btn.Text = "✅验证码"
+	} else if btn.Text == "1分" && verifySetting.VerifyTime == 1 {
+		btn.Text = "✅1分"
+	} else if btn.Text == "5分" && verifySetting.VerifyTime == 5 {
+		btn.Text = "✅5分"
+	} else if btn.Text == "10分" && verifySetting.VerifyTime == 10 {
+		btn.Text = "✅10分"
+	} else if btn.Text == "禁言" && verifySetting.PunishType == "禁言" {
+		btn.Text = "✅禁言"
+	} else if btn.Text == "踢出" && verifySetting.PunishType == "踢出" {
+		btn.Text = "✅踢出"
+	}
 }

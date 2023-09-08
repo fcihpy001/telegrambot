@@ -56,7 +56,7 @@ func prohibitedSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	prohibitedSetting.ChatId = utils.GroupInfo.GroupId
 
 	var btns [][]model.ButtonInfo
-	utils.Json2Button2("prohibited.json", &btns)
+	utils.Json2Button2("./config/prohibited.json", &btns)
 
 	var rows [][]model.ButtonInfo
 	for i := 0; i < len(btns); i++ {
@@ -290,4 +290,51 @@ func updatePunishSettingMsg() string {
 	content = content + actionMsg
 	services.SaveProhibitSettings(&prohibitedSetting)
 	return content
+}
+
+// 过滤违禁词
+func HandlerProhibited(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	messageText := update.Message.Text
+	//获取数据库中的违禁词列表
+	_ = services.GetModelData(utils.GroupInfo.GroupId, &prohibitedSetting)
+	var content string
+	if strings.Contains(prohibitedSetting.World, messageText) {
+
+		//获取用户的违禁词惩罚设置
+		//如果是警告，就警告一次，并增加警告次数
+		if prohibitedSetting.Punish == model.PunishTypeWarning {
+			//获取用户的警告次数
+			record := model.PunishRecord{}
+			where := fmt.Sprintf("chat_id = %d and user_id = %d", utils.GroupInfo.GroupId, update.Message.From.ID)
+			_ = services.GetModelWhere(where, &record)
+			r := &model.PunishRecord{
+				ChatId:       utils.GroupInfo.GroupId,
+				UserId:       update.Message.From.ID,
+				Reason:       "违禁词,被警告一次",
+				Punish:       model.PunishTypeWarning,
+				WarningCount: record.WarningCount + 1,
+			}
+			//记录入库
+			services.SaveModel(r, utils.GroupInfo.GroupId)
+			//	发送一条系统消息
+			content = fmt.Sprintf("%s触犯了违禁词，被敬告一次", update.Message.From.FirstName)
+
+		} else if prohibitedSetting.Punish == model.PunishTypeKick {
+			//	执行踢出操作
+			//	tgbotapi.BanChatMemberConfig{
+			//		ChatMemberConfig: tgbotapi.ChatMemberConfig{
+			//			ChatID: utils.GroupInfo.GroupId,
+			//			UserID: update.Message.From.ID,
+			//		},
+			//		}
+			//	}
+
+			//	发送一条系统消息
+			content = fmt.Sprintf("%s触犯了违禁词，被踢出群组", update.Message.From.FirstName)
+
+		}
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
+		bot.Send(msg)
+	}
 }

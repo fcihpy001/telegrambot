@@ -21,7 +21,7 @@ func spamSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	spamsSetting.ChatId = utils.GroupInfo.GroupId
 
 	var buttons [][]model.ButtonInfo
-	utils.Json2Button2("spam.json", &buttons)
+	utils.Json2Button2("./config/spam.json", &buttons)
 	fmt.Println(&buttons)
 	var rows [][]model.ButtonInfo
 	for i := 0; i < len(buttons); i++ {
@@ -29,6 +29,7 @@ func spamSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		var row []model.ButtonInfo
 		for j := 0; j < len(btnArr); j++ {
 			btn := btnArr[j]
+			updateBtn(&btn)
 			row = append(row, btn)
 		}
 		rows = append(rows, row)
@@ -43,7 +44,6 @@ func spamSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if err != nil {
 		log.Println(err)
 	}
-
 }
 
 func SpamSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
@@ -256,4 +256,34 @@ func updateSpamMsg() string {
 
 	services.SaveModel(&spamsSetting, spamsSetting.ChatId)
 	return content
+}
+
+func updateBtn(btn *model.ButtonInfo) {
+	if btn.Data == "spam_setting_type:ai" && spamsSetting.EnableAi {
+		btn.Text = "✅AI屏蔽垃圾消息[强劲版]"
+	} else if btn.Data == "spam_setting_type:ddos" && spamsSetting.DDos {
+		btn.Text = "✅反洪水攻击"
+	} else if btn.Data == "spam_setting_type:blackUser" && spamsSetting.BlackUser {
+		btn.Text = "✅屏蔽被封禁账号"
+	} else if btn.Data == "spam_setting_type:link" && spamsSetting.Link {
+		btn.Text = "✅屏蔽链接"
+	} else if btn.Data == "spam_setting_type:channelCopy" && spamsSetting.ChannelCopy {
+		btn.Text = "✅屏蔽频道马甲发言"
+	} else if btn.Data == "spam_setting_type:channelForward" && spamsSetting.ChannelForward {
+		btn.Text = "✅屏蔽来自频道转发"
+	} else if btn.Data == "spam_setting_type:userForward" && spamsSetting.UserForward {
+		btn.Text = "✅屏蔽来自用户转发"
+	} else if btn.Data == "spam_setting_type:atGroup" && spamsSetting.AtGroup {
+		btn.Text = "✅屏蔽@群组ID"
+	} else if btn.Data == "spam_setting_type:atUser" && spamsSetting.AtUser {
+		btn.Text = "✅屏蔽@用户ID"
+	} else if btn.Data == "spam_setting_type:ethAddress" && spamsSetting.EthAddr {
+		btn.Text = "✅屏蔽以太坊地址"
+	} else if btn.Data == "spam_setting_type:command" && spamsSetting.Command {
+		btn.Text = "✅清除命令消息"
+	} else if btn.Data == "spam_setting_type:longMsg" && spamsSetting.LongMsg {
+		btn.Text = "✅屏蔽超长消息"
+	} else if btn.Data == "spam_setting_type:longName" && spamsSetting.LongName {
+
+	}
 }

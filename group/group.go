@@ -16,8 +16,6 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	query := update.CallbackQuery.Data
 	fmt.Println("group query --", query)
 	switch query {
-	case "group_welcome_setting":
-		mgr.group_welcome_setting(update)
 
 	case "group_solitaire":
 		fmt.Println("group_solitaire")
@@ -45,31 +43,7 @@ func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		mgr.groupmemberstatis(update, "week")
 	case "group_back_statics":
 		mgr.group_back_statics(update)
-	case "group_welcomeSettingEnable":
-		mgr.group_welcomeSettingStatus(update, true)
-	case "group_welcomeSettingDisable":
-		mgr.group_welcomeSettingStatus(update, false)
-	case "group_welcome_DeletePrevMsg_enable":
-		mgr.welcomeSettingDeletePrevMsg(update, true)
-	case "group_welcome_DeletePrevMsg_disable":
-		mgr.welcomeSettingDeletePrevMsg(update, false)
-	case "group_welcome_setting_text":
-		mgr.welcomeTextSetting(update)
-	case "group_invite_setting":
-		mgr.inviteSetting(update)
-	case "group_invite_status_enable":
-		mgr.group_invite_status(update, true)
-	case "group_invite_status_disable":
-		mgr.group_invite_status(update, false)
-	case "group_invite_autogenerate_enable":
-		mgr.group_invite_autogenerate(update, true)
-	case "group_invite_autogenerate_disable":
-		mgr.group_invite_autogenerate(update, false)
 
-	case "group_invite_notify_enable":
-		mgr.group_invite_notify(update, true)
-	case "group_invite_notify_disable":
-		mgr.group_invite_notify(update, false)
 	case "toast":
 		fmt.Println("请选择")
 	}
@@ -79,9 +53,7 @@ func GroupHandlerCommand(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	mgr := GroupManager{
 		bot: bot,
 	}
-	// if update.CallbackQuery == nil {
-	// 	return
-	// }
+
 	query := strings.ToLower(update.Message.Command())
 	switch query {
 	case "invite":

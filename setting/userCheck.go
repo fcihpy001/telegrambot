@@ -46,7 +46,7 @@ func userCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	fmt.Println("userCheckSetting-query", userCheckSetting)
 
 	var btns [][]model.ButtonInfo
-	utils.Json2Button2("userCheck.json", &btns)
+	utils.Json2Button2("./config/userCheck.json", &btns)
 
 	var rows [][]model.ButtonInfo
 	for i := 0; i < len(btns); i++ {

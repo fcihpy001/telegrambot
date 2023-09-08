@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"telegramBot/model"
+	"telegramBot/utils"
 
 	"gorm.io/gorm/clause"
 )
@@ -119,13 +120,12 @@ func GetProhibitSettings(chatId int64) model.ProhibitedSetting {
 }
 
 func SaveModel(model interface{}, chatId int64) {
-	fmt.Println("save-mode chat-id", chatId)
 	if chatId == 0 {
 		fmt.Println("不符合存储条件")
 		return
 	}
 	err := db.Save(model)
-	if err != nil {
+	if err.Error != nil {
 		log.Println("update or insert model data failed", err)
 	}
 }
@@ -133,10 +133,11 @@ func SaveModel(model interface{}, chatId int64) {
 func GetModelData(chatId int64, model interface{}) error {
 
 	err := db.Where("chat_id = ?", chatId).First(&model)
-	if err != nil {
-		log.Println("get Prohibit settings failed")
+	if err.Error != nil {
+		log.Println("get model data  failed", err.Error)
 		return err.Error
 	}
+	fmt.Println("get model data success::", model)
 	return nil
 }
 func GetModels(model []interface{}) error {
@@ -148,16 +149,51 @@ func GetModels(model []interface{}) error {
 	}
 	return nil
 }
+
+func GetReplySetting(chat_id int64) (model.ReplySetting, error) {
+	var items model.ReplySetting
+	err := db.Model(&model.ReplySetting{}).Preload("ReplyList").Where("chat_id = ?", chat_id).First(&items).Error
+	return items, err
+}
+
+func GetAllReply(chat_id int64) ([]model.Reply, error) {
+	var items []model.Reply
+	err := db.Where("chat_id = ?", chat_id).Find(&items).Error
+	return items, err
+}
+
+func DeleteReply(keyword string, chat_id int64) error {
+	var item model.Reply
+	err := db.Where("chat_id = ? and key_world = ?", chat_id, keyword).Delete(&item).Error
+	return err
+}
+
+func DeleteInviteData() error {
+	var item model.InviteSetting
+	err := db.Where("chat_id =?", utils.GroupInfo.GroupId).Delete(&item).Error
+	return err
+}
+
 func GetAllGroups() ([]model.GroupInfo, error) {
 	var items []model.GroupInfo
 	err := db.Find(&items).Error
 	return items, err
 }
 
+func GetModelWhere(where string, model interface{}) error {
+
+	err := db.Where(where).First(&model)
+	if err.Error != nil {
+		log.Println("get Prohibit settings failed")
+		return err.Error
+	}
+	return nil
+}
+
 func GetModelDataWhere(chatId int64, model interface{}) error {
 
 	err := db.Where("spam_setting_id = ?", chatId).First(&model)
-	if err != nil {
+	if err.Error != nil {
 		log.Println("get Prohibit settings failed")
 		return err.Error
 	}

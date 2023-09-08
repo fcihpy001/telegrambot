@@ -1,0 +1,87 @@
+[
+  [
+    {
+      "text": "状态",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "启用",
+      "data": "verify_setting_status:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "关闭",
+      "data": "verify_setting_status:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "模式",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "按钮",
+      "data": "verify_setting_method:按钮",
+      "btn_type": "data"
+    },
+    {
+      "text": "数学题",
+      "data": "verify_setting_method:数学题",
+      "btn_type": "data"
+    },
+    {
+      "text": "验证码",
+      "data": "verify_setting_method:验证码",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "验证时间",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "1分",
+      "data": "verify_setting_time:1",
+      "btn_type": "data"
+    },
+    {
+      "text": "5分",
+      "data": "verify_setting_time:5",
+      "btn_type": "data"
+    },
+    {
+      "text": "10分",
+      "data": "verify_setting_time:10",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "验证超时处理",
+      "data": "verify_setting_punish",
+      "btn_type": "data"
+    },
+    {
+      "text": "禁言",
+      "data": "verify_setting_punish:禁言",
+      "btn_type": "data"
+    },
+    {
+      "text": "踢出",
+      "data": "verify_setting_punish:踢出",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDD19返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]

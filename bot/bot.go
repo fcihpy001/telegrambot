@@ -20,8 +20,7 @@ func StartBot(ctx context.Context) {
 		panic(err)
 	}
 	log.Printf("Authorized on account %s--%d-%s", bot.bot.Self.UserName, bot.bot.Self.ID, bot.bot.Self.FirstName)
-	//记录bot信息
-	// fmt.Println(utils.GetBotUserId(), utils.GetBotUserName())
+
 	bot.setupBotWithPool()
 	//	bot.setupBotWithWebhook()
 }
@@ -46,7 +45,11 @@ func (bot *SmartBot) setupBotWithPool() {
 		group.DoStat(&update, bot.bot)
 
 		if update.Message != nil && update.Message.IsCommand() { // 以/开头的指令消息
-			bot.handleCommand(update)
+			//如果不是管理或创建者，不响应命令信息
+			member, _ := getMemberInfo(update.Message.Chat.ID, update.Message.From.ID, bot.bot)
+			if member.IsAdministrator() || member.IsCreator() || update.Message.Chat.Type == "private" {
+				bot.handleCommand(update)
+			}
 
 		} else if update.Message != nil && update.Message.ReplyToMessage != nil { // 要求用户回复的消息
 			bot.handleReply(&update)
