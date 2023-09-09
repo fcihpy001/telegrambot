@@ -100,6 +100,8 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 		param := query[len("solitaire_confirm_delete?"):]
 		group.SolitaireConfirmDelete(update, bot.bot, param)
 
+	} else if query == "toast" {
+
 	} else {
 		if group.CallbackHandler(update, bot.bot) {
 			return
@@ -112,7 +114,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 			log.Println(err)
 		}
 	}
-	//utils.SendReply(update.CallbackQuery.ID, bot.bot, false, "消息已经处理")
+	utils.SendReply(update.CallbackQuery.ID, bot.bot, false, "")
 }
 
 func (bot *SmartBot) go_setting(update *tgbotapi.Update) {

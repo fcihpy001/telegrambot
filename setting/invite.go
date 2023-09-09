@@ -1,6 +1,7 @@
 package setting
 
 import (
+	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
+	"time"
 )
 
 var inviteSetting model.InviteSetting
@@ -159,7 +161,7 @@ func inviteExpireTimeMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 }
 
 func InviteExpireTimeResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	inviteSetting.LinkExpireTime = update.Message.Text
+	inviteSetting.ExpireDate = update.Message.Text
 	content := "✅设置成功，点击按钮返回"
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
@@ -198,7 +200,7 @@ func invitePeopleMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 func InvitePeopleLimitResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	count, err := strconv.Atoi(update.Message.Text)
 
-	inviteSetting.InvitePeopleLimit = count
+	inviteSetting.MemberLimit = count
 	content := "✅设置成功，点击按钮返回"
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
@@ -313,7 +315,9 @@ func clearInviteData(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 }
 
 func updateInviteSettingMsg() string {
-	content := "🔗 【toplink官方群】邀请链接生成\n\n开启后群组中成员使用 /link 指令自动生成链接/查询邀请统计\n\n防作弊：\n└ 只有第一次进群视为有效邀请数，退群再用其他人的链接加群不计算邀请数\n"
+	content := fmt.Sprintf("🔗 【%s】邀请链接生成\n\n开启后群组中成员使用"+
+		" /link 指令自动生成链接/查询邀请统计\n\n防作弊：\n"+
+		"└ 只有第一次进群视为有效邀请数，退群再用其他人的链接加群不计算邀请数\n", utils.GroupInfo.GroupName)
 	enableMsg := "┌当前状态：关闭 ❌"
 	if inviteSetting.Enable {
 		enableMsg = "当前状态：开启 ✅"
@@ -321,13 +325,13 @@ func updateInviteSettingMsg() string {
 
 	InviteCount := "├总邀请人数：" + strconv.Itoa(inviteSetting.InviteCount) + "\n"
 	linkExpireTime := "├邀请链接有效期：不限制 \n"
-	if inviteSetting.LinkExpireTime != "0" {
-		linkExpireTime = "├邀请链接有效期：" + inviteSetting.LinkExpireTime + "\n"
+	if inviteSetting.ExpireDate != "0" {
+		linkExpireTime = "├邀请链接有效期：" + inviteSetting.ExpireDate + "\n"
 	}
 
 	InvitePeopleLimit := "├最大邀请人数：无限制\n"
-	if inviteSetting.InvitePeopleLimit > 0 {
-		InvitePeopleLimit = "├最大邀请人数：" + strconv.Itoa(inviteSetting.InvitePeopleLimit) + "\n"
+	if inviteSetting.MemberLimit > 0 {
+		InvitePeopleLimit = "├最大邀请人数：" + strconv.Itoa(inviteSetting.MemberLimit) + "\n"
 	}
 
 	InviteLinkLimit := "└生成数量上限： 无限制     已生成数量：0\n"
@@ -354,4 +358,87 @@ func updateInviteButtonStatus(btn *model.ButtonInfo) {
 	} else if btn.Data == "invite_setting_notify:disable" && !inviteSetting.Notify {
 		btn.Text = "✅不通知"
 	}
+}
+
+func GetInviteLink(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	//获取群的邀请配置信息
+	inviteSetting := model.InviteSetting{}
+	_ = services.GetModelData(update.Message.Chat.ID, &inviteSetting)
+	if inviteSetting.Enable == false {
+		utils.SendText(update.Message.Chat.ID, "管理员关闭了生成邀请链接的开关", bot)
+		return
+	}
+	invite := model.InviteRecord{}
+	where := fmt.Sprintf("chat_id = %d and uid = %d", update.Message.Chat.ID, update.Message.From.ID)
+	_ = services.GetModelWhere(where, &invite)
+	link := invite.InviteLink
+	if invite.ID > 0 {
+		msg := fmt.Sprintf("🔗 @%s 您的专属链接:\n %s (点击复制)\n\n👉 👉 当前总共邀请%d人\n\n", update.Message.From.FirstName, link, invite.InviteCount)
+		utils.SendText(update.Message.Chat.ID, msg, bot)
+		return
+	}
+
+	expireDate := int(time.Now().Unix() + 86400*365)
+	if len(inviteSetting.ExpireDate) > 0 {
+		expireDateStr, _ := time.Parse("2006-01-02 15:04", inviteSetting.ExpireDate)
+		expireDate = int(expireDateStr.Unix())
+	}
+
+	memberLimit := 9999
+	if inviteSetting.MemberLimit > 0 {
+		memberLimit = inviteSetting.MemberLimit
+	}
+
+	linkName := update.Message.From.FirstName + "的专属链接"
+	config := tgbotapi.CreateChatInviteLinkConfig{
+		ChatConfig: tgbotapi.ChatConfig{
+			ChatID: update.Message.Chat.ID,
+		},
+		Name:               linkName,
+		ExpireDate:         expireDate,
+		MemberLimit:        memberLimit,
+		CreatesJoinRequest: false,
+	}
+	//tip CreatesJoinRequest与MemberLimit不能同时设置
+
+	resp, err := bot.Request(config)
+	if err != nil {
+		fmt.Println("invite get failed:", err)
+		utils.SendText(update.Message.Chat.ID, "机器人的管理权限不足", bot)
+		return
+	}
+	m := map[string]interface{}{}
+
+	json.Unmarshal(resp.Result, &m)
+	link = m["invite_link"].(string)
+
+	msg := fmt.Sprintf("🔗 @%s 您的专属链接:\n %s (点击复制)\n\n👉 👉 当前总共邀请0人\n\n（本消息5分钟自毁）", update.Message.From.FirstName, link)
+	utils.SendText(update.Message.Chat.ID, msg, bot)
+
+	//	将邀请链接入库
+	invite.InviteLink = link
+	invite.ChatId = update.Message.Chat.ID
+	invite.Uid = update.Message.From.ID
+	invite.LinkName = linkName
+	invite.ChatName = update.Message.Chat.Title
+	invite.ChatType = update.Message.Chat.Type
+	invite.ExpireDate = expireDate
+	invite.MemberLimit = inviteSetting.MemberLimit
+	invite.CreatesJoinRequest = false
+	services.SaveModel(&invite, invite.ChatId)
+}
+
+func UpdateInviteRecord(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+
+	link := update.ChatJoinRequest.InviteLink.InviteLink
+	count := update.ChatJoinRequest.InviteLink.PendingJoinRequestCount
+	userid := update.ChatJoinRequest.From.ID
+	record := model.InviteRecord{}
+	record.InviteLink = link
+	record.LinkName = update.ChatJoinRequest.InviteLink.Name
+	record.ChatId = update.ChatJoinRequest.Chat.ID
+	record.Uid = userid
+	record.InviteCount = count
+	services.SaveModel(&record, record.ChatId)
+
 }

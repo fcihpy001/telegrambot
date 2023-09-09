@@ -101,7 +101,7 @@ func updatePermissionButtonStatus(btn *model.ButtonInfo) {
 		permission_selectInfo.Row = 3
 		permission_selectInfo.Column = 0
 
-	} else if btn.Text == "仅群主" && utils.GroupInfo.Permission == "owner" {
+	} else if btn.Text == "仅群主" && utils.GroupInfo.Permission == "creator" {
 		btn.Text = "✅" + btn.Text
 		permission_selectInfo.Text = btn.Text
 		permission_selectInfo.Row = 4

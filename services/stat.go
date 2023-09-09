@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"telegramBot/model"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/redis/go-redis/v9"
@@ -143,6 +144,14 @@ func CountTotalChatMessageUsers(
 	db.Raw("SELECT count(DISTINCT user_id) as users  from stat_count sc  where chat_id=? and  ts>=? and ts<?", chatId, startMin, endMin).Scan(&users)
 	logger.Info().Int64("messages", int64(messages)).Int64("users", int64(users)).Msg("count total messages and users")
 	return messages, users
+}
+
+// 统计某个用户在过去一段时间内的消息数量
+func MessageCountPeriod(chatId int64, userId int64, second int64) int64 {
+	var count int64
+	where := fmt.Sprintf("timestamp >= %d and chat_id = %d and user_id = %d", time.Now().Unix()-second, chatId, userId)
+	db.Model(&model.Message{}).Where(where).Count(&count)
+	return count
 }
 
 // 查询指定时间范围内按照用户id group的结果

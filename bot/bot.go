@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"telegramBot/group"
+	"telegramBot/setting"
 	"telegramBot/utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -45,10 +46,10 @@ func (bot *SmartBot) setupBotWithPool() {
 		group.DoStat(&update, bot.bot)
 
 		if update.Message != nil && update.Message.IsCommand() { // 以/开头的指令消息
+			bot.handleCommand(update)
 			//如果不是管理或创建者，不响应命令信息
 			member, _ := getMemberInfo(update.Message.Chat.ID, update.Message.From.ID, bot.bot)
 			if member.IsAdministrator() || member.IsCreator() || update.Message.Chat.Type == "private" {
-				bot.handleCommand(update)
 			}
 
 		} else if update.Message != nil && update.Message.ReplyToMessage != nil { // 要求用户回复的消息
@@ -67,6 +68,9 @@ func (bot *SmartBot) setupBotWithPool() {
 
 		} else if update.InlineQuery != nil {
 			fmt.Println("inline query")
+
+		} else if update.ChatJoinRequest != nil { // 用户申请加入群组
+			setting.UpdateInviteRecord(&update, bot.bot)
 
 		} else {
 			if update.Message != nil && update.Message.Chat != nil { // 未定义消息的处理

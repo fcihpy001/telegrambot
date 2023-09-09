@@ -39,8 +39,8 @@ func WelcomeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 // welcome主菜单
 func welcomeSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	_ = services.GetModelData(utils.GroupInfo.GroupId, &inviteSetting)
-	inviteSetting.ChatId = utils.GroupInfo.GroupId
+	_ = services.GetModelData(utils.GroupInfo.GroupId, &welcomeSetting)
+	welcomeSetting.ChatId = utils.GroupInfo.GroupId
 
 	var btns [][]model.ButtonInfo
 	utils.Json2Button2("./config/welcome.json", &btns)
@@ -60,7 +60,7 @@ func welcomeSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	utils.GroupWelcomeMarkup = keyboard
 
 	//要读取用户设置的数据
-	content := updateInviteSettingMsg()
+	content := updateWelcomeMsg()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard)
 	_, err := bot.Send(msg)
 	if err != nil {
@@ -173,7 +173,7 @@ func welcomeTextDeleteHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 }
 
 func updateWelcomeMsg() string {
-	content := "🎉 进群欢迎"
+	content := "🎉 进群欢迎\n\n"
 	enableMsg := "当前状态：关闭 ❌"
 	if welcomeSetting.Enable {
 		enableMsg = "当前状态：开启 ✅"
@@ -196,7 +196,7 @@ func updateWelcomeMsg() string {
 		welcome_media = "📸 媒体图片:✅"
 	}
 
-	content = "进群欢迎\n\n" + enableMsg + "\n" + deletePrevMsg + "\n\n自定义欢迎内容：\n" + welcome_media + "\n" + welcome_button + "\n" + welcome_text
+	content += enableMsg + "\n" + deletePrevMsg + "\n\n自定义欢迎内容：\n" + welcome_media + "\n" + welcome_button + "\n" + welcome_text
 	services.SaveModel(&welcomeSetting, utils.GroupInfo.GroupId)
 	return content
 }
