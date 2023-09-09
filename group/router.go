@@ -100,6 +100,7 @@ func InitCallbackRouters() {
 	router = iradix.New[CallbackFn]()
 
 	RegisterCallback("lucky$", luckyIndex)
+	RegisterCallback("lucky_record?idx=0", luckyRecords)
 	RegisterCallback("luckysetting", toggleLuckySetting)
 	RegisterCallback("lucky_create_index$", luckyCreateIndex)
 	RegisterCallback("lucky_create", luckyCreate)

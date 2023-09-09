@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"regexp"
 	"strconv"
@@ -392,4 +393,30 @@ func sendEditText(bot *tgbotapi.BotAPI, chatId int64, msgId int, text string) {
 	if err != nil {
 		logger.Err(err).Stack().Str("content", text).Msg("send message failed")
 	}
+}
+
+func yyyymmddhhmmss(tm int64) string {
+	return time.Unix(tm, 0).Format("2006-01-02 15:04:05")
+}
+
+func getIntParam(param *url.Values, key string) int64 {
+	v := param.Get(key)
+	if v == "" {
+		logger.Error().Stack().Msgf("not found param %v", key)
+		return 0
+	}
+	i, err := strconv.ParseInt(v, 10, 64)
+	if err != nil {
+		logger.Err(err).Stack().Msgf("parse param %v failed", key)
+	}
+	return i
+}
+
+func getStringParam(param *url.Values, key string) string {
+	v := param.Get(key)
+	if v == "" {
+		logger.Error().Stack().Msgf("not found param %v", key)
+	}
+
+	return v
 }

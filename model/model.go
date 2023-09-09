@@ -400,28 +400,36 @@ type LuckySetting struct {
 }
 
 const (
-	LuckyTypeCommon   = "common"   // 通用抽奖
+	LuckyTypeGeneral  = "general"  // 通用抽奖
 	LuckyTypeChatJoin = "chatJoin" // 指定群组报道
 	LuckyTypeInvite   = "invite"   // 邀请抽奖
 	LuckyTypeHot      = "hot"      // 群活跃抽奖
 	LuckyTypeFun      = "fun"      // 娱乐抽奖
 	LuckyTypePoints   = "points"   // 积分抽奖
 	LuckyTypeAnswer   = "answer"   // 答题抽奖
+
+	LuckyStatusStart  = "start"
+	LuckyStatusEnd    = "end"
+	LuckyStatusCancel = "cancel"
 )
 
 // 抽奖活动
 type LuckyActivity struct {
 	gorm.Model
 	ChatId       int64
+	UserId       int64
 	LuckyName    string
+	Creator      string
 	LuckyType    string `gorm:"type:varchar(20)"`
 	LuckySubType string `gorm:"type:varchar(20)"`
 	LuckyCond    string // 配置信息 json
 	TotalReward  string `gorm:"type:varchar(30)"`
 	Status       string `gorm:"type:varchar(20)"`
 	RewardDetail string // 奖励信息 json
+	Results      string // 开奖信息
 	StartTime    int64  // 开始时间
 	EndTime      int64  // 开奖时间
+	Participant  int    // 参与人数
 	PushChannel  bool   // 是否推送到频道
 }
 
@@ -438,12 +446,13 @@ type LuckyReward struct {
 }
 
 type LuckyGeneral struct {
-	ChatId  int64
-	SubType string // user time
-	Users   int    // 限制人数
-	Time    int64  // 到期时间
-	Rewards []LuckyReward
-	Keyword string
-	Push    *bool
-	Name    string // 活动名称
+	ChatId    int64
+	SubType   string // user time
+	Users     int    // 限制人数
+	StartTime int64
+	EndTime   int64 // 到期时间
+	Rewards   []LuckyReward
+	Keyword   string
+	Push      *bool
+	Name      string // 活动名称
 }
