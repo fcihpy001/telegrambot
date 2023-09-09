@@ -15,6 +15,8 @@ const (
 	ConversationPlaySolitaire      ConversationStatus = "playSolitaire"      // limitUser
 )
 
+type ConversationFn func(update *tgbotapi.Update, bot *tgbotapi.BotAPI, sess *botConversation) error
+
 type botConversation struct {
 	groupChatId int64 // supergroup chat ID
 	chatId      int64 // private conversation chat ID
@@ -22,15 +24,21 @@ type botConversation struct {
 	messageId   int64
 	status      ConversationStatus
 	data        interface{}
+	fn          ConversationFn
 }
 
-var (
-	sessions = map[int64]*botConversation{}
-)
+var sessions = map[int64]*botConversation{}
+
+func GetConversation(chatId int64) *botConversation {
+	return sessions[chatId]
+}
 
 func StartAdminConversation(groupChatId, chatId, userId, messageId int64,
 	status ConversationStatus,
-	data interface{}) {
+	data interface{},
+	fn ConversationFn) {
+	logger.Info().Msgf("new session: group=%d chatId=%d userId=%d msgId=%d",
+		groupChatId, chatId, userId, messageId)
 	sessions[groupChatId] = &botConversation{
 		groupChatId: groupChatId,
 		chatId:      chatId,
@@ -38,6 +46,7 @@ func StartAdminConversation(groupChatId, chatId, userId, messageId int64,
 		messageId:   messageId,
 		status:      status,
 		data:        data,
+		fn:          fn,
 	}
 }
 
@@ -61,6 +70,7 @@ func HandleAdminConversation(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool
 	userId := msg.From.ID
 	chat := msg.Chat
 	chatId := chat.ID
+	logger.Info().Msgf("message: chatId=%d userId=%d", chatId, userId)
 	conversion, ok := sessions[chatId]
 	if !ok {
 		//
@@ -69,6 +79,12 @@ func HandleAdminConversation(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool
 	if conversion.userId != userId {
 		return false
 	}
+
+	if conversion.fn != nil {
+		conversion.fn(update, bot, conversion)
+		return true
+	}
+
 	mgr := GroupManager{bot}
 	switch conversion.status {
 	case ConversationWaitSolitaireDesc:

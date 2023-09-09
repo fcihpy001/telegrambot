@@ -430,6 +430,7 @@ const (
 type LuckyActivity struct {
 	gorm.Model
 	ChatId       int64
+	LuckyName    string
 	LuckyType    string `gorm:"type:varchar(20)"`
 	LuckySubType string `gorm:"type:varchar(20)"`
 	LuckyCond    string // 配置信息 json
@@ -446,4 +447,20 @@ type LuckyRecord struct {
 	LuckyId int64
 	ChatId  int64
 	UserId  int64
+}
+
+type LuckyReward struct {
+	Name   string
+	Shares int
+}
+
+type LuckyGeneral struct {
+	ChatId  int64
+	SubType string // user time
+	Users   int    // 限制人数
+	Time    int64  // 到期时间
+	Rewards []LuckyReward
+	Keyword string
+	Push    *bool
+	Name    string // 活动名称
 }
