@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 
 	"gorm.io/gorm"
@@ -425,6 +426,9 @@ const (
 	LuckyTypePoints   = "points"   // 积分抽奖
 	LuckyTypeAnswer   = "answer"   // 答题抽奖
 
+	LuckySubTypeUsers = "users" // 限制抽奖人数
+	LuckySubTypeTime  = "time"
+
 	LuckyStatusStart  = "start"
 	LuckyStatusEnd    = "end"
 	LuckyStatusCancel = "cancel"
@@ -448,7 +452,21 @@ type LuckyActivity struct {
 	StartTime    int64  // 开始时间
 	EndTime      int64  // 开奖时间
 	Participant  int    // 参与人数
+	PartReward   int    // 中奖人数
+	RewardRatio  string // 中奖率
 	PushChannel  bool   // 是否推送到频道
+}
+
+func (la *LuckyActivity) ReachParticipantUsers() bool {
+	if la.LuckyType == LuckyTypeGeneral && la.LuckySubType == LuckySubTypeUsers {
+		var cond map[string]interface{}
+		json.Unmarshal([]byte(la.LuckyCond), &cond)
+
+		if cond["users"].(int) > la.Participant {
+			return true
+		}
+	}
+	return false
 }
 
 type LuckyRecord struct {
@@ -456,6 +474,7 @@ type LuckyRecord struct {
 	LuckyId int64
 	ChatId  int64
 	UserId  int64
+	Reward  string // 中奖结果
 }
 
 type LuckyReward struct {

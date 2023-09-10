@@ -1,10 +1,14 @@
 package group
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"strconv"
+	"strings"
+	"sync"
 	"telegramBot/model"
 	"telegramBot/services"
 	"time"
@@ -19,6 +23,164 @@ const (
 	ConversationLuckyCreateGeneralStep4 ConversationStatus = "createGeneralStep4" // 关键词
 	ConversationLuckyCreateGeneralStep5 ConversationStatus = "createGeneralStep5" // 活动名称
 )
+
+var (
+	luckyEndChan  chan int
+	luckyCreated  chan *model.LuckyActivity
+	luckyLock     sync.RWMutex
+	luckyKeywords = map[string][]*model.LuckyActivity{}
+)
+
+// 监听所有 lucky keywords
+func InitLuckyFilter(ctx context.Context) {
+	luckies := services.GetAllLuckyActivities()
+
+	for _, item := range luckies {
+		luckyKeywords[item.Keyword] = append(luckyKeywords[item.Keyword], item)
+	}
+
+	luckyEndChan = make(chan int, 1)
+	luckyCreated = make(chan *model.LuckyActivity, 1)
+
+	tmr := time.NewTicker(time.Second)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				logger.Info().Msg("context cancel")
+				return
+			case <-tmr.C:
+				loopLuckyKeywords()
+			case <-luckyEndChan:
+				loopLuckyKeywords()
+			case item := <-luckyCreated:
+				luckyKeywords[item.Keyword] = append(luckyKeywords[item.Keyword], item)
+			}
+		}
+	}()
+}
+
+func loopLuckyKeywords() {
+	luckyLock.Lock()
+	defer luckyLock.Unlock()
+
+	now := time.Now().Unix()
+	for word, records := range luckyKeywords {
+		nRecords := []*model.LuckyActivity{}
+		for _, record := range records {
+			if record.Status != model.LuckyStatusStart {
+				nRecords = append(nRecords, record)
+			} else if record.EndTime > 0 && record.EndTime < now {
+				// record is time up
+				record.Status = model.LuckyStatusEnd
+				// todo 这里需要 bot 实例
+				luckyOpenReward(nil, record)
+
+				nRecords = append(nRecords, record)
+			}
+		}
+		luckyKeywords[word] = nRecords
+		if len(nRecords) == 0 {
+			delete(luckyKeywords, word)
+		}
+	}
+}
+
+func luckyOpenReward(bot *tgbotapi.BotAPI, record *model.LuckyActivity) {
+	var rewards []model.LuckyReward
+	shares := 0
+	json.Unmarshal([]byte(record.RewardDetail), &rewards)
+	for _, reward := range rewards {
+		shares += reward.Shares
+	}
+	flatRewards := make([]model.LuckyReward, shares)
+	idx := 0
+	used := 0
+	for i := 0; i < shares; i++ {
+		flatRewards[i] = rewards[idx]
+		used++
+		if used >= rewards[idx].Shares {
+			used = 0
+			idx++
+		}
+	}
+
+	parts := services.GetLuckyAllParticipates(record)
+	if len(parts) == 0 {
+		return
+	}
+
+	counter := len(parts)
+	rewardIdx := 0
+	for i := 0; i < len(parts); {
+		val := rand.Intn(counter)
+		if rewardIdx >= len(flatRewards) {
+			// 奖金发完
+			break
+		}
+		if parts[val].Reward != "" {
+			// 已经中奖
+			continue
+		} else {
+			parts[val].Reward = flatRewards[rewardIdx].Name
+			rewardIdx++
+			i++
+		}
+	}
+	// 更新数据库
+	rewardParts := 0
+	for _, part := range parts {
+		if part.Reward != "" {
+			services.UpdateLuckyRewardRecord(&part)
+			rewardParts++
+		}
+	}
+	record.PartReward = rewardParts
+	record.RewardRatio = fmt.Sprint(len(flatRewards)*100/rewardParts) + "%"
+
+	services.UpdateLuckyActivity(record)
+
+	// todo 中奖结果通知
+}
+
+// 记录数据库
+// 判断抽奖是否达到结束条件
+func onLuckyTrigger(update *tgbotapi.Update, bot *tgbotapi.BotAPI, record *model.LuckyActivity) {
+	fromId := update.Message.From.ID
+	record.Participant += 1
+	if record.ReachParticipantUsers() {
+		record.Status = model.LuckyStatusEnd
+		go luckyOpenReward(bot, record)
+	}
+
+	go services.OnLuckyParticipate(record, fromId)
+}
+
+func MatchLuckyKeywords(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	if update.Message == nil {
+		return
+	}
+	text := update.Message.Text
+
+	changed := false
+	luckyLock.RLock()
+	for word, records := range luckyKeywords {
+		if strings.Contains(text, word) {
+			// trigger record
+			for _, record := range records {
+				onLuckyTrigger(update, bot, record)
+				if record.Status != model.LuckyStatusStart {
+					changed = true
+				}
+			}
+		}
+	}
+	luckyLock.RUnlock()
+
+	if changed {
+		luckyEndChan <- 1
+	}
+}
 
 // LuckyHandler 处理抽奖部分功能
 // func LuckyHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
@@ -127,9 +289,12 @@ func luckyIndex(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackPa
 			tgbotapi.NewInlineKeyboardButtonData("🧶设置抽奖", "luckysetting"),
 			tgbotapi.NewInlineKeyboardButtonData("🦀返回首页", "settings"),
 		))
-	// todo
+	//
+	total, opened, canceled := services.StatChatLuckyCount(param.chatId)
 	msg := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId,
-		"🎁【测试】抽奖\n\n发起抽奖次数：0    \n\n已开奖：0       未开奖：0       取消：0", inlineKeyboard)
+		fmt.Sprintf("🎁【测试】抽奖\n\n发起抽奖次数：%d    \n\n已开奖：%d       未开奖：%d       取消：%d",
+			total, opened, total-opened-canceled, canceled),
+		inlineKeyboard)
 
 	_, err := bot.Send(msg)
 	if err != nil {
@@ -594,6 +759,7 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 		PushChannel:  *data.Push,
 	}
 	services.CreateLucky(&item)
+	luckyCreated <- &item
 	// 2. push lucky info to chat group
 
 	notify := tgbotapi.NewMessage(sess.groupChatId, buildLuckyMarkdown(bot, sess.groupChatId, sess.userId, data))

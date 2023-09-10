@@ -31,8 +31,20 @@ func UpdateChatLuckySettings(item *model.LuckySetting) {
 	}
 }
 
-func GetAllLuckyActivities(chatId int64, offset, limit int) (items []*model.LuckyActivity) {
-	err := db.Where("chat_id = ?", chatId).Offset(offset).Limit(limit).Find(&items).Error
+// 获取所有正在进行的抽奖
+func GetAllLuckyActivities() (items []*model.LuckyActivity) {
+	err = db.Where("status = ?", model.LuckyStatusStart).Find(&items).Error
+	return
+}
+
+func GetChatGroupLuckyActivities(chatId int64, offset, limit int) (items []*model.LuckyActivity) {
+	var err error
+	if limit > 0 {
+		err = db.Where("chat_id = ?", chatId).Offset(offset).Limit(limit).Find(&items).Error
+	} else {
+		err = db.Where("chat_id = ?", chatId).Offset(offset).Find(&items).Error
+	}
+
 	if err != nil {
 		log.Err(err).Msg("find lucky activity failed")
 	}
@@ -65,4 +77,52 @@ func GetLuckyActivityCount(chatId int64) int64 {
 		logger.Err(err).Msg("count lucky activity failed")
 	}
 	return count
+}
+
+func StatChatLuckyCount(chatId int64) (total, opened, canceled int) {
+	var items []*model.LuckyActivity
+	err := db.Model(&model.LuckyActivity{}).Where("chat_id = ?", chatId).Find(&items).Error
+	if err != nil {
+		return 0, 0, 0
+	}
+
+	total = len(items)
+	for _, item := range items {
+		if item.Status == model.LuckyStatusEnd {
+			opened++
+		} else if item.Status == model.LuckyStatusCancel {
+			canceled++
+		}
+	}
+	return
+}
+
+func OnLuckyParticipate(record *model.LuckyActivity, fromId int64) {
+	item := model.LuckyRecord{
+		LuckyId: int64(record.ID),
+		ChatId:  record.ChatId,
+		UserId:  fromId,
+	}
+	if err := db.Save(&item).Error; err != nil {
+		logger.Err(err).Msg("save lucky participate record failed")
+	}
+	if err := db.Save(record).Error; err != nil {
+		logger.Err(err).Msg("update lucky activity failed")
+	}
+}
+
+func GetLuckyAllParticipates(record *model.LuckyActivity) []model.LuckyRecord {
+	var parts []model.LuckyRecord
+
+	if err := db.Where("lucky_id = ?", record.ID).Find(&parts).Error; err != nil {
+		logger.Err(err).Msg("gete participates failed")
+	}
+
+	return parts
+}
+
+func UpdateLuckyRewardRecord(record *model.LuckyRecord) {
+	if err := db.Save(record).Error; err != nil {
+		logger.Err(err).Msg("update lucky reward failed")
+	}
 }
