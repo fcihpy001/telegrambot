@@ -135,7 +135,7 @@ func FloodIntervalResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 func FloodMsgCountResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	count, err := strconv.Atoi(update.Message.Text)
 
-	floodSetting.MsgCount = count
+	floodSetting.MsgCount = int64(count)
 	content := "添加完成"
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
@@ -205,4 +205,26 @@ func updateFloodMsg() string {
 	content = content + status_msg + setting_msg + punish_msg + delete_msg
 	services.SaveModel(&floodSetting, floodSetting.ChatId)
 	return content
+}
+
+func FloodCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
+	chatId := update.Message.Chat.ID
+	userId := update.Message.From.ID
+	setting := model.FloodSetting{}
+	err := services.GetModelData(chatId, &setting)
+	if err != nil {
+		log.Println(err)
+	}
+	//统计时间段内,用户发送消息条数排行榜，如果用户发送消息条数超过设置的条数，就触发反刷屏规则
+
+	if !setting.Enable {
+		return false
+	}
+
+	count := services.MessageCountPeriod(chatId, userId, int64(setting.Interval))
+	if count >= setting.MsgCount {
+		utils.SendText(chatId, fmt.Sprintf("@%s 您在 %d 秒内发送了 %d 条消息，已触发反刷屏规则，将被禁言 %d 分钟", update.Message.From.FirstName, setting.Interval, count, setting.Punishment.BanTime), bot)
+		return true
+	}
+	return false
 }

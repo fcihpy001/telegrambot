@@ -288,37 +288,40 @@ func updatePunishSettingMsg() string {
 	}
 
 	content = content + actionMsg
-	services.SaveProhibitSettings(&prohibitedSetting)
+	services.SaveModel(&prohibitedSetting, prohibitedSetting.ChatId)
 	return content
 }
 
 // 过滤违禁词
-func HandlerProhibited(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func ProhibitedCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 	messageText := update.Message.Text
+	chatId := update.Message.Chat.ID
 	//获取数据库中的违禁词列表
-	_ = services.GetModelData(utils.GroupInfo.GroupId, &prohibitedSetting)
+	prohibitedSetting = services.GetProhibitSettings(chatId)
+	if prohibitedSetting.Enable == false {
+		return false
+	}
 	var content string
 	if strings.Contains(prohibitedSetting.World, messageText) {
 
-		//获取用户的违禁词惩罚设置
 		//如果是警告，就警告一次，并增加警告次数
 		if prohibitedSetting.Punish == model.PunishTypeWarning {
 			//获取用户的警告次数
 			record := model.PunishRecord{}
-			where := fmt.Sprintf("chat_id = %d and user_id = %d", utils.GroupInfo.GroupId, update.Message.From.ID)
+			where := fmt.Sprintf("chat_id = %d and user_id = %d", chatId, update.Message.From.ID)
 			_ = services.GetModelWhere(where, &record)
 			r := &model.PunishRecord{
-				ChatId:       utils.GroupInfo.GroupId,
+				ChatId:       chatId,
 				UserId:       update.Message.From.ID,
-				Reason:       "违禁词,被警告一次",
+				Reason:       "prohibited",
 				Punish:       model.PunishTypeWarning,
 				WarningCount: record.WarningCount + 1,
 			}
 			//记录入库
-			services.SaveModel(r, utils.GroupInfo.GroupId)
+			services.SaveModel(r, chatId)
 			//	发送一条系统消息
-			content = fmt.Sprintf("%s触犯了违禁词，被敬告一次", update.Message.From.FirstName)
-
+			content = fmt.Sprintf("%s触犯了违禁词，被警告%d次", update.Message.From.FirstName, record.WarningCount+1)
+			return true
 		} else if prohibitedSetting.Punish == model.PunishTypeKick {
 			//	执行踢出操作
 			//	tgbotapi.BanChatMemberConfig{
@@ -331,10 +334,13 @@ func HandlerProhibited(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 			//	发送一条系统消息
 			content = fmt.Sprintf("%s触犯了违禁词，被踢出群组", update.Message.From.FirstName)
-
+			return true
+		} else {
+			//	只发个提示消息
+			utils.SendText(update.Message.Chat.ID, "您发送的消息包含违禁词，请注意言行", bot)
+			return true
 		}
-
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
-		bot.Send(msg)
+		utils.SendText(update.Message.Chat.ID, content, bot)
 	}
+	return false
 }

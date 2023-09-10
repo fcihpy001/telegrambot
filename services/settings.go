@@ -92,27 +92,9 @@ func GetReplySettings(chatId int64) model.ReplySetting {
 	return setting
 }
 
-func SaveProhibitSettings(model *model.ProhibitedSetting) {
-	if model.ChatId < 1 {
-		return
-	}
-	//更新或者创建
-	if GetProhibitSettings(model.ChatId).ChatId > 0 {
-		err := db.Save(model)
-		if err != nil {
-			log.Println("update Prohibit settings failed", err)
-		}
-	} else {
-		err := db.Create(model)
-		if err != nil {
-			log.Println("create Prohibit settings failed", err)
-		}
-	}
-}
-
 func GetProhibitSettings(chatId int64) model.ProhibitedSetting {
 	var setting model.ProhibitedSetting
-	err := db.Where("chat_id = ?", chatId).First(&setting).Error
+	err := db.Model(&model.ProhibitedSetting{}).Preload("Punishment").Where("chat_id = ?", chatId).First(&setting).Error
 	if err != nil {
 		log.Println("get Prohibit settings failed")
 	}
@@ -124,11 +106,28 @@ func SaveModel(model interface{}, chatId int64) {
 		fmt.Println("不符合存储条件")
 		return
 	}
+
 	err := db.Save(model)
 	if err.Error != nil {
 		log.Println("update or insert model data failed", err)
 	}
 }
+
+//func SaveGroupInfo(model *model.GroupInfo) {
+//	if model.GroupId == 0 {
+//		fmt.Println("不符合存储条件")
+//		return
+//	}
+//
+//	err := db.Save(model)
+//	if err.Error != nil {
+//		log.Println("update or insert model data failed", err)
+//	}
+//}
+//
+//func GetGroupInfo() {
+//
+//}
 
 func GetModelData(chatId int64, model interface{}) error {
 
@@ -174,9 +173,9 @@ func DeleteInviteData() error {
 	return err
 }
 
-func GetAllGroups() ([]model.GroupInfo, error) {
+func GetAllGroups(where string) ([]model.GroupInfo, error) {
 	var items []model.GroupInfo
-	err := db.Find(&items).Error
+	err := db.Where(where).Find(&items).Error
 	return items, err
 }
 
@@ -184,7 +183,7 @@ func GetModelWhere(where string, model interface{}) error {
 
 	err := db.Where(where).First(&model)
 	if err.Error != nil {
-		log.Println("get Prohibit settings failed")
+		log.Println("get model failed")
 		return err.Error
 	}
 	return nil

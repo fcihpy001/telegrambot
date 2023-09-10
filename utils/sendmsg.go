@@ -10,7 +10,10 @@ import (
 
 func SendText(chatId int64, text string, bot *tgbotapi.BotAPI) {
 	msg := tgbotapi.NewMessage(chatId, text)
-	bot.Send(msg)
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func SendMessage(bot *tgbotapi.BotAPI, c tgbotapi.Chattable, fmt string, args ...interface{}) {

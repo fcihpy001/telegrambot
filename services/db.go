@@ -135,6 +135,15 @@ func createTable() {
 	if err := db.AutoMigrate(&model.LuckyRecord{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
+	if err := db.AutoMigrate(&model.InviteRecord{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.PunishRecord{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.Message{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 	log.Println("数据表创建成功...")
 }
 

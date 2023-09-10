@@ -314,12 +314,17 @@ func updateReplySettingMsg() string {
 }
 
 // 回复逻辑处理
-func HandlerAutoReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func HandlerAutoReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
+	//读取配置状态
+	replySetting, _ = services.GetReplySetting(utils.GroupInfo.GroupId)
+	if replySetting.Enable == false {
+		return false
+	}
+
 	// 获取用户发送的消息文本
 	messageText := update.Message.Text
 
 	//从数据库中取取出所有的自动回复词库
-
 	relyList, err := services.GetAllReply(utils.GroupInfo.GroupId)
 	if err != nil {
 		log.Println(err)
@@ -333,7 +338,7 @@ func HandlerAutoReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 				if err != nil {
 					log.Println(err)
 				}
-				return
+				return true
 			}
 		} else {
 			if strings.Contains(messageText, v.KeyWorld) {
@@ -342,10 +347,11 @@ func HandlerAutoReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 				if err != nil {
 					log.Println(err)
 				}
-				return
+				return true
 			}
 		}
 	}
+	return false
 }
 
 func updateSelectInfo() {

@@ -110,22 +110,30 @@ type WelcomeSetting struct {
 
 type InviteSetting struct {
 	gorm.Model
-	ChatId            int64 `gorm:"index:uniqueIndex; primaryKey"`
-	Uid               int64
-	Enable            bool
-	AutoGenerate      bool
-	Notify            bool
-	LinkExpireTime    string
-	InviteLinkLimit   int
-	InvitePeopleLimit int
-	InviteCount       int
+	ChatId          int64 `gorm:"index:uniqueIndex; primaryKey"`
+	Uid             int64
+	Enable          bool
+	AutoGenerate    bool
+	Notify          bool
+	ExpireDate      string
+	InviteLinkLimit int
+	MemberLimit     int
+	InviteCount     int
 }
 
-type Invite struct {
+type InviteRecord struct {
 	gorm.Model
-	Uid         int64 `gorm:"index:uniqueIndex"`
-	InviteLink  string
-	InviteCount int
+	Uid                int64 `gorm:"uniqueIndex:user_chat_idx"`
+	ChatId             int64 `gorm:"uniqueIndex:user_chat_idx"`
+	ChatName           string
+	ChatType           string
+	InviteLink         string
+	InviteUserId       int64
+	LinkName           string
+	InviteCount        int
+	ExpireDate         int
+	MemberLimit        int
+	CreatesJoinRequest bool
 }
 
 type ReplySetting struct {
@@ -308,7 +316,7 @@ type FloodSetting struct {
 	ChatId     int64 `gorm:"uniqueIndex"`
 	Uid        int64
 	Enable     bool
-	MsgCount   int
+	MsgCount   int64
 	Interval   int
 	DeleteMsg  bool
 	Punishment Punishment
@@ -383,11 +391,20 @@ type SelectInfo struct {
 
 type GroupInfo struct {
 	gorm.Model
-	GroupId    int64 `gorm:"uniqueIndex; primaryKey"`
+	GroupId    int64 `gorm:";uniqueIndex"`
 	GroupName  string
 	GroupType  string
 	Uid        int64
 	Permission string
+}
+
+// 消息信息
+type Message struct {
+	gorm.Model
+	ChatId    int64
+	UserId    int64
+	MessageId int64
+	Timestamp int
 }
 
 // 抽奖总体设置

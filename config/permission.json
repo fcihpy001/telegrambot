@@ -21,7 +21,7 @@
   },
   {
     "text": "仅群主",
-    "data": "permission_type:owner&4",
+    "data": "permission_type:creator&4",
     "btn_type": "data"
   },
   {

@@ -10,6 +10,7 @@ import (
 )
 
 func Settings(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+
 	var (
 		chatId   int64
 		chatType string
@@ -39,7 +40,6 @@ func Settings(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 			row = []model.ButtonInfo{btn}
 			rows = append(rows, row)
 			continue
-
 		}
 
 		row = append(row, buttons[i-1])

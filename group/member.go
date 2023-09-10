@@ -17,9 +17,10 @@ func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 		//读取库里的欢迎语
 		welcomeSetting := model.WelcomeSetting{}
 		err := services.GetModelData(message.Chat.ID, &welcomeSetting)
+
 		if err != nil {
 			logger.Err(err)
-			continue
+			welcomeSetting.WelcomeText = "👋 🤚 🖐 ✋欢迎 %s 加入 %s"
 		}
 		content := fmt.Sprintf(welcomeSetting.WelcomeText, user.FirstName, message.Chat.Title)
 

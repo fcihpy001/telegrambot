@@ -35,7 +35,7 @@ func UserCheckHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	} else if cmd == "user_check_black_list" {
 		blackUserList(update, bot)
 
-	} else if cmd == "ser_check_black_add" {
+	} else if cmd == "user_check_black_add" {
 		blackUserAdd(update, bot)
 
 	}
@@ -54,6 +54,7 @@ func userCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		var row []model.ButtonInfo
 		for j := 0; j < len(btnArray); j++ {
 			btn := btnArray[j]
+			updateUserCheckButtonStatus(&btn)
 			row = append(row, btn)
 		}
 		rows = append(rows, row)
@@ -138,8 +139,7 @@ func subScribeCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 // 黑名单用户处理
 func blackUserList(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	words := strings.Split(userCheckSetting.BlackUserList, "&")
-	fmt.Println("black user", words)
-	fmt.Println("black user count", len(words))
+
 	count := len(words)
 	if len(words) == 1 && words[0] == "" {
 		count = 0
@@ -150,11 +150,17 @@ func blackUserList(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 
 	btn1 := model.ButtonInfo{
-		Text:    "返回",
-		Data:    "go_user_check_setting",
+		Text:    "➕添加黑名单",
+		Data:    "user_check_black_add",
 		BtnType: model.BtnTypeData,
 	}
-	row1 := []model.ButtonInfo{btn1}
+
+	btn2 := model.ButtonInfo{
+		Text:    "返回",
+		Data:    "user_check_menu",
+		BtnType: model.BtnTypeData,
+	}
+	row1 := []model.ButtonInfo{btn1, btn2}
 	rows := [][]model.ButtonInfo{row1}
 	keyboard := utils.MakeKeyboard(rows)
 
@@ -196,12 +202,12 @@ func BlackUserAddResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "go_user_check_setting",
+		Data:    "user_check_menu",
 		BtnType: model.BtnTypeData,
 	}
 	btn2 := model.ButtonInfo{
 		Text:    "继续添加",
-		Data:    "black_user_add",
+		Data:    "user_check_black_add",
 		BtnType: model.BtnTypeData,
 	}
 	row1 := []model.ButtonInfo{btn1, btn2}
@@ -235,14 +241,58 @@ func updateUserSettingMsg() string {
 	return content
 }
 
-//func UserCheckSetting(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-//	content := updateUserSettingMsg()
-//	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.UserCheckMenuMarkup)
-//	bot.Send(msg)
-//}
-//
-//func GoUserPunishSetting(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-//	content := updateUserSettingMsg()
-//	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.UserCheckMenuMarkup)
-//	bot.Send(msg)
-//}
+func updateUserCheckButtonStatus(btn *model.ButtonInfo) {
+	if btn.Data == "user_check_name" && userCheckSetting.NameCheck {
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "user_check_username" && userCheckSetting.UserNameCheck {
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "user_check_icon" && userCheckSetting.IconCheck {
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "user_check_subscribe" && userCheckSetting.SubScribe {
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "user_check_name" && !userCheckSetting.NameCheck {
+		btn.Text = "❌" + btn.Text
+	} else if btn.Data == "user_check_username" && !userCheckSetting.UserNameCheck {
+		btn.Text = "❌" + btn.Text
+	} else if btn.Data == "user_check_icon" && !userCheckSetting.IconCheck {
+		btn.Text = "❌" + btn.Text
+	} else if btn.Data == "user_check_subscribe" && !userCheckSetting.SubScribe {
+		btn.Text = "❌" + btn.Text
+	}
+}
+
+func UserValidateCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
+	chatId := update.Message.Chat.ID
+	setting := model.UserCheck{}
+	_ = services.GetModelData(chatId, &setting)
+
+	if setting.UserNameCheck && update.Message.From.UserName == "" {
+		content := fmt.Sprintf("@%s 🚫请设置用户名", update.Message.From.FirstName)
+		utils.SendText(update.Message.Chat.ID, content, bot)
+		return true
+	}
+	if setting.NameCheck && update.Message.From.LastName == "" {
+		content := fmt.Sprintf("@%s 🚫请设置名字", update.Message.From.FirstName)
+		utils.SendText(update.Message.Chat.ID, content, bot)
+		return true
+	}
+	//获取头像信息
+	profile, _ := bot.GetUserProfilePhotos(tgbotapi.UserProfilePhotosConfig{
+		UserID: update.Message.From.ID,
+		Limit:  5,
+		Offset: 0,
+	})
+	if setting.IconCheck && profile.TotalCount < 1 {
+		content := fmt.Sprintf("🚫@%s 请设置头像", update.Message.From.FirstName)
+		utils.SendText(update.Message.Chat.ID, content, bot)
+		return true
+	}
+
+	// 检查是否在黑名单中
+	if len(setting.BlackUserList) > 0 && strings.Contains(setting.BlackUserList, update.Message.From.UserName) {
+		content := fmt.Sprintf("🚫@%s 你是黑名单用户，已被禁言", update.Message.From.FirstName)
+		utils.SendText(update.Message.Chat.ID, content, bot)
+		return true
+	}
+	return false
+}

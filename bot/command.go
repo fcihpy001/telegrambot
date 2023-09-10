@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
@@ -26,7 +27,7 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 		if len(args) > 0 {
 			//根据参数获取群组信息
 			groupId, _ := strconv.Atoi(args)
-			where := fmt.Sprintf("group_id = %d", groupId)
+			where := fmt.Sprintf("group_id = %d and uid = %d", groupId, update.Message.From.ID)
 			_ = services.GetModelWhere(where, &utils.GroupInfo)
 
 			//开始页面跳转
@@ -43,7 +44,16 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 		setting.Help(update.Message.Chat.ID, bot.bot)
 
 	case "start":
-		setting.StartHandler(&update, bot.bot)
+		//判断是否是私聊
+		if update.Message.Chat.Type == "private" {
+			setting.StartHandler(&update, bot.bot)
+		} else {
+			//如果是管理员	弹出管理菜单
+			member, _ := getMemberInfo(update.Message.Chat.ID, update.Message.From.ID, bot.bot)
+			if member.IsAdministrator() || member.IsCreator() {
+				managerHandler(&update, bot.bot)
+			}
+		}
 
 	case "setting":
 		// 这里如果有参数, 进入对应的处理逻辑; 否则展示管理界面
@@ -66,7 +76,10 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 
 	case "filters":
 
-	case "stat", "stats", "statistic", "stat_week", "mute", "unmute", "ban", "unban", "admin", "kick", "invite", "link":
+	case "link":
+		setting.GetInviteLink(&update, bot.bot)
+
+	case "stat", "stats", "statistic", "stat_week", "mute", "unmute", "ban", "unban", "admin", "kick", "invite":
 		group.GroupHandlerCommand(&update, bot.bot)
 
 	case "mention":
@@ -76,6 +89,8 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 		managerHandler(&update, bot.bot)
 
 	case "test":
+		//setting.ScheduleMessage(&update, bot.bot)
+		testapp(bot.bot, "https://python-telegram-bot.org/static/webappbot", "点击这里了解信息", update.Message.Chat.ID, "这是个好东西")
 
 	default:
 		fmt.Println("i dont't know this command")
@@ -84,16 +99,21 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 }
 
 func managerHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+
 	info := model.GroupInfo{
 		GroupId:   update.Message.Chat.ID,
+		Uid:       update.Message.From.ID,
 		GroupName: update.Message.Chat.Title,
 		GroupType: update.Message.Chat.Type,
 	}
+	//保存到数据库
 	services.SaveModel(&info, info.GroupId)
+	//更新本地变量
+	utils.GroupInfo = info
 
-	content := "欢迎使用@smart_vbot：\n1)点击下面按钮选择设置(仅限管理员)\n2)点击机器人对话框底部【开始】按钮\n\n🟩 功能更新提醒：在机器人私聊中发送 /start 也可打开管理菜单"
+	content := fmt.Sprintf("欢迎使用 @%s：\n1)点击下面按钮选择设置(仅限管理员)\n2)点击机器人对话框底部【开始】按钮\n\n🟩 功能更新提醒：在机器人私聊中发送 /start 也可打开管理菜单\n", bot.Self.UserName)
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
-	url := fmt.Sprintf("https://t.me/%s?start=%d", bot.Self.UserName, update.Message.Chat.ID)
+	url := fmt.Sprintf("https://t.me/%s?start=%d", bot.Self.UserName, utils.GroupInfo.GroupId)
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonURL("👉⚙️进入管理菜单👈", url),
@@ -112,4 +132,33 @@ func getMemberInfo(chat_id int64, user_id int64, bot *tgbotapi.BotAPI) (tgbotapi
 		},
 	}
 	return bot.GetChatMember(req)
+}
+
+func testapp(bot *tgbotapi.BotAPI, url string, buttonTitle string, receiver int64, desc string) {
+	data := make(map[string]interface{})
+	data["inline_keyboard"] = [][]interface{}{
+		{
+			map[string]interface{}{
+				"text": buttonTitle,
+				"web_app": map[string]string{
+					"url": url,
+				},
+			},
+		},
+	}
+	payload, _ := json.Marshal(data)
+
+	params := map[string]string{
+		"chat_id":      fmt.Sprint(receiver),
+		"text":         desc,
+		"reply_markup": string(payload), //
+	}
+
+	resp, err := bot.MakeRequest("sendMessage", params)
+	if err != nil {
+		log.Println(err)
+	}
+	buf, _ := json.MarshalIndent(resp, "", "  ")
+	fmt.Println(string(buf))
+	tgbotapi.NewMessage(receiver, "ok")
 }
