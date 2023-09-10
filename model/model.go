@@ -420,6 +420,7 @@ type LuckyActivity struct {
 	UserId       int64
 	LuckyName    string
 	Creator      string
+	Keyword      string
 	LuckyType    string `gorm:"type:varchar(20)"`
 	LuckySubType string `gorm:"type:varchar(20)"`
 	LuckyCond    string // 配置信息 json

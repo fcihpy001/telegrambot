@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"telegramBot/model"
 	"telegramBot/services"
@@ -38,23 +37,23 @@ const (
 // 	}
 // }
 
-func (mgr *GroupManager) luckyActivity(update *tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "🎁【测试】抽奖\n\n发起抽奖次数：0    \n\n已开奖：0       未开奖：0       取消：0")
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("📎发起抽奖活动", "lucky_create"),
-			tgbotapi.NewInlineKeyboardButtonData("📪查看抽奖记录", "lucky_record"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🧶设置抽奖", "lucky_setting"),
-			tgbotapi.NewInlineKeyboardButtonData("🦀返回首页", "settings"),
-		))
-	msg.ReplyMarkup = inlineKeyboard
-	_, err := mgr.bot.Send(msg)
-	if err != nil {
-		log.Println(err)
-	}
-}
+// func (mgr *GroupManager) luckyActivity(update *tgbotapi.Update) {
+// 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "🎁【测试】抽奖\n\n发起抽奖次数：0    \n\n已开奖：0       未开奖：0       取消：0")
+// 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+// 		tgbotapi.NewInlineKeyboardRow(
+// 			tgbotapi.NewInlineKeyboardButtonData("📎发起抽奖活动", "lucky_create"),
+// 			tgbotapi.NewInlineKeyboardButtonData("📪查看抽奖记录", "lucky_record"),
+// 		),
+// 		tgbotapi.NewInlineKeyboardRow(
+// 			tgbotapi.NewInlineKeyboardButtonData("🧶设置抽奖", "lucky_setting"),
+// 			tgbotapi.NewInlineKeyboardButtonData("🦀返回首页", "settings"),
+// 		))
+// 	msg.ReplyMarkup = inlineKeyboard
+// 	_, err := mgr.bot.Send(msg)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// }
 
 func luckyRecords(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
 	println("luckyRecords")
@@ -206,6 +205,29 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 	default:
 		logger.Error().Msgf("not implement lucky type: %v", typ)
 	}
+	return nil
+}
+
+func luckyCancel(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	println("luckyRecords")
+	cb := update.CallbackQuery
+	chat := cb.Message.Chat
+	chatId := chat.ID
+	sidx := param.param.Get("idx")
+	idx := getIntParam(&param.param, "idx")
+	if idx < 0 {
+		//
+		logger.Info().Msg("no prev luck record")
+		return nil
+	}
+	record := services.GetLuckyActivity(chatId, int(idx))
+	if record.Status != model.LuckyStatusStart {
+		logger.Warn().Str("status", record.Status).Str("idx", sidx).Msg("cannot cancel")
+		return nil
+	}
+	record.Status = model.LuckyStatusCancel
+	services.UpdateLuckyActivity(record)
+	luckyRecords(update, bot, param)
 	return nil
 }
 
@@ -371,6 +393,7 @@ func buildRewardInfo(data *model.LuckyGeneral) string {
 	content := fmt.Sprintf("%s\n├开奖时间：%s\n├参与关键词：%s\n├奖品列表：\n",
 		data.Name,
 		yyyymmddhhmmss(data.StartTime),
+		data.Keyword,
 	)
 	for _, reward := range data.Rewards {
 		if reward.Shares > 0 {
@@ -561,6 +584,7 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 		LuckyName:    data.Name,
 		LuckyType:    model.LuckyTypeGeneral,
 		LuckySubType: data.SubType,
+		Keyword:      data.Keyword,
 		LuckyCond:    string(cond),
 		TotalReward:  "{}",
 		Status:       model.LuckyStatusStart,
@@ -619,14 +643,36 @@ func buildLuckyRecord(record *model.LuckyActivity) string {
 	content := record.LuckyName + "\n"
 	switch record.LuckyType {
 	case model.LuckyTypeGeneral:
-		content += fmt.Sprintf("├满人开奖  (%d人)\n")
-		content += fmt.Sprintf("├参与关键词:  %s\n")
-		content += fmt.Sprintf("├推送至频道:  %s\n")
-		content += fmt.Sprintf("├奖品列表：\n")
+		var (
+			cond    map[string]interface{}
+			rewards []model.LuckyReward
+		)
+		json.Unmarshal([]byte(record.LuckyCond), &cond)
+		json.Unmarshal([]byte(record.RewardDetail), &rewards)
+		content += fmt.Sprintf("├满人开奖  (%d人)\n", cond["users"].(int))
+		content += fmt.Sprintf("├参与关键词:  %s\n", record.Keyword)
+		content += fmt.Sprintf("├推送至频道:  %s\n", "❌")
+		content += "├奖品列表：\n"
+		for _, reward := range rewards {
+			content += fmt.Sprintf("├       %s    x %d份\n", reward.Name, reward.Shares)
+		}
 	}
 
 	content += fmt.Sprintf("\n创建者：%s\n", mentionUser(record.Creator, record.UserId))
 	content += fmt.Sprintf("创建时间：%s\n", yyyymmddhhmmss(record.StartTime))
-	content += fmt.Sprintf("状态: %s 已参与: %d人\n\n", record.Status, record.Participant)
+	content += fmt.Sprintf("状态: %s 已参与: %d人\n\n", luckyStatus(record.Status), record.Participant)
 	return content
+}
+
+func luckyStatus(status string) string {
+	switch status {
+	case model.LuckyStatusStart:
+		return "进行中✅"
+	case model.LuckyStatusCancel:
+		return "已取消❌"
+	case model.LuckyStatusEnd:
+		return "已开奖 ⭕️"
+	}
+
+	return status
 }

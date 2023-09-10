@@ -52,6 +52,12 @@ func GetLuckyActivity(chatId int64, offset int) (item *model.LuckyActivity) {
 	return
 }
 
+func UpdateLuckyActivity(record *model.LuckyActivity) {
+	if err := db.Save(record).Error; err != nil {
+		logger.Err(err).Msg("update lucky activity failed")
+	}
+}
+
 func GetLuckyActivityCount(chatId int64) int64 {
 	var count int64
 	err := db.Model(&model.LuckyActivity{}).Where("chat_id = ?", chatId).Count(&count).Error
