@@ -53,25 +53,14 @@ func GroupHandlerCommand(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	query := strings.ToLower(update.Message.Command())
 	switch query {
-	case "invite":
-		//mgr.inviteLink(update)
-	case "stats":
-		mgr.StatsMemberMessages(update)
+
 	case "stat_week":
 
 	case "stat":
 		mgr.StatsMemberMessages(update)
-	case "mute":
-		mgr.UnMute(update)
-	case "unmute":
-		mgr.UnMute(update)
-	case "ban":
-		mgr.ban(update)
-	case "unban":
-		mgr.unBan(update)
+
 	case "admin":
 		mgr.checkAdmin(update)
-	case "kick":
 
 	default:
 		fmt.Println("unknown command")

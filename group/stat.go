@@ -122,6 +122,9 @@ func (mgr *GroupManager) StatsMemberMessages(update *tgbotapi.Update) {
 		return
 	}
 	res := fmtUserRating(1, result.Data)
+	if len(res) == 0 {
+		res = "暂无数据"
+	}
 	mgr.sendText(chat.ID, res)
 }
 

@@ -6,7 +6,6 @@ import (
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/setting"
-	"telegramBot/utils"
 )
 
 // 处理普通消息
@@ -36,9 +35,6 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 	if setting.HandlerAutoReply(update, bot.bot) {
 		return
 	}
-
-	reply := "感谢您的消息，我还在进修闭关中。。。"
-	utils.SendText(update.Message.Chat.ID, reply, bot.bot)
 
 	// 保存消息
 	message := model.Message{

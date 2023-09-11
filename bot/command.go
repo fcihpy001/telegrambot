@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"telegramBot/group"
-	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/setting"
 	"telegramBot/utils"
@@ -51,7 +50,7 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 			//如果是管理员	弹出管理菜单
 			member, _ := getMemberInfo(update.Message.Chat.ID, update.Message.From.ID, bot.bot)
 			if member.IsAdministrator() || member.IsCreator() {
-				managerHandler(&update, bot.bot)
+				setting.ManagerMenu(&update, bot.bot)
 			}
 		}
 
@@ -79,14 +78,17 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	case "link":
 		setting.GetInviteLink(&update, bot.bot)
 
-	case "stat", "stats", "statistic", "stat_week", "mute", "unmute", "ban", "unban", "admin", "kick", "invite":
+	case "stat", "stats", "statistic", "stat_week", "admin", "invite":
 		group.GroupHandlerCommand(&update, bot.bot)
 
 	case "mention":
 		group.SendTestMentioned(bot.bot, &update)
 
 	case "manager":
-		managerHandler(&update, bot.bot)
+		setting.ManagerMenu(&update, bot.bot)
+
+	case "ban", "kick", "unmute", "mute", "unban":
+		setting.OperationHandler(&update, bot.bot)
 
 	case "test":
 		//setting.ScheduleMessage(&update, bot.bot)
@@ -95,32 +97,6 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	default:
 		fmt.Println("i dont't know this command")
 		return
-	}
-}
-
-func managerHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-
-	info := model.GroupInfo{
-		GroupId:   update.Message.Chat.ID,
-		Uid:       update.Message.From.ID,
-		GroupName: update.Message.Chat.Title,
-		GroupType: update.Message.Chat.Type,
-	}
-	//保存到数据库
-	services.SaveModel(&info, info.GroupId)
-	//更新本地变量
-	utils.GroupInfo = info
-
-	content := fmt.Sprintf("欢迎使用 @%s：\n1)点击下面按钮选择设置(仅限管理员)\n2)点击机器人对话框底部【开始】按钮\n\n🟩 功能更新提醒：在机器人私聊中发送 /start 也可打开管理菜单\n", bot.Self.UserName)
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
-	url := fmt.Sprintf("https://t.me/%s?start=%d", bot.Self.UserName, utils.GroupInfo.GroupId)
-	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonURL("👉⚙️进入管理菜单👈", url),
-		))
-	_, err := bot.Send(msg)
-	if err != nil {
-		log.Println(err)
 	}
 }
 

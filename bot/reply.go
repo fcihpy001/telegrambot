@@ -13,7 +13,7 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 	if strings.Contains(replyMsg, "输入添加的违禁词（一行一个") {
 		setting.ProhibitedAddResult(update, bot.bot)
 
-	} else if strings.Contains(replyMsg, "请输入新群员限制时间") {
+	} else if strings.Contains(replyMsg, "请输入新群员限制时间（分钟，例如：3）") {
 		setting.MemberCheckTimeResult(update, bot.bot)
 
 	} else if strings.Contains(replyMsg, "请输入要禁止的名字（一行一个") {
@@ -66,5 +66,9 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 
 	} else if strings.Contains(replyMsg, "请回复生成链接数量上限(不限制请输入：0)") {
 		setting.InviteLinkLimitResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "请输入要kick的用户") {
+		//setting.KickUserHandler(update, bot.bot)
+
 	}
 }

@@ -3,6 +3,7 @@ package setting
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log"
 	"strconv"
 	"strings"
 	"telegramBot/model"
@@ -106,5 +107,31 @@ func updatePermissionButtonStatus(btn *model.ButtonInfo) {
 		permission_selectInfo.Text = btn.Text
 		permission_selectInfo.Row = 4
 		permission_selectInfo.Column = 0
+	}
+}
+
+func ManagerMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+
+	info := model.GroupInfo{
+		GroupId:   update.Message.Chat.ID,
+		Uid:       update.Message.From.ID,
+		GroupName: update.Message.Chat.Title,
+		GroupType: update.Message.Chat.Type,
+	}
+	//保存到数据库
+	services.SaveModel(&info, info.GroupId)
+	//更新本地变量
+	utils.GroupInfo = info
+
+	content := fmt.Sprintf("欢迎使用 @%s：\n1)点击下面按钮选择设置(仅限管理员)\n2)点击机器人对话框底部【开始】按钮\n\n🟩 功能更新提醒：在机器人私聊中发送 /start 也可打开管理菜单\n", bot.Self.UserName)
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
+	url := fmt.Sprintf("https://t.me/%s?start=%d", bot.Self.UserName, utils.GroupInfo.GroupId)
+	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("👉⚙️进入管理菜单👈", url),
+		))
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Println(err)
 	}
 }

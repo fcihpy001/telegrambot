@@ -44,16 +44,15 @@ func memberCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		btnArr := buttons[i]
 		var row []model.ButtonInfo
 		for j := 0; j < len(btnArr); j++ {
+			btn := btnArr[j]
+			if btn.Text == "启用" && memberCheck.Enable {
+				btn.Text = "✅启用"
+			} else if btn.Text == "关闭" && !memberCheck.Enable {
+				btn.Text = "✅关闭"
+			}
 			row = append(row, btnArr[j])
 		}
 		rows = append(rows, row)
-	}
-	if memberCheck.Enable {
-		rows[0][1].Text = "✅启用"
-		rows[0][2].Text = "关闭"
-	} else {
-		rows[0][1].Text = "启用"
-		rows[0][2].Text = "✅关闭"
 	}
 	keyboard := utils.MakeKeyboard(rows)
 	utils.MemberCheckMarkup = keyboard
@@ -90,16 +89,17 @@ func memberCheckTimeMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if memberCheck.DelayTime < 61 {
 		time = fmt.Sprintf("%d秒", memberCheck.DelayTime)
 	} else if memberCheck.DelayTime > 60 {
+
 		time = fmt.Sprintf("%d分钟", memberCheck.DelayTime/60)
 	}
 	content := fmt.Sprintf("👤 新群员限制\n\n当前设置：%s\n👉 请输入新群员限制时间（秒，例如：600）：", time)
 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, content)
-	keybord := tgbotapi.NewReplyKeyboard(
+	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("返回"),
 		))
 
-	msg.ReplyMarkup = keybord
+	msg.ReplyMarkup = keyboard
 	msg.ReplyMarkup = tgbotapi.ForceReply{
 		ForceReply: true,
 	}
@@ -112,7 +112,7 @@ func isNumeric(str string) bool {
 }
 
 func MemberCheckTimeResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	content := "⚠️ 仅支持数字，请重新输入\n\n👉 请输入新群员限制时间（秒，例如：600）："
+	content := "⚠️ 仅支持数字，请重新输入\n\n👉 请输入新群员限制时间（分钟，例如：3）："
 	if !isNumeric(update.Message.Text) {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
 		bot.Send(msg)
@@ -144,13 +144,9 @@ func updateMemberSettingMsg() string {
 	if memberCheck.Enable {
 		enableMsg = "✅限制发消息：\n"
 	}
-	time := ""
-	if memberCheck.DelayTime < 61 {
-		time = fmt.Sprintf("%d秒", memberCheck.DelayTime)
-	} else if memberCheck.DelayTime > 60 {
-		time = fmt.Sprintf("%d分钟", memberCheck.DelayTime/60)
-	}
-	limitTime := fmt.Sprintf("└ 新群员进群在设置时间 %s 内，不能发送消息", time)
+	time := fmt.Sprintf("%d分钟", memberCheck.DelayTime/60)
+
+	limitTime := fmt.Sprintf("└ 新群员进群在设置时间%s内，不能发送消息", time)
 
 	content = content + enableMsg + limitTime
 
