@@ -97,11 +97,12 @@ func StatChatLuckyCount(chatId int64) (total, opened, canceled int) {
 	return
 }
 
-func OnLuckyParticipate(record *model.LuckyActivity, fromId int64) {
+func OnLuckyParticipate(record *model.LuckyActivity, fromId int64, username string) {
 	item := model.LuckyRecord{
-		LuckyId: int64(record.ID),
-		ChatId:  record.ChatId,
-		UserId:  fromId,
+		LuckyId:  int64(record.ID),
+		ChatId:   record.ChatId,
+		UserId:   fromId,
+		Username: username,
 	}
 	if err := db.Save(&item).Error; err != nil {
 		logger.Err(err).Msg("save lucky participate record failed")
@@ -109,6 +110,16 @@ func OnLuckyParticipate(record *model.LuckyActivity, fromId int64) {
 	if err := db.Save(record).Error; err != nil {
 		logger.Err(err).Msg("update lucky activity failed")
 	}
+}
+
+// 用户是否已经参与过
+func CheckUserHasParticipated(luckyId, userId int64) bool {
+	var count int64
+	err := db.Model(&model.LuckyRecord{}).Where("lucky_id = ? AND user_id = ?", luckyId, userId).Count(&count).Error
+	if err != nil {
+		logger.Err(err).Msg("CheckUserHasParticipated failed")
+	}
+	return count > 0
 }
 
 func GetLuckyAllParticipates(record *model.LuckyActivity) []model.LuckyRecord {

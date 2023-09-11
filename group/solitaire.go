@@ -385,8 +385,9 @@ func SolitaireCreateStep2LimitUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI
 		logger.Err(err).Msg("create solitaire with limit time failed")
 	}
 	// 等待用户输入 接龙规则
-	StartAdminConversation(chatId, chatId, cb.From.ID, int64(msg.MessageID),
-		ConversationWaitSolitaireUsers, param, nil)
+	// StartAdminConversation(chatId, chatId, cb.From.ID, int64(msg.MessageID),
+	// 	ConversationWaitSolitaireUsers, param, nil)
+	updateAdminConversation(chatId, ConversationWaitSolitaireUsers, param, nil)
 }
 
 func SolitaireCreateLastStep(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param string) {
@@ -403,8 +404,9 @@ func SolitaireCreateLastStep(update *tgbotapi.Update, bot *tgbotapi.BotAPI, para
 		logger.Err(err).Msg("create solitaire last step failed")
 	}
 	// 等待用户输入 接龙规则
-	StartAdminConversation(chatId, chatId, cb.From.ID, int64(msg.MessageID),
-		ConversationWaitSolitaireDesc, param, nil)
+	// StartAdminConversation(chatId, chatId, cb.From.ID, int64(msg.MessageID),
+	// 	ConversationWaitSolitaireDesc, param, nil)
+	updateAdminConversation(chatId, ConversationWaitSolitaireDesc, param, nil)
 }
 
 func SolitaireDelete(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param string) {
@@ -626,8 +628,13 @@ func PlaySolitaire(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param string) 
 		return
 	}
 	// save this session, wait user's reply
-	StartAdminConversation(chatId, chatId, userId, int64(msg.MessageID),
-		ConversationPlaySolitaire, map[string]interface{}{
+	// StartAdminConversation(chatId, chatId, userId, int64(msg.MessageID),
+	// 	ConversationPlaySolitaire, map[string]interface{}{
+	// 		"solitaireId":   sid,
+	// 		"prevSolitaire": prevSol,
+	// 	}, nil)
+	updateAdminConversation(chatId, ConversationPlaySolitaire,
+		map[string]interface{}{
 			"solitaireId":   sid,
 			"prevSolitaire": prevSol,
 		}, nil)
@@ -652,8 +659,11 @@ func (mgr *GroupManager) onSolitaireLimitUser(update *tgbotapi.Update, sess *bot
 		logger.Err(err).Msg("create solitaire last step failed")
 	}
 	// 等待用户输入 接龙规则
-	StartAdminConversation(sess.chatId, chatId, userId, int64(msg.MessageID),
-		ConversationWaitSolitaireDesc, param, nil)
+	// StartAdminConversation(sess.chatId, chatId, userId, int64(msg.MessageID),
+	// 	ConversationWaitSolitaireDesc, param, nil)
+	updateAdminConversation(chatId, ConversationWaitSolitaireDesc,
+		param,
+		nil)
 }
 
 // 用户接龙消息的处理

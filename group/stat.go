@@ -203,3 +203,14 @@ func (mgr *GroupManager) getUserName(chatId int64, id int64) string {
 func getDisplayName(u *model.User) string {
 	return u.FirstName + " " + u.LastName
 }
+
+func getDisplayNameFromUser(u *tgbotapi.User) string {
+	if u.FirstName == "" && u.LastName == "" {
+		return u.UserName
+	}
+	name := u.FirstName
+	if u.LastName != "" {
+		name += " " + u.LastName
+	}
+	return name
+}

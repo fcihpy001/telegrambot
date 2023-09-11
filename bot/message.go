@@ -5,7 +5,6 @@ import (
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/setting"
-	"telegramBot/utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -40,8 +39,8 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 
 	group.MatchLuckyKeywords(update, bot.bot)
 
-	reply := "感谢您的消息，我还在进修闭关中。。。"
-	utils.SendText(update.Message.Chat.ID, reply, bot.bot)
+	// reply := "感谢您的消息，我还在进修闭关中。。。"
+	// utils.SendText(update.Message.Chat.ID, reply, bot.bot)
 
 	// 保存消息
 	message := model.Message{

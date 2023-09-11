@@ -21,6 +21,7 @@ type botConversation struct {
 	groupChatId int64 // supergroup chat ID
 	chatId      int64 // private conversation chat ID
 	userId      int64
+	username    string
 	messageId   int64
 	status      ConversationStatus
 	data        interface{}
@@ -34,20 +35,37 @@ func GetConversation(chatId int64) *botConversation {
 }
 
 func StartAdminConversation(groupChatId, chatId, userId, messageId int64,
+	username string,
 	status ConversationStatus,
 	data interface{},
 	fn ConversationFn) {
 	logger.Info().Msgf("new session: group=%d chatId=%d userId=%d msgId=%d",
 		groupChatId, chatId, userId, messageId)
-	sessions[groupChatId] = &botConversation{
+	sessions[chatId] = &botConversation{
 		groupChatId: groupChatId,
 		chatId:      chatId,
 		userId:      userId,
+		username:    username,
 		messageId:   messageId,
 		status:      status,
 		data:        data,
 		fn:          fn,
 	}
+}
+
+func updateAdminConversation(
+	chatId int64,
+	status ConversationStatus,
+	data interface{},
+	fn ConversationFn) {
+	sess, ok := sessions[chatId]
+	if !ok {
+		logger.Error().Int64("chatId", chatId).Msg("not found chat session")
+		return
+	}
+	sess.status = status
+	sess.data = data
+	sess.fn = fn
 }
 
 func UpdateAdminConversation(chatId int64, status ConversationStatus) {

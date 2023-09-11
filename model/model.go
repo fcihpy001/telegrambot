@@ -439,9 +439,9 @@ type LuckyActivity struct {
 	gorm.Model
 	ChatId       int64
 	UserId       int64
-	LuckyName    string
-	Creator      string
-	Keyword      string
+	LuckyName    string `gorm:"type:varchar(200)"`
+	Creator      string `gorm:"type:varchar(50)"` // username
+	Keyword      string `gorm:"type:varchar(100)"`
 	LuckyType    string `gorm:"type:varchar(20)"`
 	LuckySubType string `gorm:"type:varchar(20)"`
 	LuckyCond    string // 配置信息 json
@@ -459,22 +459,44 @@ type LuckyActivity struct {
 
 func (la *LuckyActivity) ReachParticipantUsers() bool {
 	if la.LuckyType == LuckyTypeGeneral && la.LuckySubType == LuckySubTypeUsers {
-		var cond map[string]interface{}
-		json.Unmarshal([]byte(la.LuckyCond), &cond)
-
-		if cond["users"].(int) > la.Participant {
+		if la.Participant >= la.GetLuckGeneralUsers() {
 			return true
 		}
 	}
 	return false
 }
 
+func (la *LuckyActivity) GetLuckyType() string {
+	if la.LuckyType == LuckyTypeGeneral {
+		if la.LuckySubType == LuckySubTypeUsers {
+			return "满人开奖"
+		} else if la.LuckySubType == LuckySubTypeTime {
+			return "定时抽奖"
+		}
+	}
+	return la.LuckyType + "-" + la.LuckySubType
+}
+
+func (la *LuckyActivity) GetRewards() (rewards []LuckyReward) {
+	json.Unmarshal([]byte(la.RewardDetail), &rewards)
+	return
+}
+
+// 满人开奖: 多少人参与后开奖
+func (la *LuckyActivity) GetLuckGeneralUsers() int {
+	var cond map[string]interface{}
+
+	json.Unmarshal([]byte(la.LuckyCond), &cond)
+	return int(cond["users"].(float64))
+}
+
 type LuckyRecord struct {
 	gorm.Model
-	LuckyId int64
-	ChatId  int64
-	UserId  int64
-	Reward  string // 中奖结果
+	LuckyId  int64
+	ChatId   int64
+	UserId   int64
+	Username string `gorm:"type:varchar(50)"`
+	Reward   string `gorm:"type:varchar(200)"` // 中奖结果
 }
 
 type LuckyReward struct {

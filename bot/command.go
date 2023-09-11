@@ -3,7 +3,6 @@ package bot
 import (
 	"encoding/json"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"strconv"
 	"strings"
@@ -12,6 +11,8 @@ import (
 	"telegramBot/services"
 	"telegramBot/setting"
 	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // 处理以/开头的指令消息,如/help  /status等
@@ -22,13 +23,24 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	if strings.HasPrefix(update.Message.Command(), "start") && update.Message.Chat.Type == "private" {
 		//接收参数，取空格后面的内容
 		args := strings.TrimSpace(strings.Replace(update.Message.Text, "/start", "", -1))
-		fmt.Println("args", args)
+		fmt.Println("args", args, update.Message.Chat.ID, update.Message.MessageID)
 
 		if len(args) > 0 {
 			//根据参数获取群组信息
 			groupId, _ := strconv.Atoi(args)
 			where := fmt.Sprintf("group_id = %d and uid = %d", groupId, update.Message.From.ID)
 			_ = services.GetModelWhere(where, &utils.GroupInfo)
+
+			msg := update.Message
+			group.StartAdminConversation(int64(groupId),
+				msg.Chat.ID,
+				msg.From.ID,
+				int64(msg.MessageID),
+				msg.From.FirstName+" "+msg.From.LastName,
+				group.ConversationStart,
+				nil,
+				nil,
+			)
 
 			//开始页面跳转
 			setting.Settings(&update, bot.bot)

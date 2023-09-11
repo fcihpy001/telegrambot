@@ -387,6 +387,25 @@ func sendText(bot *tgbotapi.BotAPI, chatId int64, text string) {
 	}
 }
 
+func sendMarkdown(bot *tgbotapi.BotAPI, chatId int64, text string, escaped bool) {
+	if !escaped {
+		text = tgbotapi.EscapeText(tgbotapi.ModeMarkdownV2, text)
+	}
+	msg := tgbotapi.NewMessage(chatId, text)
+	msg.ParseMode = tgbotapi.ModeMarkdownV2
+	_, err := bot.Send(msg)
+	if err != nil {
+		logger.Err(err).Stack().Str("content", text).Msg("send message failed")
+	}
+}
+
+func sendDeleteMsg(bot *tgbotapi.BotAPI, chatId int64, msgId int) {
+	_, err := bot.Request(tgbotapi.NewDeleteMessage(chatId, msgId))
+	if err != nil {
+		logger.Err(err).Stack().Int("msgId", msgId).Msg("send delete message failed")
+	}
+}
+
 func sendEditText(bot *tgbotapi.BotAPI, chatId int64, msgId int, text string) {
 	msg := tgbotapi.NewEditMessageText(chatId, msgId, text)
 	_, err := bot.Send(msg)
@@ -419,4 +438,14 @@ func getStringParam(param *url.Values, key string) string {
 	}
 
 	return v
+}
+
+func setTimer(seconds int, fn func()) {
+	tmr := time.NewTimer(time.Duration(seconds) * time.Second)
+	<-tmr.C
+	fn()
+}
+
+func escapeText(text string) string {
+	return tgbotapi.EscapeText(tgbotapi.ModeMarkdownV2, text)
 }
