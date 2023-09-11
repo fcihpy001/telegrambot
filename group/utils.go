@@ -17,7 +17,11 @@ import (
 )
 
 // 最大统计跨度
-const MaxTimeRange = 86400 * 30
+const (
+	MaxTimeRange            = 86400 * 30
+	dateLayout              = "2006-01-02 15:04:05"
+	dateLayoutWithoutSecond = "2006-01-02 15:04"
+)
 
 var (
 	ErrNoMessage          = errors.New("message is nil")
@@ -181,6 +185,14 @@ func parseTimeRange(s string) (startTs int64, endTs int64, err error) {
 		return
 	}
 	return
+}
+
+func parseDateTime(s string) (time.Time, error) {
+	tm, err := time.Parse(dateLayout, s)
+	if err == nil {
+		return tm, nil
+	}
+	return time.ParseInLocation(dateLayoutWithoutSecond, s, time.Local)
 }
 
 // start: the first time of time range

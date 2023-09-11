@@ -74,13 +74,14 @@ func loopLuckyKeywords() {
 	for word, records := range luckyKeywords {
 		nRecords := []*model.LuckyActivity{}
 		for _, record := range records {
-			if record.Status == model.LuckyStatusStart {
-				nRecords = append(nRecords, record)
-			} else if record.EndTime > 0 && record.EndTime < now {
+			if record.LuckySubType == model.LuckySubTypeTime && record.EndTime < now {
 				// record is time up
 				record.Status = model.LuckyStatusEnd
 				// 这里需要 bot 实例
 				luckyOpenReward(_bot, record)
+			}
+			if record.Status == model.LuckyStatusStart {
+				nRecords = append(nRecords, record)
 			}
 		}
 		luckyKeywords[word] = nRecords
@@ -441,7 +442,9 @@ func luckyCreateGeneral(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 	case model.LuckySubTypeTime:
 		// 定时抽奖
 		content = "🎁创建通用抽奖(/cancel 命令返回首页)\n\n" +
-			"请回复参与多少人后开奖：\n\n"
+			"请回复开奖时间：\n" +
+			"格式：年-月-日 时:分\n" +
+			"例如：2023-09-11 19:45\n\n"
 	}
 	reply := tgbotapi.NewEditMessageText(param.chatId, param.msgId, content)
 	_, err := bot.Send(reply)
@@ -572,7 +575,12 @@ func buildRewardBody(data *model.LuckyGeneral) string {
 			content += "├推送至频道：✅\n"
 		}
 	}
-	content += escapeText(fmt.Sprintf("├满人开奖  (%v人)\n├奖品列表:", data.Users))
+	if data.SubType == model.LuckySubTypeUsers {
+		content += escapeText(fmt.Sprintf("├满人开奖  (%v人)\n", data.Users))
+	} else if data.SubType == model.LuckySubTypeTime {
+		content += escapeText(fmt.Sprintf("├开奖时间:  (%v)\n", yyyymmddhhmmss(data.EndTime)))
+	}
+	content += "├奖品列表:\n"
 	for _, reward := range data.Rewards {
 		if reward.Shares > 0 {
 			content += fmt.Sprintf("├       %s    x %d份\n", escapeText(reward.Name), reward.Shares)
@@ -591,7 +599,11 @@ func buildParticiateContent(record *model.LuckyActivity, update *tgbotapi.Update
 	username := getDisplayNameFromUser(msg.From)
 	content += mentionUser(username, msg.From.ID) + " 您已参与成功，请等待开奖通知！\n\n"
 
-	content += fmt.Sprintf("├%s  \\(%d人\\)\n", record.GetLuckyType(), record.GetLuckGeneralUsers())
+	if record.LuckyType == model.LuckyTypeGeneral && record.LuckySubType == model.LuckySubTypeUsers {
+		content += escapeText(fmt.Sprintf("├%s  \\(%d人\\)\n", record.GetLuckyType(), record.GetLuckGeneralUsers()))
+	} else {
+		content += escapeText(fmt.Sprintf("├开奖时间:  \\(%s\\)\n", yyyymmddhhmmss(record.EndTime)))
+	}
 	content += fmt.Sprintf("├已参与  \\(%d人\\)\n", record.Participant)
 	content += fmt.Sprintf("├参与关键词：  %s\n", escapeText(record.Keyword))
 	content += "├奖品列表：\n"
@@ -631,13 +643,26 @@ func luckyCreateGeneralSteps(update *tgbotapi.Update, bot *tgbotapi.BotAPI, sess
 
 	switch status {
 	case ConversationLuckyCreateGeneralStep1:
+		var content string
 		sess.status = ConversationLuckyCreateGeneralStep2
-		users, err := strconv.Atoi(text)
-		if err != nil {
-			logger.Err(err).Msg("invalid user arg")
+		if data.SubType == model.LuckySubTypeUsers {
+			users, err := strconv.Atoi(text)
+			if err != nil {
+				logger.Err(err).Msg("invalid user arg")
+			}
+			data.Users = users
+			content = escapeText(fmt.Sprintf("🎁创建通用抽奖  ( /cancel 命令返回首页)\n\n├满人开奖  (%s人)\n\n请回复第一个奖品的名称（如：1USDT）：", text))
+		} else {
+			tm, err := parseDateTime(text)
+			if err != nil {
+				logger.Err(err).Msg("invalid lucky end time")
+			}
+			if tm.Unix() <= time.Now().Unix() {
+				logger.Error().Msg("lucky end time less than current time")
+			}
+			data.EndTime = tm.Unix()
+			content = escapeText(fmt.Sprintf("🎁创建通用抽奖  ( /cancel 命令返回首页)\n\n├开奖时间:  (%s)\n\n请回复第一个奖品的名称（如：1USDT）：", text))
 		}
-		data.Users = users
-		content := escapeText(fmt.Sprintf("🎁创建通用抽奖  ( /cancel 命令返回首页)\n\n├满人开奖  (%s人)\n\n请回复第一个奖品的名称（如：1USDT）：", text))
 		sendText(bot, update.Message.Chat.ID, content)
 
 	case ConversationLuckyCreateGeneralStep2:
@@ -792,7 +817,7 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 	cond, _ := json.Marshal(map[string]interface{}{
 		"users":     data.Users,
 		"startTime": time.Now().Unix(),
-		"endTime":   0,
+		"endTime":   data.EndTime,
 	})
 	data.StartTime = time.Now().Unix()
 	item := model.LuckyActivity{
@@ -808,7 +833,7 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 		Status:       model.LuckyStatusStart,
 		RewardDetail: string(rewards), // 奖励信息 json
 		StartTime:    time.Now().Unix(),
-		EndTime:      0,
+		EndTime:      data.EndTime,
 		PushChannel:  *data.Push,
 	}
 	services.CreateLucky(&item)
