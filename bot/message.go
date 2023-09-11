@@ -1,11 +1,12 @@
 package bot
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"telegramBot/group"
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/setting"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // 处理普通消息
@@ -16,6 +17,7 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 		// 如果消息被拦截 不需要后续处理
 		return
 	}
+
 	//违禁词处理
 	if setting.ProhibitedCheck(update, bot.bot) {
 		return
@@ -35,6 +37,8 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 	if setting.HandlerAutoReply(update, bot.bot) {
 		return
 	}
+
+	group.MatchLuckyKeywords(update, bot.bot)
 
 	// 保存消息
 	message := model.Message{

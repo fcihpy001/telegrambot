@@ -62,6 +62,9 @@ func GroupHandlerCommand(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	case "admin":
 		mgr.checkAdmin(update)
 
+	case "create":
+		LuckyCreateCommand(update, bot)
+
 	default:
 		fmt.Println("unknown command")
 	}

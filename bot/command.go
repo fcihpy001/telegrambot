@@ -1,10 +1,8 @@
 package bot
 
 import (
-	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
 	"strconv"
 	"strings"
 	"telegramBot/group"
@@ -21,20 +19,41 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	if strings.HasPrefix(update.Message.Command(), "start") && update.Message.Chat.Type == "private" {
 		//接收参数，取空格后面的内容
 		args := strings.TrimSpace(strings.Replace(update.Message.Text, "/start", "", -1))
-		fmt.Println("args", args)
+		if len(args) == 0 {
+			setting.StartHandler(&update, bot.bot)
+			return
+		}
+		//分割参数
+		params := strings.Split(args, "_")
 
-		if len(args) > 0 {
-			//根据参数获取群组信息
-			groupId, _ := strconv.Atoi(args)
+		//根据参数获取群组信息
+		module := params[0]
+		groupId, _ := strconv.Atoi(params[1])
+
+		if module == "manager" {
 			where := fmt.Sprintf("group_id = %d and uid = %d", groupId, update.Message.From.ID)
 			_ = services.GetModelWhere(where, &utils.GroupInfo)
 
+			msg := update.Message
+			group.StartAdminConversation(int64(groupId),
+				msg.Chat.ID,
+				msg.From.ID,
+				int64(msg.MessageID),
+				msg.From.FirstName+" "+msg.From.LastName,
+				group.ConversationStart,
+				nil,
+				nil,
+			)
 			//开始页面跳转
 			setting.Settings(&update, bot.bot)
-		} else {
-			setting.StartHandler(&update, bot.bot)
+			return
+		} else if module == "lucky" {
+			group.MatchLuckyKeywords(&update, bot.bot)
+			return
+		} else if module == "solitaire" {
+			group.PlaySolitaire(&update, bot.bot, args)
+			return
 		}
-
 		return
 	}
 
@@ -53,32 +72,26 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 				setting.ManagerMenu(&update, bot.bot)
 			}
 		}
-
-	case "setting":
-		// 这里如果有参数, 进入对应的处理逻辑; 否则展示管理界面
 		println(update.Message.Text)
 		// 如果参数中有solitaire: 开头 且在私有聊天中, 是用户接龙
-		args := strings.TrimSpace(strings.Replace(update.Message.Text, "/start", "", -1))
-		if strings.HasPrefix(args, "solitaire-") && update.Message != nil && update.Message.Chat.Type == "private" {
-			group.PlaySolitaire(&update, bot.bot, args)
-			return
-		}
-		setting.Settings(&update, bot.bot)
-
-	case "create":
-
-	case "luck":
+		//args := strings.TrimSpace(strings.Replace(update.Message.Text, "/start", "", -1))
+		//if strings.HasPrefix(args, "solitaire-") && update.Message != nil && update.Message.Chat.Type == "private" {
+		//	group.PlaySolitaire(&update, bot.bot, args)
+		//	return
+		//}
+		//setting.Settings(&update, bot.bot)
 
 	case "filter":
 
 	case "stop":
 
 	case "filters":
+		setting.ReplyCommandHandler(&update, bot.bot)
 
 	case "link":
 		setting.GetInviteLink(&update, bot.bot)
 
-	case "stat", "stats", "statistic", "stat_week", "admin", "invite":
+	case "stat", "stats", "statistic", "stat_week", "lucky", "create":
 		group.GroupHandlerCommand(&update, bot.bot)
 
 	case "mention":
@@ -90,12 +103,8 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	case "ban", "kick", "unmute", "mute", "unban":
 		setting.OperationHandler(&update, bot.bot)
 
-	case "test":
-		//setting.ScheduleMessage(&update, bot.bot)
-		testapp(bot.bot, "https://python-telegram-bot.org/static/webappbot", "点击这里了解信息", update.Message.Chat.ID, "这是个好东西")
-
 	default:
-		fmt.Println("i dont't know this command")
+		fmt.Println("i don't know this command")
 		return
 	}
 }
@@ -108,33 +117,4 @@ func getMemberInfo(chat_id int64, user_id int64, bot *tgbotapi.BotAPI) (tgbotapi
 		},
 	}
 	return bot.GetChatMember(req)
-}
-
-func testapp(bot *tgbotapi.BotAPI, url string, buttonTitle string, receiver int64, desc string) {
-	data := make(map[string]interface{})
-	data["inline_keyboard"] = [][]interface{}{
-		{
-			map[string]interface{}{
-				"text": buttonTitle,
-				"web_app": map[string]string{
-					"url": url,
-				},
-			},
-		},
-	}
-	payload, _ := json.Marshal(data)
-
-	params := map[string]string{
-		"chat_id":      fmt.Sprint(receiver),
-		"text":         desc,
-		"reply_markup": string(payload), //
-	}
-
-	resp, err := bot.MakeRequest("sendMessage", params)
-	if err != nil {
-		log.Println(err)
-	}
-	buf, _ := json.MarshalIndent(resp, "", "  ")
-	fmt.Println(string(buf))
-	tgbotapi.NewMessage(receiver, "ok")
 }

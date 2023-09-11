@@ -376,3 +376,16 @@ func updateSelectInfo() {
 		Column: col,
 	}
 }
+
+func ReplyCommandHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	content := "💬 关键词回复\n已添加的关键词：\n"
+	for _, v := range replySetting.ReplyList {
+		if v.MatchAll {
+			content = content + "\n- " + v.KeyWorld
+		} else {
+			content = content + "\n* " + v.KeyWorld
+		}
+	}
+	content = content + "\n" + "\n- 表示精准触发\n * 表示包含触发"
+	utils.SendText(update.Message.Chat.ID, content, bot)
+}

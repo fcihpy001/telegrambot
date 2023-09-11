@@ -54,7 +54,15 @@ func PunishSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 }
 
 func punishMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	err := services.GetModelDataWhere(utils.GroupInfo.GroupId, &punishment)
+	where := ""
+	if class == "flood" {
+		where = fmt.Sprintf("flood_setting_id = %d", floodSetting.ID)
+	} else if class == "spam" {
+		where = fmt.Sprintf("spam_setting_id = %d", spamsSetting.ID)
+	} else if class == "prohibited" {
+		where = fmt.Sprintf("prohibited_setting_id = %d", prohibitedSetting.ID)
+	}
+	err := services.GetModelWhere(where, &punishment)
 
 	var btns [][]model.ButtonInfo
 	utils.Json2Button2("./config/punish.json", &btns)
@@ -225,6 +233,8 @@ func updatePunishSetting() string {
 	content := "🔇 反垃圾 \n\n惩罚："
 	if class == "prohibited" {
 		content = "🔇 违禁词 \n\n惩罚："
+	} else if class == "flood" {
+		content = "🔇 反刷屏 \n\n惩罚："
 	}
 	//todo 根据class类型分别处理
 	actionMsg := "警告 "
@@ -251,6 +261,9 @@ func updatePunishSetting() string {
 	case "spam":
 		spamsSetting.Punishment = punishment
 		updateSpamMsg()
+	case "flood":
+		floodSetting.Punishment = punishment
+		updateFloodMsg()
 	case "prohibited":
 		prohibitedSetting.Punishment = punishment
 		updateProhibitedSettingMsg()
