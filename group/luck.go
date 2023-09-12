@@ -333,7 +333,7 @@ func luckyIndex(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackPa
 }
 
 // 发起抽奖首页: 选择抽奖类型
-func luckyCreateIndex(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+func LuckyCreateIndex(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
 	println("luckyCreateIndex")
 	content := "🎁 群抽奖类型:\n\n" +
 		"🔥 通用抽奖：群员在群内回复指定关键词参与抽奖\n\n" +
@@ -344,23 +344,41 @@ func luckyCreateIndex(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Call
 		"选择抽奖类型：\n"
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔥通用抽奖", "lucky_create?typ=general"),
-			// tgbotapi.NewInlineKeyboardButtonData("📪查看抽奖记录", "lucky_record"),
+			tgbotapi.NewInlineKeyboardButtonData("🔥通用抽奖", "lucky_create?typ="+model.LuckyTypeGeneral),
+			tgbotapi.NewInlineKeyboardButtonData("🙋‍♂️ 指定群组报道抽奖", "lucky_create?typ="+model.LuckyTypeChatJoin),
 		),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("🧶设置抽奖", "luckysetting"),
-		// 	tgbotapi.NewInlineKeyboardButtonData("🦀返回首页", "settings"),
-		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🪁 邀请抽奖", "lucky_create?typ="+model.LuckyTypeInvite),
+			tgbotapi.NewInlineKeyboardButtonData("🥰 群活跃抽奖", "lucky_create?typ="+model.LuckyTypeHot),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🎰 娱乐抽奖", "lucky_create?typ="+model.LuckyTypeFun),
+			tgbotapi.NewInlineKeyboardButtonData("🪙 积分抽奖", "lucky_create?typ="+model.LuckyTypePoints),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("💬答题抽奖", "lucky_create?typ="+model.LuckyTypeAnswer),
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("🔙返回", "lucky"),
 		),
 	)
-	msg := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId,
-		content, inlineKeyboard)
-	_, err := bot.Send(msg)
-	if err != nil {
-		logger.Err(err).Msg("send choose lucky type failed")
+	var err error
+	if param.newMsg {
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
+		msg.ReplyMarkup = inlineKeyboard
+		_, err = bot.Send(msg)
+		if err != nil {
+			logger.Err(err).Msg("send choose lucky type failed")
+		}
+	} else {
+		msg := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId,
+			content, inlineKeyboard)
+		_, err = bot.Send(msg)
+		if err != nil {
+			logger.Err(err).Msg("send edit choose lucky type failed")
+		}
 	}
+
 	return err
 }
 
@@ -373,7 +391,7 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 	}
 	typ := param.param["typ"][0]
 	switch typ {
-	case "general":
+	case model.LuckyTypeGeneral:
 		content := "🎁创建通用抽奖\n\n" +
 			"通用抽奖：群员在群内回复指定关键词参与抽奖\n\n" +
 			"选择开奖方式：\n"
@@ -396,9 +414,174 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 		if err != nil {
 			logger.Err(err).Msg("send create lucky general failed")
 		}
+
+	case model.LuckyTypeChatJoin:
+		// not implement
+		// todo 不知道群组链接怎么输入
+		content := "🎁 **创建指定群报道抽奖抽奖** \n\n" +
+			" **指定群报道抽奖：** A群成员进入B群回复指定关键词参与抽奖	\n" +
+			"**注意：**两个群都需要将[机器人]添加在群组中\n" +
+			"**是否继续创建：**\n"
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("知道了，开始创建", "lucky_create_chatJoin"),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
+			),
+		)
+		msg := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId,
+			content, inlineKeyboard)
+		msg.ParseMode = tgbotapi.ModeMarkdownV2
+		_, err := bot.Send(msg)
+		if err != nil {
+			logger.Err(err).Msg("send create lucky chatJoin failed")
+		}
+
+	case model.LuckyTypeInvite:
+		content := "🎁 **创建邀请人数抽奖** \n\n" +
+			" **邀请人数抽奖：** 根据邀请排名抽奖，或达到邀请人数参与随机抽奖\n\n" +
+			"选择一个抽奖类型：\n"
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("邀请排名抽奖", "lucky_create_invite?subType="+model.LuckySubTypeInviteRank),
+				tgbotapi.NewInlineKeyboardButtonData("邀请次数抽奖", "lucky_create_invite?subType="+model.LuckySubTypeInviteTimes),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
+			),
+		)
+		msg := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId,
+			content, inlineKeyboard)
+		msg.ParseMode = tgbotapi.ModeMarkdownV2
+		_, err := bot.Send(msg)
+		if err != nil {
+			logger.Err(err).Msg("send create lucky invite failed")
+		}
+
+	case model.LuckyTypeHot:
+		// 群活跃
+		content := "🎁 **创建群活跃抽奖** \n\n" +
+			" **群活跃抽奖：** 根据活跃排名抽奖，或达到活跃度参与随机抽奖\n\n" +
+			"**选择一个抽奖类型：**\n"
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("1⃣️ 根据活跃排名抽奖",
+					"lucky_create_hot?subType="+model.LuckySubTypeHotRank),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("2⃣️ 达到发言次数参与随机抽奖",
+					"lucky_create_hot?subType="+model.LuckySubTypeHotTimes),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
+			),
+		)
+		msg := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId,
+			content, inlineKeyboard)
+		msg.ParseMode = tgbotapi.ModeMarkdownV2
+		_, err := bot.Send(msg)
+		if err != nil {
+			logger.Err(err).Msg("send create lucky hot failed")
+		}
+
+	case model.LuckyTypeFun:
+		// 娱乐抽奖
+		content := "🎁 **创建娱乐抽奖** \n\n" +
+			"**模式一：**\n" +
+			"管理员选择 🎲, 🎯, 🏀, ⚽, 🎳 其中一项创建抽奖，设置每人参加次数及开奖时间，群成员发送该表情会获得相应得分，到达抽奖结束时间后，分数最高者获胜。\n\n" +
+			"**模式二：** \n" +
+			"🎰 水果机最先摇出 \"777\" 的人中奖，中奖率：1\\.5\\%\n\n" +
+			"**选择一个抽奖类型：**\n"
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("【抽奖模式一】",
+					"lucky_create_fun"+model.LuckySubTypeHotRank),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🎲",
+					"lucky_create_fun?subType="+model.LuckySubTypeFunDice),
+				tgbotapi.NewInlineKeyboardButtonData("🎯",
+					"lucky_create_fun?subType="+model.LuckySubTypeFunTarget),
+				tgbotapi.NewInlineKeyboardButtonData("🏀",
+					"lucky_create_fun?subType="+model.LuckySubTypeFunBasket),
+				tgbotapi.NewInlineKeyboardButtonData("⚽",
+					"lucky_create_fun?subType="+model.LuckySubTypeFunFootball),
+				tgbotapi.NewInlineKeyboardButtonData("🎳",
+					"lucky_create_fun?subType="+model.LuckySubTypeFunBowl),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("【抽奖模式二】",
+					"lucky_create_fun"+model.LuckySubTypeHotRank),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🎰",
+					"lucky_create_fun"+model.LuckySubTypeHotRank),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
+			),
+		)
+		msg := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId,
+			content, inlineKeyboard)
+		msg.ParseMode = tgbotapi.ModeMarkdownV2
+		_, err := bot.Send(msg)
+		if err != nil {
+			logger.Err(err).Msg("send create lucky fun failed")
+		}
+
+	case model.LuckyTypePoints:
+		// 积分抽奖
+		content := "🎁 **创建积分抽奖** \n\n" +
+			" **积分抽奖：** 群成员签到或发言获得积分，消耗积分抽奖或管理员手动扣除积分。\n\n" +
+			"**选择一个抽奖类型：**\n"
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("满人抽奖",
+					"lucky_create_points?subType="+model.LuckySubTypeHotRank),
+				tgbotapi.NewInlineKeyboardButtonData("定时抽奖",
+					"lucky_create_points?subType="+model.LuckySubTypeHotTimes),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
+			),
+		)
+		msg := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId,
+			content, inlineKeyboard)
+		msg.ParseMode = tgbotapi.ModeMarkdownV2
+		_, err := bot.Send(msg)
+		if err != nil {
+			logger.Err(err).Msg("send create lucky points failed")
+		}
+
+	case model.LuckyTypeAnswer:
+		// 答题抽奖
+		content := "🎁 **创建答题抽奖** \n\n" +
+			" **答题抽奖：** 用户必须正确回答问题才能参与抽奖，问题可以设置多个。\n\n" +
+			"**选择一个抽奖类型：**\n"
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("满人抽奖",
+					"lucky_create_answer?subType="+model.LuckySubTypeHotRank),
+				tgbotapi.NewInlineKeyboardButtonData("定时抽奖",
+					"lucky_create_answer?subType="+model.LuckySubTypeHotTimes),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
+			),
+		)
+		msg := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId,
+			content, inlineKeyboard)
+		msg.ParseMode = tgbotapi.ModeMarkdownV2
+		_, err := bot.Send(msg)
+		if err != nil {
+			logger.Err(err).Msg("send create lucky answer failed")
+		}
+
 	default:
 		logger.Error().Msgf("not implement lucky type: %v", typ)
 	}
+
 	return nil
 }
 
@@ -467,6 +650,36 @@ func luckyCreateGeneral(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 		luckyCreateGeneralSteps)
 
 	return err
+}
+
+// 群组报道抽奖
+func luckyCreateChatJoin(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	return nil
+}
+
+// 邀请抽奖
+func luckyCreateInvite(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	return nil
+}
+
+// 活跃抽奖
+func luckyCreateHot(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	return nil
+}
+
+// 娱乐抽奖
+func luckyCreateFun(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	return nil
+}
+
+// 积分抽奖
+func luckyCreatePoints(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	return nil
+}
+
+// 邀请抽奖
+func luckyCreateAnswer(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	return nil
 }
 
 func toggleLuckySetting(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
@@ -790,7 +1003,7 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 	result := toBool(param.param["result"][0])
 	if !result {
 		// 取消发布 返回首页
-		luckyCreateIndex(update, bot, param)
+		LuckyCreateIndex(update, bot, param)
 		return nil
 	}
 	// 发布

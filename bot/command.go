@@ -2,13 +2,14 @@ package bot
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strconv"
 	"strings"
 	"telegramBot/group"
 	"telegramBot/services"
 	"telegramBot/setting"
 	"telegramBot/utils"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // 处理以/开头的指令消息,如/help  /status等
@@ -30,11 +31,11 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 		module := params[0]
 		groupId, _ := strconv.Atoi(params[1])
 
+		msg := update.Message
 		if module == "manager" {
 			where := fmt.Sprintf("group_id = %d and uid = %d", groupId, update.Message.From.ID)
 			_ = services.GetModelWhere(where, &utils.GroupInfo)
 
-			msg := update.Message
 			group.StartAdminConversation(int64(groupId),
 				msg.Chat.ID,
 				msg.From.ID,
@@ -48,7 +49,19 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 			setting.Settings(&update, bot.bot)
 			return
 		} else if module == "lucky" {
-			group.MatchLuckyKeywords(&update, bot.bot)
+			group.StartAdminConversation(
+				int64(groupId),
+				msg.Chat.ID,
+				msg.From.ID,
+				int64(msg.MessageID),
+				msg.From.FirstName+" "+msg.From.LastName,
+				group.ConversationStart,
+				nil,
+				nil,
+			)
+			group.LuckyCreateIndex(&update, bot.bot,
+				group.NewCallbackParam(int64(msg.Chat.ID), int(msg.From.ID), "", true),
+			)
 			return
 		} else if module == "solitaire" {
 			group.PlaySolitaire(&update, bot.bot, args)

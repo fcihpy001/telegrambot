@@ -22,8 +22,9 @@ func StartBot(ctx context.Context) {
 	}
 	log.Printf("Authorized on account %s--%d-%s", bot.bot.Self.UserName, bot.bot.Self.ID, bot.bot.Self.FirstName)
 
-	bot.setupBotWithPool()
 	group.SetBot(bot.bot)
+
+	go bot.setupBotWithPool()
 	//	bot.setupBotWithWebhook()
 }
 

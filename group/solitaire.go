@@ -591,7 +591,7 @@ func PlaySolitaire(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param string) 
 	chat := msg.Chat
 	chatId := chat.ID
 	userId := msg.From.ID
-	println("PlaySolitaire chatId: userId", chatId, userId)
+	println("PlaySolitaire chatId: userId", chatId, userId, param)
 
 	ss := strings.Split(param, "-")
 	if len(ss) != 2 {

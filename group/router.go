@@ -13,12 +13,35 @@ type CallbackParam struct {
 	msgId  int
 	data   string // callback data
 	query  string // raw query
+	newMsg bool   // 是否新消息
 	param  url.Values
 }
 
 type CallbackFn func(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error
 
 var router *iradix.Tree[CallbackFn]
+
+func NewCallbackParam(chatId int64, msgId int, data string, newmsg bool) *CallbackParam {
+	cp := &CallbackParam{
+		chatId: chatId,
+		msgId:  msgId,
+		data:   data,
+		newMsg: newmsg,
+	}
+	if data != "" {
+		ss := strings.Split(data, "?")
+
+		if len(ss) == 2 {
+			var err error
+			cp.query = ss[1]
+			cp.param, err = url.ParseQuery(ss[1])
+			if err != nil {
+				logger.Err(err).Msg("invalid data or query")
+			}
+		}
+	}
+	return cp
+}
 
 // callback entry
 func CallbackHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
@@ -103,9 +126,15 @@ func InitCallbackRouters() {
 	RegisterCallback("lucky_record", luckyRecords)
 	RegisterCallback("lucky_cancel", luckyCancel)
 	RegisterCallback("luckysetting", toggleLuckySetting)
-	RegisterCallback("lucky_create_index$", luckyCreateIndex)
+	RegisterCallback("lucky_create_index$", LuckyCreateIndex)
 	RegisterCallback("lucky_create", luckyCreate)
 	RegisterCallback("lucky_create_general", luckyCreateGeneral)
+	RegisterCallback("lucky_create_chatJoin", luckyCreateChatJoin)
+	RegisterCallback("lucky_create_invite", luckyCreateInvite)
+	RegisterCallback("lucky_create_hot", luckyCreateHot)
+	RegisterCallback("lucky_create_fun", luckyCreateFun)
+	RegisterCallback("lucky_create_points", luckyCreatePoints)
+	RegisterCallback("lucky_create_answer", luckyCreateAnswer)
 	RegisterCallback("lucky_create_keywords", luckyCreateKeywords)
 	RegisterCallback("lucky_push", luckyCreatePush)
 	RegisterCallback("lucky_publish", luckyCreatePublish)
