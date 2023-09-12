@@ -147,11 +147,11 @@ func CountTotalChatMessageUsers(
 }
 
 // 统计某个用户在过去一段时间内的消息数量
-func MessageCountPeriod(chatId int64, userId int64, second int64) int64 {
+func MessageCountPeriod(chatId int64, userId int64, second int64) int {
 	var count int64
 	where := fmt.Sprintf("timestamp >= %d and chat_id = %d and user_id = %d", time.Now().Unix()-second, chatId, userId)
 	db.Model(&model.Message{}).Where(where).Count(&count)
-	return count
+	return int(count)
 }
 
 // 查询指定时间范围内按照用户id group的结果

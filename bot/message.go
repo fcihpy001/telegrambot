@@ -18,18 +18,27 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 		return
 	}
 
+	if setting.SpamCheck(update, bot.bot) {
+		return
+	}
+
 	//违禁词处理
 	if setting.ProhibitedCheck(update, bot.bot) {
 		return
 	}
 
 	//规范检查，是否有名字、头像、关联了某个频道
-	if setting.UserValidateCheck(update, bot.bot) {
-		return
-	}
+	//if setting.UserValidateCheck(update, bot.bot) {
+	//	return
+	//}
 
 	//是否刷屏
 	if setting.FloodCheck(update, bot.bot) {
+		return
+	}
+
+	//是否黑夜模式
+	if setting.DarkCheck(update, bot.bot) {
 		return
 	}
 
@@ -45,6 +54,7 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 		ChatId:    update.Message.Chat.ID,
 		UserId:    update.Message.From.ID,
 		Timestamp: update.Message.Date,
+		//MessageId: update.Message.MessageID,
 	}
 	services.SaveModel(&message, message.ChatId)
 }

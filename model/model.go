@@ -98,6 +98,7 @@ type UserAction struct {
 	Day    string `gorm:"type:varchar(20)"` // 20230828
 }
 
+// 进群欢迎
 type WelcomeSetting struct {
 	gorm.Model
 	ChatId        int64 `gorm:"index:uniqueIndex"`
@@ -110,6 +111,7 @@ type WelcomeSetting struct {
 	DeletePrevMsg bool
 }
 
+// 邀请设置
 type InviteSetting struct {
 	gorm.Model
 	ChatId          int64 `gorm:"index:uniqueIndex; primaryKey"`
@@ -123,6 +125,7 @@ type InviteSetting struct {
 	InviteCount     int
 }
 
+// 邀请记录
 type InviteRecord struct {
 	gorm.Model
 	Uid                int64 `gorm:"uniqueIndex:user_chat_idx"`
@@ -138,6 +141,7 @@ type InviteRecord struct {
 	CreatesJoinRequest bool
 }
 
+// 自动回复设置
 type ReplySetting struct {
 	gorm.Model
 	ChatId          int64 `gorm:"uniqueIndex"`
@@ -156,6 +160,7 @@ type Reply struct {
 	ReplySettingID uint
 }
 
+// 违禁设置
 type ProhibitedSetting struct {
 	gorm.Model
 	ChatId              int64 `gorm:"uniqueIndex"`
@@ -166,14 +171,15 @@ type ProhibitedSetting struct {
 	WarningCount        int
 	WarningAfterPunish  PunishType
 	BanTime             int
+	MuteTime            int
 	DeleteNotifyMsgTime int64
-	Punishment          Punishment
 }
 
 type PunishType string
 
 const (
 	PunishTypeWarning    PunishType = "warning"
+	PunishTypeMute       PunishType = "mute"
 	PunishTypeBan        PunishType = "ban"
 	PunishTypeKick       PunishType = "kick"
 	PunishTypeBanAndKick PunishType = "banAndKick"
@@ -193,27 +199,32 @@ const (
 
 type Punishment struct {
 	gorm.Model
-	Punish              PunishType
 	PunishType          PunishType
 	WarningCount        int
-	WarningAfterPunish  string
+	WarningAfterPunish  PunishType
 	BanTime             int
+	MuteTime            int
 	DeleteNotifyMsgTime int64
-	FloodSettingID      uint
-	SpamSettingID       uint
-	ProhibitedSettingID uint
+	Reason              string
+	ReasonType          int
+	Content             string
 }
 
+// 惩罚记录 ReasonType 1-prohibited 2-spam 3-flood 4-usercheck
 type PunishRecord struct {
 	gorm.Model
-	ChatId       int64
-	UserId       int64
-	Reason       string
+	ChatId       int64 `gorm:"primaryKey"`
+	UserId       int64 `gorm:"primaryKey"`
+	Name         string
+	ReasonType   int    `gorm:"primaryKey"`
+	Reason       string `gorm:"type:varchar(20)"`
 	Punish       PunishType
 	WarningCount int
+	MuteTime     int
 	BanTime      int
 }
 
+// 新人设置
 type NewMemberCheck struct {
 	gorm.Model
 	ChatId    int64 `gorm:"uniqueIndex"`
@@ -222,6 +233,7 @@ type NewMemberCheck struct {
 	DelayTime int
 }
 
+// 用户合法性检测
 type UserCheck struct {
 	gorm.Model
 	ChatId              int64 `gorm:"uniqueIndex"`
@@ -236,7 +248,9 @@ type UserCheck struct {
 	WarningCount        int
 	WarningAfterPunish  PunishType
 	BanTime             int
+	MuteTime            int
 	DeleteNotifyMsgTime int64
+	DeleteMsg           bool
 }
 
 const (
@@ -290,6 +304,7 @@ const (
 	TriggerTypeUsername = "username"
 )
 
+// 反垃圾设置
 type SpamSetting struct {
 	gorm.Model
 	ChatId int64 `gorm:"uniqueIndex"`
@@ -311,18 +326,31 @@ type SpamSetting struct {
 	LongName       bool
 	NameLength     int
 	Exception      string
-	Punishment     Punishment
+	DeleteMsg      bool
+
+	Punish              PunishType
+	WarningCount        int
+	WarningAfterPunish  PunishType
+	MuteTime            int
+	BanTime             int
+	DeleteNotifyMsgTime int64
 }
 
+// 反刷屏设置
 type FloodSetting struct {
 	gorm.Model
-	ChatId     int64 `gorm:"uniqueIndex"`
-	Uid        int64
-	Enable     bool
-	MsgCount   int64
-	Interval   int
-	DeleteMsg  bool
-	Punishment Punishment
+	ChatId              int64 `gorm:"uniqueIndex"`
+	Uid                 int64
+	Enable              bool
+	MsgCount            int
+	Interval            int
+	DeleteMsg           bool
+	Punish              PunishType
+	WarningCount        int
+	WarningAfterPunish  PunishType
+	MuteTime            int
+	BanTime             int
+	DeleteNotifyMsgTime int64
 }
 
 type DarkModelSetting struct {
@@ -404,9 +432,9 @@ type GroupInfo struct {
 // 消息信息
 type Message struct {
 	gorm.Model
-	ChatId    int64
-	UserId    int64
-	MessageId int64
+	ChatId int64
+	UserId int64
+	//MessageId int
 	Timestamp int
 }
 
@@ -516,4 +544,11 @@ type LuckyGeneral struct {
 	Keyword   string
 	Push      *bool
 	Name      string // 活动名称
+}
+
+type Task struct {
+	gorm.Model
+	MessageId     int
+	Type          string
+	OperationTime int64
 }

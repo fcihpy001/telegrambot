@@ -8,12 +8,15 @@ import (
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
+	"time"
 )
 
 var (
 	darkModelSetting = model.DarkModelSetting{}
 	err              error
 )
+
+//todo 禁言时间被误写成ban单词，需要注意
 
 func darkModelSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	err = services.GetModelData(utils.GroupInfo.GroupId, &darkModelSetting)
@@ -25,19 +28,7 @@ func darkModelSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		var row []model.ButtonInfo
 		for j := 0; j < len(btnArray); j++ {
 			btn := btnArray[j]
-			if btn.Data == "dark_model_status:enable" && darkModelSetting.Enable {
-				btn.Text = "✅启用"
-			} else if btn.Data == "dark_model_status:disable" && !darkModelSetting.Enable {
-				btn.Text = "✅关闭"
-			} else if btn.Data == "dark_model_ban:message" && darkModelSetting.BanType == model.BanTypeMessage {
-				btn.Text = "✅全员禁言"
-			} else if btn.Data == "dark_model_ban:media" && darkModelSetting.BanType == model.BanTypeMedia {
-				btn.Text = "✅禁止媒体"
-			} else if btn.Data == "dark_model_notify:enable" && darkModelSetting.Notify {
-				btn.Text = "✅通知"
-			} else if btn.Data == "dark_model_notify:disable" && !darkModelSetting.Notify {
-				btn.Text = "✅不通知"
-			}
+			updateDarkBtn(&btn)
 			row = append(row, btn)
 		}
 		rows = append(rows, row)
@@ -47,7 +38,6 @@ func darkModelSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	utils.DarkModelMenuMarkup = keyboard
 	content := updateDarkSettingMsg()
 	sendEditMsgMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard, bot)
-
 }
 
 func sendEditMsgMarkup(
@@ -268,8 +258,50 @@ func updateDarkSettingMsg() string {
 	if !darkModelSetting.Notify {
 		notifyMsg = "└开始和结束通知：❌\n"
 	}
+
 	darkModelSetting.ChatId = utils.GroupInfo.GroupId
 	services.SaveModel(&darkModelSetting, darkModelSetting.ChatId)
 	content = content + enableMsg + banModelMsg + notifyMsg
 	return content
+}
+
+func updateDarkBtn(btn *model.ButtonInfo) {
+	if btn.Data == "dark_model_status:enable" && darkModelSetting.Enable {
+		btn.Text = "✅启用"
+	} else if btn.Data == "dark_model_status:disable" && !darkModelSetting.Enable {
+		btn.Text = "✅关闭"
+	} else if btn.Data == "dark_model_ban:message" && darkModelSetting.BanType == model.BanTypeMessage {
+		btn.Text = "✅全员禁言"
+	} else if btn.Data == "dark_model_ban:media" && darkModelSetting.BanType == model.BanTypeMedia {
+		btn.Text = "✅禁止媒体"
+	} else if btn.Data == "dark_model_notify:enable" && darkModelSetting.Notify {
+		btn.Text = "✅通知"
+	} else if btn.Data == "dark_model_notify:disable" && !darkModelSetting.Notify {
+		btn.Text = "✅不通知"
+	}
+}
+
+func DarkCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
+	chatId := update.Message.Chat.ID
+	userId := update.Message.From.ID
+
+	setting := model.DarkModelSetting{}
+	_ = services.GetModelData(chatId, &setting)
+
+	//判断开关
+	if !setting.Enable {
+		return false
+	}
+	//	判断时间
+	currentHour := time.Now().Hour()
+	if currentHour >= setting.BanTimeStart && currentHour < setting.BanTimeEnd {
+		// 获取当前时间
+		currentTime := time.Now()
+		// 定义目标时间
+		targetTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), setting.BanTimeEnd, 0, 0, 0, currentTime.Location())
+		secondsDifference := targetTime.Sub(currentTime).Seconds()
+		banMember(bot, chatId, int(secondsDifference), userId, setting.BanType == model.BanTypeMedia)
+		return true
+	}
+	return false
 }

@@ -33,7 +33,7 @@
   [
     {
       "text": "\uD83D\uDCDB惩罚设置",
-      "data": "punish_setting_class:user",
+      "data": "punish_setting_class:userCheck",
       "btn_type": "data"
     },
     {

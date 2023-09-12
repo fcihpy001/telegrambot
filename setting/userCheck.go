@@ -235,7 +235,6 @@ func updateUserSettingMsg() string {
 	//
 	//content = content + enableMsg + "\n" + "\n- 表示精准触发\n * 表示包含触发"
 
-	//services.SaveReplySettings(&replySetting)
 	userCheckSetting.ChatId = utils.GroupInfo.GroupId
 	services.SaveModel(&userCheckSetting, utils.GroupInfo.GroupId)
 	return content
@@ -266,15 +265,13 @@ func UserValidateCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 	setting := model.UserCheck{}
 	_ = services.GetModelData(chatId, &setting)
 
+	content := ""
 	if setting.UserNameCheck && update.Message.From.UserName == "" {
-		content := fmt.Sprintf("@%s 🚫请设置用户名", update.Message.From.FirstName)
-		utils.SendText(update.Message.Chat.ID, content, bot)
-		return true
+		content = fmt.Sprintf("@%s 🚫请设置用户名", update.Message.From.FirstName)
+
 	}
 	if setting.NameCheck && update.Message.From.LastName == "" {
-		content := fmt.Sprintf("@%s 🚫请设置名字", update.Message.From.FirstName)
-		utils.SendText(update.Message.Chat.ID, content, bot)
-		return true
+		content = fmt.Sprintf("@%s 🚫请设置名字", update.Message.From.FirstName)
 	}
 	//获取头像信息
 	profile, _ := bot.GetUserProfilePhotos(tgbotapi.UserProfilePhotosConfig{
@@ -283,16 +280,27 @@ func UserValidateCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 		Offset: 0,
 	})
 	if setting.IconCheck && profile.TotalCount < 1 {
-		content := fmt.Sprintf("🚫@%s 请设置头像", update.Message.From.FirstName)
+		content = fmt.Sprintf("🚫@%s 请设置头像", update.Message.From.FirstName)
 		utils.SendText(update.Message.Chat.ID, content, bot)
-		return true
 	}
 
 	// 检查是否在黑名单中
 	if len(setting.BlackUserList) > 0 && strings.Contains(setting.BlackUserList, update.Message.From.UserName) {
 		content := fmt.Sprintf("🚫@%s 你是黑名单用户，已被禁言", update.Message.From.FirstName)
 		utils.SendText(update.Message.Chat.ID, content, bot)
-		return true
 	}
-	return false
+
+	punishment := model.Punishment{
+		PunishType:          setting.Punish,
+		WarningCount:        setting.WarningCount,
+		WarningAfterPunish:  setting.WarningAfterPunish,
+		BanTime:             setting.BanTime,
+		MuteTime:            setting.MuteTime,
+		DeleteNotifyMsgTime: setting.DeleteNotifyMsgTime,
+		Reason:              "userCheck",
+		ReasonType:          4,
+		Content:             "",
+	}
+	punishHandler(update, bot, punishment)
+	return true
 }

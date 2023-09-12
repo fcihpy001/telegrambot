@@ -41,7 +41,7 @@
   },
   {
     "text": "\uD83D\uDCE8反垃圾",
-    "data": "spam_setting",
+    "data": "spam_setting_menu",
     "btn_type": "data"
   },
   {
@@ -51,7 +51,7 @@
   },
   {
     "text": "\uD83D\uDEAB违禁词",
-    "data": "prohibited_setting",
+    "data": "prohibited_setting_menu",
     "btn_type": "data"
   },
   {
@@ -79,5 +79,4 @@
     "data": "permission",
     "btn_type": "data"
   }
-
 ]

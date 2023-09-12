@@ -55,7 +55,7 @@ func SpamSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		params = query[1]
 	}
 
-	if cmd == "spam_setting" {
+	if cmd == "spam_setting_menu" {
 		spamSettingMenu(update, bot)
 
 	} else if cmd == "spam_setting_type" {
@@ -196,7 +196,7 @@ func SpamNameLengthReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "spam_setting",
+		Data:    "spam_setting_menu",
 		BtnType: model.BtnTypeData,
 	}
 	row1 := []model.ButtonInfo{btn1}
@@ -216,7 +216,7 @@ func SpamMsgLengthReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	spamsSetting.MsgLength = length
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "spam_setting",
+		Data:    "spam_setting_menu",
 		BtnType: model.BtnTypeData,
 	}
 	row1 := []model.ButtonInfo{btn1}
@@ -286,4 +286,29 @@ func updateBtn(btn *model.ButtonInfo) {
 	} else if btn.Data == "spam_setting_type:longName" && spamsSetting.LongName {
 
 	}
+}
+
+func SpamCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
+	messageText := update.Message.Text
+	chatId := update.Message.Chat.ID
+	//获取数据库中的违禁词列表
+	setting := model.SpamSetting{}
+	_ = services.GetModelData(chatId, &setting)
+	if setting.Link && strings.Contains(messageText, "http") {
+		punishment := model.Punishment{
+			PunishType:          setting.Punish,
+			WarningCount:        setting.WarningCount,
+			WarningAfterPunish:  setting.WarningAfterPunish,
+			BanTime:             setting.BanTime,
+			MuteTime:            setting.MuteTime,
+			DeleteNotifyMsgTime: setting.DeleteNotifyMsgTime,
+			Reason:              "spam",
+			ReasonType:          2,
+			Content:             "",
+		}
+		punishHandler(update, bot, punishment)
+		return true
+	}
+	return false
+
 }

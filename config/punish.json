@@ -7,7 +7,7 @@
     },
     {
       "text": "禁言",
-      "data": "punish_setting_type:ban",
+      "data": "punish_setting_type:mute",
       "btn_type": "data"
     },
     {
@@ -72,7 +72,7 @@
   [
     {
       "text": "禁言",
-      "data": "punish_setting_action:ban",
+      "data": "punish_setting_action:mute",
       "btn_type": "data"
     },
     {

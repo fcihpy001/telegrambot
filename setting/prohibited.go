@@ -25,7 +25,7 @@ func ProhibitedSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		params = query[1]
 	}
 	fmt.Println(query)
-	if cmd == "prohibited_setting" { //违禁词设置主菜单
+	if cmd == "prohibited_setting_menu" { //违禁词设置主菜单
 		prohibitedSettingMenu(update, bot)
 
 	} else if cmd == "prohibited_status" { //违禁词开关
@@ -118,7 +118,7 @@ func ProhibitedAddResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "prohibited_setting",
+		Data:    "prohibited_setting_menu",
 		BtnType: model.BtnTypeData,
 	}
 	btn2 := model.ButtonInfo{
@@ -151,7 +151,7 @@ func ProhibitedList(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "prohibited_setting",
+		Data:    "prohibited_setting_menu",
 		BtnType: model.BtnTypeData,
 	}
 	row1 := []model.ButtonInfo{btn1}
@@ -176,7 +176,7 @@ func prohibitedDeleteMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 	btn2 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "prohibited_setting",
+		Data:    "prohibited_setting_menu",
 		BtnType: model.BtnTypeData,
 	}
 	row1 := []model.ButtonInfo{btn1, btn2}
@@ -195,7 +195,7 @@ func ProhibitedDeleteResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	content := "已清空"
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "prohibited_setting",
+		Data:    "prohibited_setting_menu",
 		BtnType: model.BtnTypeData,
 	}
 	row1 := []model.ButtonInfo{btn1}
@@ -297,50 +297,26 @@ func ProhibitedCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 	messageText := update.Message.Text
 	chatId := update.Message.Chat.ID
 	//获取数据库中的违禁词列表
-	prohibitedSetting = services.GetProhibitSettings(chatId)
-	if prohibitedSetting.Enable == false {
+	setting := model.ProhibitedSetting{}
+	_ = services.GetModelData(chatId, &setting)
+	if setting.Enable == false {
 		return false
 	}
-	var content string
-	if strings.Contains(prohibitedSetting.World, messageText) {
 
-		//如果是警告，就警告一次，并增加警告次数
-		if prohibitedSetting.Punish == model.PunishTypeWarning {
-			//获取用户的警告次数
-			record := model.PunishRecord{}
-			where := fmt.Sprintf("chat_id = %d and user_id = %d", chatId, update.Message.From.ID)
-			_ = services.GetModelWhere(where, &record)
-			r := &model.PunishRecord{
-				ChatId:       chatId,
-				UserId:       update.Message.From.ID,
-				Reason:       "prohibited",
-				Punish:       model.PunishTypeWarning,
-				WarningCount: record.WarningCount + 1,
-			}
-			//记录入库
-			services.SaveModel(r, chatId)
-			//	发送一条系统消息
-			content = fmt.Sprintf("%s触犯了违禁词，被警告%d次", update.Message.From.FirstName, record.WarningCount+1)
-			return true
-		} else if prohibitedSetting.Punish == model.PunishTypeKick {
-			//	执行踢出操作
-			//	tgbotapi.BanChatMemberConfig{
-			//		ChatMemberConfig: tgbotapi.ChatMemberConfig{
-			//			ChatID: utils.GroupInfo.GroupId,
-			//			UserID: update.Message.From.ID,
-			//		},
-			//		}
-			//	}
-
-			//	发送一条系统消息
-			content = fmt.Sprintf("%s触犯了违禁词，被踢出群组", update.Message.From.FirstName)
-			return true
-		} else {
-			//	只发个提示消息
-			utils.SendText(update.Message.Chat.ID, "您发送的消息包含违禁词，请注意言行", bot)
-			return true
-		}
-		utils.SendText(update.Message.Chat.ID, content, bot)
+	if !strings.Contains(setting.World, messageText) {
+		return false
 	}
-	return false
+	punishment := model.Punishment{
+		PunishType:          setting.Punish,
+		WarningCount:        setting.WarningCount,
+		WarningAfterPunish:  setting.WarningAfterPunish,
+		BanTime:             setting.BanTime,
+		MuteTime:            setting.MuteTime,
+		DeleteNotifyMsgTime: setting.DeleteNotifyMsgTime,
+		Reason:              "prohibited",
+		ReasonType:          1,
+		Content:             "",
+	}
+	punishHandler(update, bot, punishment)
+	return true
 }

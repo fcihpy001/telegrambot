@@ -119,6 +119,7 @@ func (bot *SmartBot) handleQuery(update *tgbotapi.Update) {
 
 func (bot *SmartBot) go_setting(update *tgbotapi.Update) {
 	fmt.Println("go_setting...")
-	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, "设置【流量聚集地】群组，选择要更改的项目", utils.SettingMenuMarkup)
+	content := fmt.Sprintf("设置【%s】群组，选择要更改的项目", utils.GroupInfo.GroupName)
+	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.SettingMenuMarkup)
 	bot.bot.Send(msg)
 }

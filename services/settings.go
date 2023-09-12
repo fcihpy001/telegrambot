@@ -106,28 +106,23 @@ func SaveModel(model interface{}, chatId int64) {
 		fmt.Println("不符合存储条件")
 		return
 	}
-
 	err := db.Save(model)
 	if err.Error != nil {
 		log.Println("update or insert model data failed", err)
 	}
 }
 
-//func SaveGroupInfo(model *model.GroupInfo) {
-//	if model.GroupId == 0 {
-//		fmt.Println("不符合存储条件")
-//		return
-//	}
-//
-//	err := db.Save(model)
-//	if err.Error != nil {
-//		log.Println("update or insert model data failed", err)
-//	}
-//}
-//
-//func GetGroupInfo() {
-//
-//}
+func SavePunishRecord(model interface{}, chatId int64) {
+	if chatId == 0 {
+		fmt.Println("不符合存储条件")
+		return
+	}
+
+	err := db.Save(model)
+	if err.Error != nil {
+		log.Println("update or insert model data failed", err)
+	}
+}
 
 func GetModelData(chatId int64, model interface{}) error {
 

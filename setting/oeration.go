@@ -20,24 +20,28 @@ func OperationHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		unBanUserHandler(update, bot)
 
 	case "mute":
-		muteUser(update, bot, 10*60)
+		muteUserHandler(update, bot, 10*60)
 
 	case "unmute":
-		muteUser(update, bot, 0)
+		muteUserHandler(update, bot, 0)
 
 	}
 }
 
 // 对用户进行禁言,second=解除禁言
-func muteUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, second int) {
+func muteUserHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, second int) {
 
 	chatId := update.Message.Chat.ID
+	userId := update.Message.ReplyToMessage.From.ID
 	if update.Message.ReplyToMessage == nil {
 		utils.SendText(chatId, "请在要操作的用户所发的消息上，回复此命令", bot)
 		return
 	}
+	muteUser(update, bot, second, userId)
+}
 
-	userId := update.Message.ReplyToMessage.From.ID
+func muteUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, second int, userId int64) {
+
 	permission := &tgbotapi.ChatPermissions{
 		CanSendMessages:       true,
 		CanSendMediaMessages:  true,
@@ -60,12 +64,51 @@ func muteUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, second int) {
 			CanPinMessages:        false,
 		}
 	}
+	date := time.Now().Add(time.Duration(second) * time.Second).Unix()
 	msg := tgbotapi.RestrictChatMemberConfig{
 		ChatMemberConfig: tgbotapi.ChatMemberConfig{
 			ChatID: update.Message.Chat.ID,
 			UserID: userId,
 		},
-		UntilDate:   time.Now().Add(time.Duration(second) * time.Second).Unix(),
+		UntilDate:   date,
+		Permissions: permission,
+	}
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func banMember(bot *tgbotapi.BotAPI, chatId int64, second int, userId int64, muteMedia bool) {
+	permission := &tgbotapi.ChatPermissions{
+		CanSendMessages:       false,
+		CanSendMediaMessages:  false,
+		CanSendPolls:          false,
+		CanSendOtherMessages:  false,
+		CanAddWebPagePreviews: false,
+		CanChangeInfo:         false,
+		CanInviteUsers:        false,
+		CanPinMessages:        false,
+	}
+	if muteMedia {
+		permission = &tgbotapi.ChatPermissions{
+			CanSendMessages:       true,
+			CanSendMediaMessages:  false,
+			CanSendPolls:          false,
+			CanSendOtherMessages:  false,
+			CanAddWebPagePreviews: false,
+			CanChangeInfo:         false,
+			CanInviteUsers:        false,
+			CanPinMessages:        false,
+		}
+	}
+	date := time.Now().Add(time.Duration(second) * time.Second).Unix()
+	msg := tgbotapi.RestrictChatMemberConfig{
+		ChatMemberConfig: tgbotapi.ChatMemberConfig{
+			ChatID: chatId,
+			UserID: userId,
+		},
+		UntilDate:   date,
 		Permissions: permission,
 	}
 	_, err := bot.Send(msg)
@@ -108,9 +151,14 @@ func kickUserHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		return
 	}
 	userId := update.Message.ReplyToMessage.From.ID
+	kickUser(update, bot, userId)
+}
+
+func kickUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, userId int64) {
+
 	msg := tgbotapi.BanChatMemberConfig{
 		ChatMemberConfig: tgbotapi.ChatMemberConfig{
-			ChatID: chatId,
+			ChatID: update.Message.Chat.ID,
 			UserID: userId,
 		},
 		UntilDate:      time.Now().Add(7 * 60 * 24 * time.Minute).Unix(),
@@ -129,6 +177,11 @@ func banUserHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		return
 	}
 	userId := update.Message.ReplyToMessage.From.ID
+	banUser(update, bot, userId)
+}
+
+func banUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, userId int64) {
+
 	msg := tgbotapi.BanChatMemberConfig{
 		ChatMemberConfig: tgbotapi.ChatMemberConfig{
 			ChatID: update.Message.Chat.ID,

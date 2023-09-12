@@ -56,7 +56,7 @@ func notifyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	//返回按钮
 	backBtn := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "prohibited_setting",
+		Data:    "prohibited_setting_menu",
 		BtnType: model.BtnTypeData,
 	}
 	row := []model.ButtonInfo{backBtn}
