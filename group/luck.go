@@ -24,6 +24,10 @@ const (
 	ConversationLuckyCreateGeneralStep5 ConversationStatus = "createGeneralStep5" // 活动名称
 )
 
+// button callback data 的长度不能超过 64 字节
+// https://core.telegram.org/bots/api#inlinekeyboardbutton
+// Optional. Data to be sent in a callback query to the bot when button is pressed, 1-64 bytes
+
 var (
 	luckyEndChan  chan int
 	luckyCreated  chan *model.LuckyActivity
@@ -75,7 +79,7 @@ func loopLuckyKeywords() {
 	for word, records := range luckyKeywords {
 		nRecords := []*model.LuckyActivity{}
 		for _, record := range records {
-			if record.LuckySubType == model.LuckySubTypeTime && record.EndTime < now {
+			if record.LuckyEndType == model.LuckyEndTypeByTime && record.EndTime < now {
 				// record is time up
 				record.Status = model.LuckyStatusEnd
 				// 这里需要 bot 实例
@@ -389,7 +393,14 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 		logger.Err(err).Msg("lucky create failed")
 		return err
 	}
+	cb := update.CallbackQuery
 	typ := param.param["typ"][0]
+	data := model.LuckyData{
+		ChatId:   cb.Message.Chat.ID,
+		UserId:   cb.Message.From.ID,
+		Username: getDisplayNameFromUser(cb.Message.From),
+		Typ:      typ,
+	}
 	switch typ {
 	case model.LuckyTypeGeneral:
 		content := "🎁创建通用抽奖\n\n" +
@@ -397,8 +408,8 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 			"选择开奖方式：\n"
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("满人开奖", "lucky_create_general?subType=users"),
-				tgbotapi.NewInlineKeyboardButtonData("定时抽奖", "lucky_create_general?subType=time"),
+				tgbotapi.NewInlineKeyboardButtonData("满人开奖", "lucky_create_general?endType=users"),
+				tgbotapi.NewInlineKeyboardButtonData("定时抽奖", "lucky_create_general?endType=time"),
 			),
 			// tgbotapi.NewInlineKeyboardRow(
 			// 	tgbotapi.NewInlineKeyboardButtonData("🧶设置抽奖", "luckysetting"),
@@ -444,8 +455,8 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 			"选择一个抽奖类型：\n"
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("邀请排名抽奖", "lucky_create_invite?subType="+model.LuckySubTypeInviteRank),
-				tgbotapi.NewInlineKeyboardButtonData("邀请次数抽奖", "lucky_create_invite?subType="+model.LuckySubTypeInviteTimes),
+				tgbotapi.NewInlineKeyboardButtonData("邀请排名抽奖", "lucky_create_invite?stage=1&subType="+model.LuckySubTypeInviteRank),
+				tgbotapi.NewInlineKeyboardButtonData("邀请次数抽奖", "lucky_create_invite?stage=1&subType="+model.LuckySubTypeInviteTimes),
 			),
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
@@ -467,11 +478,11 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("1⃣️ 根据活跃排名抽奖",
-					"lucky_create_hot?subType="+model.LuckySubTypeHotRank),
+					"lucky_create_hot?stage=1&subType="+model.LuckySubTypeHotRank),
 			),
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("2⃣️ 达到发言次数参与随机抽奖",
-					"lucky_create_hot?subType="+model.LuckySubTypeHotTimes),
+					"lucky_create_hot?stage=1&subType="+model.LuckySubTypeHotTimes),
 			),
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
@@ -538,9 +549,9 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("满人抽奖",
-					"lucky_create_points?subType="+model.LuckySubTypeHotRank),
+					"lucky_create_points?endType="+model.LuckySubTypeHotRank),
 				tgbotapi.NewInlineKeyboardButtonData("定时抽奖",
-					"lucky_create_points?subType="+model.LuckySubTypeHotTimes),
+					"lucky_create_points?endType="+model.LuckySubTypeHotTimes),
 			),
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
@@ -562,9 +573,9 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("满人抽奖",
-					"lucky_create_answer?subType="+model.LuckySubTypeHotRank),
+					"lucky_create_answer?endType="+model.LuckyEndTypeByUsers),
 				tgbotapi.NewInlineKeyboardButtonData("定时抽奖",
-					"lucky_create_answer?subType="+model.LuckySubTypeHotTimes),
+					"lucky_create_answer?endType="+model.LuckyEndTypeByTime),
 			),
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("🔙返回选择抽奖类型", "lucky_create_index"),
@@ -581,6 +592,11 @@ func luckyCreate(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 	default:
 		logger.Error().Msgf("not implement lucky type: %v", typ)
 	}
+
+	updateAdminConversation(param.chatId,
+		ConversationLuckyCreateGeneralStep1,
+		&data,
+		luckyCreateGeneralSteps)
 
 	return nil
 }
@@ -610,23 +626,36 @@ func luckyCancel(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackP
 
 // 通用抽奖
 func luckyCreateGeneral(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
-	if len(param.param["subType"]) == 0 {
-		err := errors.New("not found param subType")
+	if len(param.param["endType"]) == 0 {
+		err := errors.New("not found param endType")
 		logger.Err(err).Msg("lucky create general failed")
 		return err
 	}
-	subType := param.param["subType"][0]
+	endType := param.param["endType"][0]
 
+	sess := GetConversation(param.chatId)
+	if sess == nil {
+		logger.Error().Msg("luckyCreateGeneral: not found session")
+		return errors.New("luckyCreateGeneral: not found session")
+	}
+	data := sess.data.(*model.LuckyData)
+	status := ConversationLuckyCreateGeneralStep1
 	var content string
-	switch subType {
-	case model.LuckySubTypeUsers:
+	if data.Typ == model.LuckyTypeGeneral {
+		content = "🎁创建通用抽奖(/cancel 命令返回首页)\n\n"
+	} else if data.Typ == model.LuckyTypeInvite && data.SubType == model.LuckySubTypeInviteTimes {
+		content = "🎁创建邀请人数抽奖(/cancel 命令返回首页)\n\n"
+		content += fmt.Sprintf("├参与条件：邀请 %d人进群 [添加成员]\n", data.MinInviteCount)
+		// status = ConversationLuckyCreateGeneralStep2 // 奖品
+	}
+
+	switch endType {
+	case model.LuckyEndTypeByUsers:
 		// 满人抽奖
-		content = "🎁创建通用抽奖(/cancel 命令返回首页)\n\n" +
-			"请回复参与多少人后开奖：\n\n"
-	case model.LuckySubTypeTime:
+		content += "请回复参与多少人后开奖：\n\n"
+	case model.LuckyEndTypeByTime:
 		// 定时抽奖
-		content = "🎁创建通用抽奖(/cancel 命令返回首页)\n\n" +
-			"请回复开奖时间：\n" +
+		content += "请回复开奖时间：\n" +
 			"格式：年-月-日 时:分\n" +
 			"例如：2023-09-11 19:45\n\n"
 	}
@@ -635,18 +664,11 @@ func luckyCreateGeneral(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 	if err != nil {
 		logger.Err(err).Msg("send msg failed")
 	}
-	data := model.LuckyGeneral{
-		ChatId:  param.chatId,
-		SubType: subType,
-	}
-	// StartAdminConversation(param.chatId, param.chatId, update.CallbackQuery.From.ID, int64(param.msgId),
-	// 	ConversationLuckyCreateGeneralStep1,
-	// 	&data,
-	// 	luckyCreateGeneralSteps,
-	// )
+	data.EndType = endType
+
 	updateAdminConversation(param.chatId,
-		ConversationLuckyCreateGeneralStep1,
-		&data,
+		status,
+		data,
 		luckyCreateGeneralSteps)
 
 	return err
@@ -657,13 +679,114 @@ func luckyCreateChatJoin(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *C
 	return nil
 }
 
-// 邀请抽奖
-func luckyCreateInvite(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+// 活跃抽奖
+func luckyCreateHot(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
 	return nil
 }
 
-// 活跃抽奖
-func luckyCreateHot(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+// 邀请抽奖 lucky_create_invite?stage=1&subType=xx
+func luckyCreateInvite(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	subType := getStringParam(&param.param, "subType")
+	if subType == "" {
+		return errors.New("luckyCreateHot: not found param subType")
+	}
+	stage := getStringParam(&param.param, "stage")
+
+	var (
+		err     error
+		content string
+	)
+	if stage == "1" {
+		content = "🎁创建邀请人数抽奖(/cancel 命令返回首页)\n\n" +
+			"专属链接邀请：群成员用指令 /link 获得专属链接拉人进群（在管理菜单首页【专属邀请链接生成】可对生成链接进行设置，在抽奖前你应该先清空邀请数据）：\n\n" +
+			"添加成员邀请：群成员用[添加成员]拉人进群\n\n" +
+			"选择邀请方式：\n"
+		pullText := "⚠️添加成员邀请"
+		if subType == model.LuckySubTypeInviteTimes {
+			pullText = "添加成员邀请"
+		}
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("专属链接邀请",
+					"lucky_create_invite?it="+model.LuckyInviteByLink+"&subType="+subType),
+				tgbotapi.NewInlineKeyboardButtonData(pullText,
+					"lucky_create_invite?it="+model.LuckyInviteByPull+"&subType="+subType),
+			),
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🔙返回", "lucky_create_index?typ="+model.LuckyTypeInvite),
+			),
+		)
+		reply := tgbotapi.NewEditMessageTextAndMarkup(param.chatId, param.msgId, content, inlineKeyboard)
+		_, err = bot.Send(reply)
+		if err != nil {
+			logger.Err(err).Msg("send invite msg failed")
+		}
+	} else {
+		sess := GetConversation(param.chatId)
+		if sess == nil {
+			sendText(bot, param.chatId, "not found admin session, please restart admin")
+			return ErrNotFoundSession
+		}
+
+		inviteType := getStringParam(&param.param, "it")
+		if inviteType == "" {
+			sendText(bot, param.chatId, "not found param it, please restart admin")
+			return errors.New("not found param it")
+		}
+		if subType == model.LuckySubTypeInviteRank {
+			content = "请回复开奖时间：\n\n" +
+				"格式：年-月-日 时:分\n\n" +
+				"例如：2023-09-13 08:02\n"
+		} else {
+			content = "🎁创建邀请人数抽奖\n\n请输入邀请多少人参与抽奖：\n"
+		}
+
+		data := model.LuckyData{
+			ChatId:     param.chatId,
+			Typ:        model.LuckyTypeInvite,
+			SubType:    subType,
+			InviteType: inviteType,
+		}
+
+		updateAdminConversation(param.chatId,
+			ConversationLuckyCreateGeneralStep1,
+			&data,
+			luckyCreateGetMinInvite)
+		sendText(bot, param.chatId, content)
+	}
+	return err
+}
+
+func luckyCreateGetMinInvite(update *tgbotapi.Update, bot *tgbotapi.BotAPI, sess *botConversation) error {
+	text := update.Message.Text
+	if text == "/cancel" {
+		return nil
+	}
+	data := sess.data.(*model.LuckyData)
+
+	users, err := strconv.Atoi(text)
+	if err != nil {
+		// todo
+		logger.Err(err).Msg("invalid input: 请输入邀请多少人参与抽奖")
+	}
+	data.MinInviteCount = users
+	content := "🎁创建邀请人数排名抽奖  ( /cancel 命令返回首页)\n\n"
+	content += fmt.Sprintf("├参与条件：邀请%d人进群[添加成员]\n", users)
+	// content += "请回复第一个奖品的名称（如：1USDT）：\n"
+	// content := step1Content(text, data)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("满人开奖", "lucky_create_general?endType="+model.LuckyEndTypeByUsers),
+			tgbotapi.NewInlineKeyboardButtonData("定时开奖", "lucky_create_general?endType="+model.LuckyEndTypeByTime),
+		),
+	)
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, content) //
+	// NewMessageTextAndMarkup(update.Message.Chat.ID, update.Message.MessageID, content, keyboard)
+	msg.ReplyMarkup = keyboard
+	if _, err := bot.Send(msg); err != nil {
+		logger.Err(err).Stack().Msg("send msg failed")
+	}
+
 	return nil
 }
 
@@ -770,17 +893,23 @@ func toggleLuckySetting(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 	return err
 }
 
-func buildRewardContent(data *model.LuckyGeneral) string {
-	return escapeText("🎁创建通用抽奖  ( /cancel 命令返回首页)\n\n") + buildRewardBody(data)
-}
+func buildRewardContent(data *model.LuckyData) (content string) {
+	content = escapeText("🎁创建" + data.GetTypeName() + "抽奖  ( /cancel 命令返回首页)\n\n")
 
-func buildRewardBody(data *model.LuckyGeneral) string {
-	content := ""
 	if data.Name != "" {
 		content += escapeText(data.Name) + "\n"
 	}
 	if data.Keyword != "" {
 		content += fmt.Sprintf("├参与关键词：%s\n", escapeText(data.Keyword))
+	}
+	if data.Typ == model.LuckyTypeInvite {
+		// todo
+		if data.SubType == model.LuckySubTypeInviteRank {
+			content += "├参与条件：邀请人数排名\n"
+			// content += escapeText("├开奖时间：" + yyyymmddhhmmss(data.EndTime) + "\n")
+		} else {
+			content += fmt.Sprintf("├参与条件：邀请%d人[添加成员]\n", data.MinInviteCount)
+		}
 	}
 	if data.Push != nil {
 		if *data.Push {
@@ -789,9 +918,9 @@ func buildRewardBody(data *model.LuckyGeneral) string {
 			content += "├推送至频道：✅\n"
 		}
 	}
-	if data.SubType == model.LuckySubTypeUsers {
+	if data.EndType == model.LuckyEndTypeByUsers {
 		content += escapeText(fmt.Sprintf("├满人开奖  (%v人)\n", data.Users))
-	} else if data.SubType == model.LuckySubTypeTime {
+	} else if data.EndType == model.LuckyEndTypeByTime {
 		content += escapeText(fmt.Sprintf("├开奖时间:  (%v)\n", yyyymmddhhmmss(data.EndTime)))
 	}
 	content += "├奖品列表:\n"
@@ -813,10 +942,12 @@ func buildParticiateContent(record *model.LuckyActivity, update *tgbotapi.Update
 	username := getDisplayNameFromUser(msg.From)
 	content += mentionUser(username, msg.From.ID) + " 您已参与成功，请等待开奖通知！\n\n"
 
-	if record.LuckyType == model.LuckyTypeGeneral && record.LuckySubType == model.LuckySubTypeUsers {
+	if record.LuckyType == model.LuckyTypeGeneral && record.LuckyEndType == model.LuckyEndTypeByUsers {
 		content += escapeText(fmt.Sprintf("├%s  \\(%d人\\)\n", record.GetLuckyType(), record.GetLuckGeneralUsers()))
 	} else {
-		content += escapeText(fmt.Sprintf("├开奖时间:  \\(%s\\)\n", yyyymmddhhmmss(record.EndTime)))
+		if record.EndTime > 0 {
+			content += escapeText(fmt.Sprintf("├开奖时间:  \\(%s\\)\n", yyyymmddhhmmss(record.EndTime)))
+		}
 	}
 	content += fmt.Sprintf("├已参与  \\(%d人\\)\n", record.Participant)
 	content += fmt.Sprintf("├参与关键词：  %s\n", escapeText(record.Keyword))
@@ -830,7 +961,7 @@ func buildParticiateContent(record *model.LuckyActivity, update *tgbotapi.Update
 }
 
 // 用于展示抽奖活动
-func buildRewardInfo(data *model.LuckyGeneral) string {
+func buildRewardInfo(data *model.LuckyData) string {
 	content := fmt.Sprintf("%s\n├开始时间：%s\n├参与关键词：%s\n├奖品列表：\n",
 		escapeText(data.Name),
 		escapeText(yyyymmddhhmmss(data.StartTime)),
@@ -846,20 +977,10 @@ func buildRewardInfo(data *model.LuckyGeneral) string {
 	return content
 }
 
-// 满人抽奖: step1 输入人数
-func luckyCreateGeneralSteps(update *tgbotapi.Update, bot *tgbotapi.BotAPI, sess *botConversation) error {
-	text := update.Message.Text
-	if text == "/cancel" {
-		return nil
-	}
-	data := sess.data.(*model.LuckyGeneral)
-	status := sess.status
-
-	switch status {
-	case ConversationLuckyCreateGeneralStep1:
-		var content string
-		sess.status = ConversationLuckyCreateGeneralStep2
-		if data.SubType == model.LuckySubTypeUsers {
+func step1Content(text string, data *model.LuckyData) (content string) {
+	switch data.Typ {
+	case model.LuckyTypeGeneral:
+		if data.EndType == model.LuckyEndTypeByUsers {
 			users, err := strconv.Atoi(text)
 			if err != nil {
 				logger.Err(err).Msg("invalid user arg")
@@ -877,7 +998,71 @@ func luckyCreateGeneralSteps(update *tgbotapi.Update, bot *tgbotapi.BotAPI, sess
 			data.EndTime = tm.Unix()
 			content = escapeText(fmt.Sprintf("🎁创建通用抽奖  ( /cancel 命令返回首页)\n\n├开奖时间:  (%s)\n\n请回复第一个奖品的名称（如：1USDT）：", text))
 		}
+
+	case model.LuckyTypeInvite:
+		if data.SubType == model.LuckySubTypeInviteRank {
+			tm, err := parseDateTime(text)
+			if err != nil {
+				logger.Err(err).Msg("invalid lucky end time")
+			}
+			data.EndTime = tm.Unix()
+			if data.SubType == model.LuckySubTypeInviteRank {
+				content = "🎁创建邀请人数排名抽奖  ( /cancel 命令返回首页)\n\n"
+				content += "├参与条件：邀请人数排名\n"
+			} else {
+				// inviteTimes
+				content = "🎁创建邀请人数排名抽奖  ( /cancel 命令返回首页)\n\n"
+				content += "├参与条件：邀请人数排名\n"
+			}
+			content += "├开奖时间：" + text + "\n\n"
+			content += "请回复排名第一奖品（如：1USDT）： \n"
+		} else {
+			users, err := strconv.Atoi(text)
+			if err != nil {
+				// todo
+				logger.Err(err).Msg("invalid input: 请输入邀请多少人参与抽奖")
+			}
+			data.Users = users
+			content = "🎁创建邀请人数排名抽奖  ( /cancel 命令返回首页)\n\n"
+			content += fmt.Sprintf("├参与条件：邀请%d人进群[添加成员]\n", users)
+			content += "请回复第一个奖品的名称（如：1USDT）：\n"
+		}
+	default:
+		logger.Error().Stack().Msg("unknow data type")
+	}
+
+	return
+}
+
+// 满人抽奖: step1 输入人数
+func luckyCreateGeneralSteps(update *tgbotapi.Update, bot *tgbotapi.BotAPI, sess *botConversation) error {
+	text := update.Message.Text
+	if text == "/cancel" {
+		return nil
+	}
+	data := sess.data.(*model.LuckyData)
+	status := sess.status
+
+	switch status {
+	case ConversationLuckyCreateGeneralStep1:
+		content := step1Content(text, data)
+		sess.status = ConversationLuckyCreateGeneralStep2
+		// if data.SubType == model.LuckySubTypeInviteTimes {
+		// 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		// 		tgbotapi.NewInlineKeyboardRow(
+		// 			tgbotapi.NewInlineKeyboardButtonData("满人开奖", "lucky_create_general?endType="+model.LuckyEndTypeByUsers),
+		// 			tgbotapi.NewInlineKeyboardButtonData("定时开奖", "lucky_create_general?endType="+model.LuckyEndTypeByTime),
+		// 		),
+		// 	)
+		// 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, content) //
+		// 	// NewMessageTextAndMarkup(update.Message.Chat.ID, update.Message.MessageID, content, keyboard)
+		// 	msg.ReplyMarkup = keyboard
+		// 	if _, err := bot.Send(msg); err != nil {
+		// 		logger.Err(err).Stack().Msg("send msg failed")
+		// 	}
+		// } else {
 		sendText(bot, update.Message.Chat.ID, content)
+		// }
 
 	case ConversationLuckyCreateGeneralStep2:
 		sess.status = ConversationLuckyCreateGeneralStep3
@@ -900,13 +1085,19 @@ func luckyCreateGeneralSteps(update *tgbotapi.Update, bot *tgbotapi.BotAPI, sess
 		// 这里可以结束进入下一步, 也可以继续添加奖品
 		content := buildRewardContent(data)
 		content += "\n回复奖品名称，继续添加：\n"
+		nextStep := "lucky_create_keywords"
+		if data.Typ == model.LuckyTypeInvite {
+			nextStep = "lucky_create_name"
+			sess.status = ConversationLuckyCreateGeneralStep4
+		}
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("👉结束添加奖品，进入下一步👈", "lucky_create_keywords"),
+				tgbotapi.NewInlineKeyboardButtonData("👉结束添加奖品，进入下一步👈", nextStep),
 			),
 		)
 		reply := tgbotapi.NewMessage(update.Message.Chat.ID, content)
-		reply.ReplyMarkup = inlineKeyboard
+		reply.
+			ReplyMarkup = inlineKeyboard
 		if _, err = bot.Send(reply); err != nil {
 			logger.Err(err).Msg("send lucky create keywords failed")
 		}
@@ -951,12 +1142,30 @@ func luckyCreateKeywords(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *C
 	chatId := chat.ID
 	sess := GetConversation(chatId)
 	if sess == nil {
-		logger.Error().Stack().Int64("chatId", chatId).Msg("not found session")
+		logger.Error().Stack().Int64("chatId", chatId).Msg("luckyCreateKeywords: not found session")
 		return errors.New("not found session")
 	}
-	content := buildRewardContent(sess.data.(*model.LuckyGeneral))
+	content := buildRewardContent(sess.data.(*model.LuckyData))
 	content += "\n👉 请回复参与抽奖关键词：\n"
 	sess.status = ConversationLuckyCreateGeneralStep4
+	sendEditText(bot, chatId, cb.Message.MessageID, content)
+
+	return nil
+}
+
+// callback
+func luckyCreateName(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *CallbackParam) error {
+	cb := update.CallbackQuery
+	chat := cb.Message.Chat
+	chatId := chat.ID
+	sess := GetConversation(chatId)
+	if sess == nil {
+		logger.Error().Stack().Int64("chatId", chatId).Msg("luckyCreateName: not found session")
+		return errors.New("luckyCreateName: not found session")
+	}
+	content := buildRewardContent(sess.data.(*model.LuckyData))
+	content += "\n👉 请输入抽奖活动名称：\n"
+	sess.status = ConversationLuckyCreateGeneralStep5
 	sendEditText(bot, chatId, cb.Message.MessageID, content)
 
 	return nil
@@ -975,10 +1184,10 @@ func luckyCreatePush(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Callb
 		logger.Error().Stack().Int64("chatId", chatId).Msg("not found session")
 		return errors.New("not found session")
 	}
-	data := sess.data.(*model.LuckyGeneral)
+	data := sess.data.(*model.LuckyData)
 	pushVal := false
 	data.Push = &pushVal
-	content := buildRewardContent(sess.data.(*model.LuckyGeneral))
+	content := buildRewardContent(sess.data.(*model.LuckyData))
 	content += "\n🥳恭喜！已完成所有内容，是否发布到群组?\n" // todo 群组名称
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -1016,9 +1225,10 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 		return errors.New("not found session")
 	}
 
-	data := sess.data.(*model.LuckyGeneral)
+	data := sess.data.(*model.LuckyData)
+	data.StartTime = time.Now().Unix()
 
-	content := buildRewardContent(sess.data.(*model.LuckyGeneral))
+	content := buildRewardContent(data)
 	content += "\n✅抽奖活动已发布！\n"
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -1028,12 +1238,7 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 	)
 	// 1. create lucky activity
 	rewards, _ := json.Marshal(data.Rewards)
-	cond, _ := json.Marshal(map[string]interface{}{
-		"users":     data.Users,
-		"startTime": time.Now().Unix(),
-		"endTime":   data.EndTime,
-	})
-	data.StartTime = time.Now().Unix()
+	cond, _ := json.Marshal(data)
 	item := model.LuckyActivity{
 		ChatId:       chatId,
 		LuckyName:    data.Name,
@@ -1053,7 +1258,8 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 	services.CreateLucky(&item)
 	luckyCreated <- &item
 	// 2. push lucky info to chat group
-	notifyText := buildLuckyMarkdown(bot, sess.groupChatId, sess.userId, data)
+	username := getUserDisplayName(bot, chatId, sess.userId)
+	notifyText := buildLuckyNotice(sess.userId, username, data)
 	sendMarkdown(bot, sess.groupChatId, notifyText, true)
 
 	// 3. send reply
@@ -1067,7 +1273,21 @@ func luckyCreatePublish(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param *Ca
 	return nil
 }
 
-func buildLuckyMarkdown(bot *tgbotapi.BotAPI, chatId, userId int64, data *model.LuckyGeneral) string {
+func getUserDisplayName(bot *tgbotapi.BotAPI, chatId, userId int64) string {
+	var username string
+	mgr := GroupManager{bot}
+	user, err := mgr.fetchAndSaveMember(chatId, userId)
+	if err != nil {
+		username = fmt.Sprint(userId)
+	} else {
+		username = getDisplayName(&user)
+	}
+
+	return username
+}
+
+// 抽奖信息发布到群里时的通知
+func buildLuckyNotice(userId int64, username string, data *model.LuckyData) string {
 	/*
 	   	🎁bigwinner 发起了通用抽奖活动
 
@@ -1079,16 +1299,64 @@ func buildLuckyMarkdown(bot *tgbotapi.BotAPI, chatId, userId int64, data *model.
 
 	   【如何参与？】在群组中回复关键词『andy』参与活动。
 	*/
-	var username string
-	mgr := GroupManager{bot}
-	user, err := mgr.fetchAndSaveMember(chatId, userId)
-	if err != nil {
-		username = fmt.Sprint(userId)
-	} else {
-		username = getDisplayName(&user)
+	content := "🎁" + mentionUser(username, userId) + " 发起了" + data.GetTypeName() + "活动\n\n"
+	rewards := "├奖品列表：\n"
+	for _, reward := range data.Rewards {
+		if reward.Shares > 0 {
+			rewards += fmt.Sprintf("├       %s    x %d份\n", escapeText(reward.Name), reward.Shares)
+		} else {
+			rewards += fmt.Sprintf("├       %s\n", escapeText(reward.Name))
+		}
 	}
-	content := "🎁" + mentionUser(username, userId) + " 发起了通用抽奖活动\n\n" + buildRewardInfo(data)
-	content += fmt.Sprintf("\n【如何参与？】在群组中回复关键词『%s』参与活动。\n", escapeText(data.Keyword))
+
+	if data.Typ == model.LuckyTypeGeneral {
+		content += fmt.Sprintf("%s\n├开始时间：%s\n├参与关键词：%s\n",
+			escapeText(data.Name),
+			escapeText(yyyymmddhhmmss(data.StartTime)),
+			escapeText(data.Keyword),
+		)
+	} else if data.Typ == model.LuckyTypeInvite {
+		if data.SubType == model.LuckySubTypeInviteRank {
+			content += "├参与条件：邀请人数排名	\n"
+		} else {
+			content += fmt.Sprintf("├参与条件：邀请%d人进群\\[%s\\]\n", data.MinInviteCount, data.GetInviteType())
+		}
+		if data.EndTime > 0 {
+			content += escapeText(fmt.Sprintf("├开奖时间：%s\n", yyyymmddhhmmss(data.EndTime)))
+		} else {
+			content += escapeText(fmt.Sprintf("├满人开奖  (%d人)\n", data.Users))
+		}
+	} else if data.Typ == model.LuckyTypeHot {
+
+		if data.EndTime > 0 {
+			content += escapeText(fmt.Sprintf("开奖时间：%s\n", yyyymmddhhmmss(data.EndTime)))
+		} else {
+			content += escapeText(fmt.Sprintf("├满人开奖  (%d人)\n", data.Users))
+		}
+	} else if data.Typ == model.LuckyTypeFun {
+		if data.EndTime > 0 {
+			content += escapeText(fmt.Sprintf("开奖时间：%s\n", yyyymmddhhmmss(data.EndTime)))
+		} else {
+			content += escapeText(fmt.Sprintf("├满人开奖  (%d人)\n", data.Users))
+		}
+	} else if data.Typ == model.LuckyTypePoints {
+
+		if data.EndTime > 0 {
+			content += escapeText(fmt.Sprintf("开奖时间：%s\n", yyyymmddhhmmss(data.EndTime)))
+		} else {
+			content += escapeText(fmt.Sprintf("├满人开奖  (%d人)\n", data.Users))
+		}
+	} else if data.Typ == model.LuckyTypeAnswer {
+
+		if data.EndTime > 0 {
+			content += escapeText(fmt.Sprintf("开奖时间：%s\n", yyyymmddhhmmss(data.EndTime)))
+		} else {
+			content += escapeText(fmt.Sprintf("├满人开奖  (%d人)\n", data.Users))
+		}
+	}
+
+	content += rewards
+	content += data.HowToParticiate()
 
 	return content
 }

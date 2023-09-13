@@ -1,6 +1,8 @@
 package group
 
 import (
+	"errors"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -28,7 +30,11 @@ type botConversation struct {
 	fn          ConversationFn
 }
 
-var sessions = map[int64]*botConversation{}
+var (
+	sessions = map[int64]*botConversation{}
+
+	ErrNotFoundSession = errors.New("not found chat session")
+)
 
 func GetConversation(chatId int64) *botConversation {
 	return sessions[chatId]
@@ -68,7 +74,7 @@ func updateAdminConversation(
 	sess.fn = fn
 }
 
-func UpdateAdminConversation(chatId int64, status ConversationStatus) {
+func UpdateAdminConversationStatus(chatId int64, status ConversationStatus) {
 	sess := sessions[chatId]
 	if sess == nil {
 		logger.Error().Int64("chatId", chatId).Msg("not found admin conversation")

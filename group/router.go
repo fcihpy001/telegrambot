@@ -136,6 +136,7 @@ func InitCallbackRouters() {
 	RegisterCallback("lucky_create_points", luckyCreatePoints)
 	RegisterCallback("lucky_create_answer", luckyCreateAnswer)
 	RegisterCallback("lucky_create_keywords", luckyCreateKeywords)
+	RegisterCallback("lucky_create_name", luckyCreateName)
 	RegisterCallback("lucky_push", luckyCreatePush)
 	RegisterCallback("lucky_publish", luckyCreatePublish)
 }
