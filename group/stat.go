@@ -48,6 +48,10 @@ func DoStat(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 					mgr := GroupManager{bot}
 					mgr.GetChatInfo(msg.Chat.ID)
 				}
+				// 统计 lucky 抽奖
+				if member.ID != update.Message.From.ID {
+					luckyInviteCh <- update
+				}
 			}
 			return
 		}

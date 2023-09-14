@@ -47,7 +47,7 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 			//开始页面跳转
 			setting.Settings(&update, bot.bot)
 			return
-		} else if module == "lucky" {
+		} else if module == "lucky" || module == "luckyRecord" {
 			group.StartAdminConversation(
 				int64(groupId),
 				msg.Chat.ID,
@@ -58,9 +58,15 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 				nil,
 				nil,
 			)
-			group.LuckyCreateIndex(&update, bot.bot,
-				group.NewCallbackParam(int64(msg.Chat.ID), int(msg.From.ID), "", true),
-			)
+			if module == "lucky" {
+				group.LuckyCreateIndex(&update, bot.bot,
+					group.NewCallbackParam(int64(msg.Chat.ID), int(msg.From.ID), "", true),
+				)
+			} else if module == "luckyRecord" {
+				group.LuckyRecords(&update, bot.bot,
+					group.NewCallbackParam(int64(msg.Chat.ID), int(msg.From.ID), "", true),
+				)
+			}
 			return
 		} else if module == "solitaire" {
 			group.PlaySolitaire(&update, bot.bot, args)
@@ -97,7 +103,7 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	case "link":
 		setting.GetInviteLink(&update, bot.bot)
 
-	case "stat", "stats", "statistic", "stat_week", "lucky", "create":
+	case "stat", "stats", "statistic", "stat_week", "lucky", "create", "record":
 		group.GroupHandlerCommand(&update, bot.bot)
 
 	case "mention":

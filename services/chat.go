@@ -61,6 +61,16 @@ func UpdateChatMember(chatId, userId, inviteBy int64, status string, ts int64) {
 	}
 }
 
+// 查找邀请次数
+func GetUserInviteCount(chatId, userId int64, startTime int64) int {
+	var count int
+	err := db.Model(&model.UserChat{}).Where("chat_id=? AND invited_by=? AND ts > ?", chatId, userId, startTime).Scan(&count).Error
+	if err != nil {
+		logger.Err(err).Msg("GetUserInviteCount failed")
+	}
+	return count
+}
+
 func RemoveChatMember(chatId, userId int64) {
 	db.Exec("delete from user_chat where user_id = ? and chat_id = ?", userId, chatId)
 }
