@@ -30,11 +30,6 @@
     "btn_type": "data"
   },
   {
-    "text": "\uD83E\uDEAC入群验证",
-    "data": "verify_setting_menu",
-    "btn_type": "data"
-  },
-  {
     "text": "\uD83C\uDF89进群欢迎",
     "data": "welcome_setting_menu",
     "btn_type": "data"

@@ -161,7 +161,7 @@ type Reply struct {
 // 违禁设置
 type ProhibitedSetting struct {
 	gorm.Model
-	ChatId              int64 `gorm:"uniqueIndex"`
+	ChatId              int64 `gorm:"primaryKey;uniqueIndex"`
 	Uid                 int64
 	Enable              bool
 	World               string `gorm:"type:longtext"`
@@ -428,7 +428,7 @@ type SelectInfo struct {
 
 type GroupInfo struct {
 	gorm.Model
-	GroupId    int64 `gorm:"uniqueIndex"`
+	GroupId    int64 `gorm:"primaryKey"`
 	GroupName  string
 	GroupType  string
 	Uid        int64

@@ -18,6 +18,7 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 		return
 	}
 
+	//垃圾信息处理
 	if setting.SpamCheck(update, bot.bot) {
 		return
 	}
@@ -28,9 +29,9 @@ func (bot *SmartBot) handleMessage(update *tgbotapi.Update) {
 	}
 
 	//规范检查，是否有名字、头像、关联了某个频道
-	//if setting.UserValidateCheck(update, bot.bot) {
-	//	return
-	//}
+	if setting.UserValidateCheck(update, bot.bot) {
+		return
+	}
 
 	//是否刷屏
 	if setting.FloodCheck(update, bot.bot) {
