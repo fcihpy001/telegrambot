@@ -147,6 +147,12 @@ func createTable() {
 	if err := db.AutoMigrate(&model.Task{}); err != nil {
 		logger.Error().Stack().Err(err)
 	}
+	if err := db.AutoMigrate(&model.Member{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
+	if err := db.AutoMigrate(&model.ScheduleDelete{}); err != nil {
+		logger.Error().Stack().Err(err)
+	}
 	log.Println("数据表创建成功...")
 }
 

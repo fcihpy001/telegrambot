@@ -1,0 +1,91 @@
+[
+  [
+    {
+      "text": "状态",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "启用",
+      "data": "schedule_status:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "关闭",
+      "data": "schedule_status:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "删除上一条消息",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "是",
+      "data": "schedule_delete_prev:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "否",
+      "data": "schedule_delete_prev:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "置顶消息",
+      "data": "toast",
+      "btn_type": "data"
+    },
+    {
+      "text": "是的",
+      "data": "schedule_pin:enable",
+      "btn_type": "data"
+    },
+    {
+      "text": "否",
+      "data": "schedule_pin:disable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "消息内容",
+      "data": "schedule_content",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "发送频率",
+      "data": "schedule_repeat",
+      "btn_type": "data"
+    },
+    {
+      "text": "发送日间段",
+      "data": "schedule_time:enable",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "⏰开始日期",
+      "data": "schedule_date_start",
+      "btn_type": "data"
+    },
+    {
+      "text": "⏰终止日期",
+      "data": "schedule_date_end",
+      "btn_type": "data"
+    }
+  ],
+  [
+    {
+      "text": "\uD83D\uDD19返回",
+      "data": "go_setting",
+      "btn_type": "data"
+    }
+  ]
+]

@@ -335,7 +335,7 @@ func saveRecord(bot *tgbotapi.BotAPI, chatId int64, content string, record *mode
 	task := model.Task{
 		MessageId:     message.MessageID,
 		Type:          "delete",
-		OperationTime: time.Now().Add(time.Duration(deleteTime) * time.Minute).Unix(),
+		OperationTime: time.Now().Add(time.Duration(deleteTime) * time.Minute),
 	}
 	services.SaveModel(&task, chatId)
 }

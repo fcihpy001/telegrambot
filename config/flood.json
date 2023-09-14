@@ -37,12 +37,12 @@
   ],
   [
     {
-      "text": "\uD83D\uDCDB惩罚设置",
+      "text": "\uD83D\uDEB7惩罚设置",
       "data": "punish_setting_class:flood",
       "btn_type": "data"
     },
     {
-      "text": "\uD83D\uDD5F自动删除提醒消息",
+      "text": "♻\uFE0F自动删除提醒消息",
       "data": "delete_notify_menu:flood",
       "btn_type": "data"
     }

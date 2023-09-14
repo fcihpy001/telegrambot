@@ -2,10 +2,13 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"telegramBot/model"
+	"time"
 )
 
 func Json2Button(file string, models *[]model.ButtonInfo) {
@@ -56,4 +59,53 @@ func TimeStr(time int) string {
 		str = strconv.Itoa(time/3600) + "小时"
 	}
 	return str
+}
+
+// 将时间字符串转换为秒
+func ParseTime(time string) int {
+	var count int = 0
+	if strings.Contains(time, "秒") {
+		arr := strings.Split(time, "秒")
+		count, _ = strconv.Atoi(arr[0])
+
+	} else if strings.Contains(time, "分钟") {
+		arr := strings.Split(time, "分钟")
+		count, _ = strconv.Atoi(arr[0])
+		count = count * 60
+	} else if strings.Contains(time, "小时") {
+		arr := strings.Split(time, "小时")
+		count, _ = strconv.Atoi(arr[0])
+		count = count * 3600
+
+	} else if strings.Contains(time, "不提醒") {
+		count = -1
+	} else if strings.Contains(time, "不删除") {
+		count = 0
+	}
+	return count
+}
+
+func IsInDateSpan(startDateStr string, endDateStr string) bool {
+
+	// 将日期字符串解析为时间
+	startDate, err := time.Parse("2006-01-02", startDateStr)
+	if err != nil {
+		fmt.Println("无法解析开始日期:", err)
+		return false
+	}
+
+	endDate, err := time.Parse("2006-01-02", endDateStr)
+	if err != nil {
+		fmt.Println("无法解析结束日期:", err)
+		return false
+	}
+
+	// 获取当前时间
+	currentTime := time.Now()
+
+	// 判断当前时间是否在两个日期之间
+	if currentTime.After(startDate) && currentTime.Before(endDate) {
+		return true
+	}
+	return false
 }

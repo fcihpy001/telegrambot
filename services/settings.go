@@ -112,13 +112,12 @@ func SaveModel(model interface{}, chatId int64) {
 	}
 }
 
-func SavePunishRecord(model interface{}, chatId int64) {
+func SaveModelWhere(model interface{}, chatId int64, where string) {
 	if chatId == 0 {
 		fmt.Println("不符合存储条件")
 		return
 	}
-
-	err := db.Save(model)
+	err := db.Where(where).Save(model)
 	if err.Error != nil {
 		log.Println("update or insert model data failed", err)
 	}
@@ -134,7 +133,7 @@ func GetModelData(chatId int64, model interface{}) error {
 	fmt.Println("get model data success::", model)
 	return nil
 }
-func GetModels(model []interface{}) error {
+func GetModels(model *[]interface{}) error {
 
 	err := db.Find(&model)
 	if err != nil {
@@ -162,6 +161,28 @@ func DeleteReply(keyword string, chat_id int64) error {
 	return err
 }
 
+func GetAllTask(chat_id int64) ([]model.Task, error) {
+	var items []model.Task
+	err := db.Find(&items).Error
+	return items, err
+}
+
+func GetAllDeleteTask() ([]model.ScheduleDelete, error) {
+	var items []model.ScheduleDelete
+	err := db.Find(&items).Error
+	return items, err
+}
+
+func DeleteTask(task *model.ScheduleDelete) error {
+	err := db.Delete(&task).Error
+	return err
+}
+
+func DeleteModel(model interface{}, where string) error {
+	err := db.Where(where).Delete(&model).Error
+	return err
+}
+
 func DeleteInviteData() error {
 	var item model.InviteSetting
 	err := db.Where("chat_id =?", utils.GroupInfo.GroupId).Delete(&item).Error
@@ -184,14 +205,13 @@ func GetModelWhere(where string, model interface{}) error {
 	return nil
 }
 
-func GetModelDataWhere(chatId int64, model interface{}) error {
-
-	err := db.Where("spam_setting_id = ?", chatId).First(&model)
-	if err.Error != nil {
-		log.Println("get Prohibit settings failed")
-		return err.Error
+func GetScheduleMsgList(where string) ([]model.ScheduleMsg, error) {
+	var items []model.ScheduleMsg
+	err := db.Where(where).Find(&items).Error
+	if len(where) == 0 {
+		err = db.Find(&items).Error
 	}
-	return nil
+	return items, err
 }
 
 func GetAllProhibitSettings() ([]model.ProhibitedSetting, error) {
@@ -214,6 +234,21 @@ func GetAllCautions() ([]model.UserCautions, error) {
 }
 
 func UpdateUserCaution(chatId, userId int64, triggerType model.TriggerType, count int) error {
+	item := model.UserCautions{
+		ChatId:       chatId,
+		UserId:       userId,
+		TriggerType:  string(triggerType),
+		TriggerCount: int64(count),
+	}
+	return db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "user_id"}, {Name: "chat_id"}, {Name: "trigger_type"}},
+		DoUpdates: clause.Assignments(map[string]interface{}{
+			"trigger_count": count,
+		}),
+	}).Create(&item).Error
+}
+
+func Update2GroupInfoCaution(chatId, userId int64, triggerType model.TriggerType, count int) error {
 	item := model.UserCautions{
 		ChatId:       chatId,
 		UserId:       userId,

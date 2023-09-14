@@ -37,10 +37,10 @@ func muteUserHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, second int) 
 		utils.SendText(chatId, "请在要操作的用户所发的消息上，回复此命令", bot)
 		return
 	}
-	muteUser(update, bot, second, userId)
+	MuteUser(chatId, bot, second, userId)
 }
 
-func muteUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, second int, userId int64) {
+func MuteUser(chatId int64, bot *tgbotapi.BotAPI, second int, userId int64) {
 
 	permission := &tgbotapi.ChatPermissions{
 		CanSendMessages:       true,
@@ -67,7 +67,7 @@ func muteUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, second int, userId 
 	date := time.Now().Add(time.Duration(second) * time.Second).Unix()
 	msg := tgbotapi.RestrictChatMemberConfig{
 		ChatMemberConfig: tgbotapi.ChatMemberConfig{
-			ChatID: update.Message.Chat.ID,
+			ChatID: chatId,
 			UserID: userId,
 		},
 		UntilDate:   date,
@@ -118,9 +118,9 @@ func banMember(bot *tgbotapi.BotAPI, chatId int64, second int, userId int64, mut
 }
 
 // Pin某条消息
-func PinMessage(update *tgbotapi.Update, bot *tgbotapi.BotAPI, messageId int) {
+func PinMessage(chatId int64, bot *tgbotapi.BotAPI, messageId int) {
 	msg := tgbotapi.PinChatMessageConfig{
-		ChatID:              update.Message.Chat.ID,
+		ChatID:              chatId,
 		ChannelUsername:     "",
 		MessageID:           messageId,
 		DisableNotification: false,

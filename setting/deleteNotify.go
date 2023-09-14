@@ -15,8 +15,8 @@ var deleteNotifySelect model.SelectInfo = model.SelectInfo{
 	Column: 0,
 	Text:   "10秒",
 }
-
-var punishNotifyTime = 10
+var notifyClass string
+var deleteTime = 10
 
 func DeleteNotifyHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
@@ -28,14 +28,16 @@ func DeleteNotifyHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		params = query[1]
 	}
 	if cmd == "delete_notify_menu" { //删除提醒消息主菜单
-		notifyMenu(update, bot)
+		notifyMenu(update, bot, params)
 
 	} else if cmd == "delete_notify_time" { //删除提醒消息时间设置
 		notifyTimeHandler(update, bot, params)
 	}
 }
 
-func notifyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func notifyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
+	notifyClass = params
+
 	times := utils.GetTimeData()
 
 	var rows [][]model.ButtonInfo
@@ -65,7 +67,7 @@ func notifyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	keyboard := utils.MakeKeyboard(rows)
 	utils.DeleteNotifyMenuMarkup = keyboard
 
-	content := "🔇 违禁词\n\n群成员触发🔇 违禁词时，机器人发出的提醒消息在多少时间后自动删除"
+	content := updateDeleteNotifyMsg()
 	sendEditMsgMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard, bot)
 }
 
@@ -78,6 +80,8 @@ func notifyTimeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 	column, _ := strconv.Atoi(data[1])
 	text := data[2]
 
+	deleteTime = utils.ParseTime(text)
+
 	//取消以前的选中
 	utils.DeleteNotifyMenuMarkup.InlineKeyboard[deleteNotifySelect.Row][deleteNotifySelect.Column].Text = deleteNotifySelect.Text
 	//更新选中
@@ -86,12 +90,36 @@ func notifyTimeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 	deleteNotifySelect.Row = row
 	deleteNotifySelect.Column = column
 	deleteNotifySelect.Text = text
-	fmt.Println("deleteNotifySelect", params)
 
-	content := "🔇 违禁词\n\n群成员触发🔇 违禁词时，机器人发出的提醒消息在多少时间后自动删除"
+	content := updateDeleteNotifyMsg()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.DeleteNotifyMenuMarkup)
 	_, err := bot.Send(msg)
 	if err != nil {
 		fmt.Println("statusHandel", err)
 	}
+}
+
+func updateDeleteNotifyMsg() string {
+	content := ""
+	if notifyClass == "prohibited" {
+		content = "🔇 违禁词\n\n群成员触发🔇 违禁词时，机器人发出的提醒消息在多少时间后自动删除"
+		prohibitedSetting.DeleteNotifyMsgTime = deleteTime
+		updateProhibitedSettingMsg()
+
+	} else if notifyClass == "flood" {
+		content = "💬 反刷屏\n\n群成员触发💬 反刷屏时，机器人发出的提醒消息在多少时间后自动删除"
+		floodSetting.DeleteNotifyMsgTime = deleteTime
+		updateFloodMsg()
+
+	} else if notifyClass == "spam" {
+		content = "📨 反垃圾\n\n群成员触发📨 反垃圾时，机器人发出的提醒消息在多少时间后自动删除"
+		spamsSetting.DeleteNotifyMsgTime = deleteTime
+		updateSpamMsg()
+
+	} else if notifyClass == "userCheck" {
+		content = "🔦 用户检查\n\n群成员触发🔦 用户检查时，机器人发出的提醒消息在多少时间后自动删除"
+		userCheckSetting.DeleteNotifyMsgTime = deleteTime
+		updateUserSettingMsg()
+	}
+	return content
 }

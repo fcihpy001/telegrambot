@@ -1,6 +1,7 @@
 package setting
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"telegramBot/model"
@@ -13,16 +14,26 @@ import (
 var startInfo model.GroupInfo
 
 func StartHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	where := fmt.Sprintf("uid = %d", update.Message.From.ID)
-	groups, err := services.GetAllGroups(where)
-	if err != nil {
-		return
-	}
-	fmt.Println("startInfo", groups)
 
+	//获取所有群组，然后获取所有管理员信息，检查当前操作者的uid是否在其中
+	var managerGroups []model.GroupInfo
+	groups, _ := services.GetAllGroups("")
+	for _, group := range groups {
+		admins := []model.Member{}
+		//拿出管理员信息，并解析成model
+		err := json.Unmarshal([]byte(group.GroupAdmin), &admins)
+		if err != nil {
+			fmt.Println("json unmarshal failed", err)
+		}
+		for _, admin := range admins {
+			if admin.UserId == update.Message.From.ID {
+				managerGroups = append(managerGroups, group)
+			}
+		}
+	}
 	var managerRow []model.ButtonInfo
 	var rows [][]model.ButtonInfo
-	for i := 1; i <= len(groups); i++ {
+	for i := 1; i <= len(managerGroups); i++ {
 		btn := model.ButtonInfo{
 			Text:    groups[i-1].GroupName,
 			Data:    "manager_group_detail:" + groups[i-1].GroupName,
@@ -34,7 +45,7 @@ func StartHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 			managerRow = []model.ButtonInfo{}
 		}
 	}
-	if len(groups)%2 != 0 {
+	if len(groups)%2 != 0 && len(groups) != 0 {
 		rows = append(rows, managerRow)
 	}
 

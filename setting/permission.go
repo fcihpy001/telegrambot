@@ -1,6 +1,7 @@
 package setting
 
 import (
+	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
@@ -111,12 +112,38 @@ func updatePermissionButtonStatus(btn *model.ButtonInfo) {
 }
 
 func ManagerMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-
+	chatId := update.Message.Chat.ID
+	//获取群组管理员信息
+	admins, err := bot.GetChatAdministrators(
+		tgbotapi.ChatAdministratorsConfig{
+			ChatConfig: tgbotapi.ChatConfig{
+				ChatID: chatId,
+			},
+		})
+	members := []model.Member{}
+	for _, admin := range admins {
+		fmt.Println(admin.User.ID, admin.User.UserName, admin.User.FirstName, admin.User.LastName, admin.Status)
+		member := model.Member{
+			GroupId:                 chatId,
+			UserId:                  admin.User.ID,
+			Role:                    admin.Status,
+			IsBot:                   admin.User.IsBot,
+			FirstName:               admin.User.FirstName,
+			LastName:                admin.User.LastName,
+			UserName:                admin.User.UserName,
+			LanguageCode:            admin.User.LanguageCode,
+			CanJoinGroups:           admin.User.CanJoinGroups,
+			CanReadAllGroupMessages: admin.User.CanReadAllGroupMessages,
+		}
+		members = append(members, member)
+	}
+	jsondata, err := json.Marshal(members)
 	info := model.GroupInfo{
-		GroupId:   update.Message.Chat.ID,
-		Uid:       update.Message.From.ID,
-		GroupName: update.Message.Chat.Title,
-		GroupType: update.Message.Chat.Type,
+		GroupId:    update.Message.Chat.ID,
+		Uid:        update.Message.From.ID,
+		GroupName:  update.Message.Chat.Title,
+		GroupType:  update.Message.Chat.Type,
+		GroupAdmin: string(jsondata),
 	}
 	//保存到数据库
 	services.SaveModel(&info, info.GroupId)
@@ -130,7 +157,7 @@ func ManagerMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonURL("👉⚙️进入管理菜单👈", url),
 		))
-	_, err := bot.Send(msg)
+	_, err = bot.Send(msg)
 	if err != nil {
 		log.Println(err)
 	}

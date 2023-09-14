@@ -45,16 +45,6 @@
       "text": " \uD83D\uDCC4文本内容",
       "data": "welcome_setting_type:text",
       "btn_type": "data"
-    },
-    {
-      "text": "\uD83D\uDCF8媒体图片",
-      "data": "welcome_setting_type:media",
-      "btn_type": "data"
-    },
-    {
-      "text": "\uD83D\uDCCE链接按钮",
-      "data": "welcome_setting_type:link",
-      "btn_type": "data"
     }
   ],
   [

@@ -42,8 +42,8 @@
       "btn_type": "data"
     },
     {
-      "text": "♻\uFE0F自动除提醒消息",
-      "data": "delete_notify_menu",
+      "text": "♻\uFE0F自动删除提醒消息",
+      "data": "delete_notify_menu:prohibited",
       "btn_type": "data"
     }
   ],

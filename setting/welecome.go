@@ -152,7 +152,6 @@ func WelcomeTextSettingResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 func welcomeTextDeleteHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	welcomeSetting.WelcomeText = ""
-
 	content := "✅ 文本内容已删除，点击按钮返回。"
 	btn1 := model.ButtonInfo{
 		Text:    "返回",
@@ -183,32 +182,32 @@ func updateWelcomeMsg() string {
 		deletePrevMsg = "删除上条消息：✅"
 	}
 
-	welcome_media := "┌📸 媒体图片:❌"
-	welcome_button := "├🔠 链接按钮:❌"
-	welcome_text := "└📄 文本内容:❌"
+	//welcome_media := "┌📸 媒体图片:❌"
+	//welcome_button := "├🔠 链接按钮:❌"
+	welcome_text := "📄 文本内容:❌"
 	if len(welcomeSetting.WelcomeText) > 0 {
 		welcome_text = "└📄 文本内容: " + welcomeSetting.WelcomeText
 	}
-	if len(welcomeSetting.WelcomeButton) > 0 {
-		welcome_button = "├🔠 链接按钮:✅"
-	}
-	if len(welcomeSetting.WelcomeMedia) > 0 {
-		welcome_media = "📸 媒体图片:✅"
-	}
+	//if len(welcomeSetting.WelcomeButton) > 0 {
+	//	welcome_button = "├🔠 链接按钮:✅"
+	//}
+	//if len(welcomeSetting.WelcomeMedia) > 0 {
+	//	welcome_media = "📸 媒体图片:✅"
+	//}
 
-	content += enableMsg + "\n" + deletePrevMsg + "\n\n自定义欢迎内容：\n" + welcome_media + "\n" + welcome_button + "\n" + welcome_text
+	content += enableMsg + "\n" + deletePrevMsg + "\n\n自定义欢迎内容：\n" + "\n" + welcome_text
 	services.SaveModel(&welcomeSetting, utils.GroupInfo.GroupId)
 	return content
 }
 
 func updateWelcomeButtonStatus(btn *model.ButtonInfo) {
-	if btn.Data == "welcome_setting_status" && welcomeSetting.Enable {
+	if btn.Data == "welcome_setting_status:enable" && welcomeSetting.Enable {
 		btn.Text = "✅启用"
-	} else if btn.Data == "welcome_setting_status" && !welcomeSetting.Enable {
+	} else if btn.Data == "welcome_setting_status:disable" && !welcomeSetting.Enable {
 		btn.Text = "✅关闭"
-	} else if btn.Data == "welcome_setting_delete_prev" && welcomeSetting.DeletePrevMsg {
+	} else if btn.Data == "welcome_setting_delete_prev:enable" && welcomeSetting.DeletePrevMsg {
 		btn.Text = "✅删除"
-	} else if btn.Data == "welcome_setting_delete_prev" && !welcomeSetting.DeletePrevMsg {
+	} else if btn.Data == "welcome_setting_delete_prev:disable" && !welcomeSetting.DeletePrevMsg {
 		btn.Text = "✅不删"
 	}
 }

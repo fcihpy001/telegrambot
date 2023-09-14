@@ -5,6 +5,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"telegramBot/model"
 	"telegramBot/services"
+	"telegramBot/setting"
+	"telegramBot/utils"
 )
 
 // WelcomeNewMember 进群欢迎
@@ -23,11 +25,32 @@ func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 			welcomeSetting.WelcomeText = "👋 🤚 🖐 ✋欢迎 %s 加入 %s"
 		}
 		content := fmt.Sprintf(welcomeSetting.WelcomeText, user.FirstName, message.Chat.Title)
+		if welcomeSetting.Enable {
+			msg := tgbotapi.NewMessage(message.Chat.ID, content)
+			welcomeMsg, err := mgr.bot.Send(msg)
+			if err != nil {
+				logger.Err(err)
+				continue
+			}
+			//	记录一条消息的id
+			welcomeSetting.MessageId = welcomeMsg.MessageID
+			services.SaveModel(&welcomeSetting, message.Chat.ID)
 
-		msg := tgbotapi.NewMessage(message.Chat.ID, content)
-		if _, err := mgr.bot.Send(msg); err != nil {
-			logger.Err(err)
-			continue
+			//	删除一条消息
+			if welcomeSetting.DeletePrevMsg {
+				mm := tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID)
+				mgr.bot.Send(mm)
+			}
+		}
+
+		//	检查新成员进群后，是否需要禁言
+		memberCheck := model.NewMemberCheck{}
+		err = services.GetModelData(utils.GroupInfo.GroupId, &memberCheck)
+		if err != nil {
+			return
+		}
+		if memberCheck.Enable && memberCheck.DelayTime > 0 {
+			setting.MuteUser(message.Chat.ID, mgr.bot, memberCheck.DelayTime, user.ID)
 		}
 	}
 }

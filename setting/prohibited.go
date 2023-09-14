@@ -15,7 +15,7 @@ var prohibitedSetting model.ProhibitedSetting
 // ProhibitedSettingHandler 违禁词处理逻辑入口
 func ProhibitedSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	_ = services.GetModelData(utils.GroupInfo.GroupId, &prohibitedSetting)
-	scheduleMsg.ChatId = update.CallbackQuery.Message.Chat.ID
+	scheduleMessage.ChatId = update.CallbackQuery.Message.Chat.ID
 
 	data := update.CallbackQuery.Data
 	query := strings.Split(data, ":")
@@ -64,9 +64,9 @@ func prohibitedSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		var row []model.ButtonInfo
 		for j := 0; j < len(btnArray); j++ {
 			btn := btnArray[j]
-			if btn.Data == "prohibitedSetting_enable" && prohibitedSetting.Enable {
+			if btn.Data == "prohibited_status:enable" && prohibitedSetting.Enable {
 				btn.Text = "✅启用"
-			} else if btn.Data == "prohibitedSetting_disable" && !prohibitedSetting.Enable {
+			} else if btn.Data == "prohibited_status:disable" && !prohibitedSetting.Enable {
 				btn.Text = "✅关闭"
 			}
 			row = append(row, btn)

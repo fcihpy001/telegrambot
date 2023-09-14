@@ -16,8 +16,7 @@ var (
 	err              error
 )
 
-//todo 禁言时间被误写成ban单词，需要注意
-
+// todo 禁言时间被误写成ban单词，需要注意
 func darkModelSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	err = services.GetModelData(utils.GroupInfo.GroupId, &darkModelSetting)
 	var btns [][]model.ButtonInfo

@@ -107,6 +107,7 @@ type WelcomeSetting struct {
 	WelcomeMedia  string
 	WelcomeButton string
 	DeletePrevMsg bool
+	MessageId     int
 }
 
 type InviteSetting struct {
@@ -169,7 +170,7 @@ type ProhibitedSetting struct {
 	WarningAfterPunish  PunishType
 	BanTime             int
 	MuteTime            int
-	DeleteNotifyMsgTime int64
+	DeleteNotifyMsgTime int
 }
 
 type PunishType string
@@ -201,7 +202,7 @@ type Punishment struct {
 	WarningAfterPunish  PunishType
 	BanTime             int
 	MuteTime            int
-	DeleteNotifyMsgTime int64
+	DeleteNotifyMsgTime int
 	Reason              string
 	ReasonType          int
 	Content             string
@@ -246,7 +247,7 @@ type UserCheck struct {
 	WarningAfterPunish  PunishType
 	BanTime             int
 	MuteTime            int
-	DeleteNotifyMsgTime int64
+	DeleteNotifyMsgTime int
 	DeleteMsg           bool
 }
 
@@ -330,7 +331,7 @@ type SpamSetting struct {
 	WarningAfterPunish  PunishType
 	MuteTime            int
 	BanTime             int
-	DeleteNotifyMsgTime int64
+	DeleteNotifyMsgTime int
 }
 
 // 反刷屏设置
@@ -347,7 +348,7 @@ type FloodSetting struct {
 	WarningAfterPunish  PunishType
 	MuteTime            int
 	BanTime             int
-	DeleteNotifyMsgTime int64
+	DeleteNotifyMsgTime int
 }
 
 type DarkModelSetting struct {
@@ -394,7 +395,7 @@ type Schedule struct {
 
 type ScheduleMsg struct {
 	gorm.Model
-	ChatId int64 `gorm:"uniqueIndex"`
+	ChatId int64 `gorm:"primaryKey"`
 	Uid    int64
 	Enable bool
 
@@ -403,12 +404,20 @@ type ScheduleMsg struct {
 	StartHour     int
 	EndHour       int
 	Pin           bool
-	RepeatHour    int
-	RepeatMinute  int
+	Repeat        int
 	DeletePrevMsg bool
-	Text          string
+	Text          string `gorm:":varchar(30)"`
 	Media         string
 	Link          string
+	ExecuteTime   time.Time
+	MessageId     int
+}
+
+type ScheduleDelete struct {
+	gorm.Model
+	ChatId     int64 `gorm:"primaryKey"`
+	MessageId  int
+	DeleteTime time.Time
 }
 
 type SelectInfo struct {
@@ -419,11 +428,25 @@ type SelectInfo struct {
 
 type GroupInfo struct {
 	gorm.Model
-	GroupId    int64 `gorm:";uniqueIndex"`
+	GroupId    int64 `gorm:"uniqueIndex"`
 	GroupName  string
 	GroupType  string
 	Uid        int64
 	Permission string
+	GroupAdmin string
+}
+
+type Member struct {
+	GroupId                 int64
+	UserId                  int64
+	Role                    string
+	IsBot                   bool
+	FirstName               string
+	LastName                string
+	UserName                string
+	LanguageCode            string
+	CanJoinGroups           bool
+	CanReadAllGroupMessages bool
 }
 
 // 消息信息
@@ -437,7 +460,8 @@ type Message struct {
 
 type Task struct {
 	gorm.Model
+	ChatId        int64
 	MessageId     int
 	Type          string
-	OperationTime int64
+	OperationTime time.Time
 }

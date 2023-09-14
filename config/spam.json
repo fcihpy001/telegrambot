@@ -92,20 +92,20 @@
   ],
   [
     {
-      "text": "惩罚设置",
+      "text": "\uD83D\uDEB7惩罚设置",
       "data": "punish_setting_class:spam",
       "btn_type": "data"
     },
     {
-      "text": "例外管理",
+      "text": "\uD83C\uDF41例外管理",
       "data": "spam_setting_exception",
       "btn_type": "data"
     }
   ],
   [
     {
-      "text": "自动删除提醒消息",
-      "data": "spam_setting_delete_msg",
+      "text": "♻\uFE0F自动删除提醒消息",
+      "data": "delete_notify_menu:spam",
       "btn_type": "data"
     }
   ],

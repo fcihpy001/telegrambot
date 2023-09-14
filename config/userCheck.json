@@ -32,13 +32,13 @@
   ],
   [
     {
-      "text": "\uD83D\uDCDB惩罚设置",
+      "text": "\uD83D\uDEB7惩罚设置",
       "data": "punish_setting_class:userCheck",
       "btn_type": "data"
     },
     {
-      "text": "\uD83D\uDD52自动删除提醒消息",
-      "data": "delete_notify_menu:user",
+      "text": "♻\uFE0F自动删除提醒消息",
+      "data": "delete_notify_menu:userCheck",
       "btn_type": "data"
     }
   ],

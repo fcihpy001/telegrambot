@@ -11,6 +11,7 @@ import (
 	"telegramBot/group"
 	"telegramBot/setting"
 	"telegramBot/utils"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -39,6 +40,11 @@ func (bot *SmartBot) setupBotWithPool() {
 	}
 	updateConfig.Timeout = timeout
 	updatesChannel := bot.bot.GetUpdatesChan(updateConfig)
+
+	// 创建定时任务
+	timer10Task(bot.bot)
+
+	timer600Task(bot.bot)
 
 	// 机器人与用户的交互逻辑
 	for update := range updatesChannel {
@@ -151,4 +157,35 @@ func (bot *SmartBot) SendText(chatId int64, text string) {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+// 定时删除任务
+func timer10Task(bot *tgbotapi.BotAPI) {
+	ticker := time.NewTicker(10 * time.Second)
+	// 使用 Goroutine 执行任务
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				// 在这里执行您的定时任务代码
+				setting.DeleteMessageTask(bot)
+				fmt.Println("10 task")
+			}
+		}
+	}()
+}
+
+// 定时发送消息任务
+func timer600Task(bot *tgbotapi.BotAPI) {
+	ticker := time.NewTicker(10 * time.Minute)
+	// 使用 Goroutine 执行任务
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				// 在这里执行您的定时任务代码
+				setting.SendMessageTask(bot)
+			}
+		}
+	}()
 }

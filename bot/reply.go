@@ -13,7 +13,7 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 	if strings.Contains(replyMsg, "输入添加的违禁词（一行一个") {
 		setting.ProhibitedAddResult(update, bot.bot)
 
-	} else if strings.Contains(replyMsg, "请输入新群员限制时间（分钟，例如：3）") {
+	} else if strings.Contains(replyMsg, "请输入新群员限制时间") {
 		setting.MemberCheckTimeResult(update, bot.bot)
 
 	} else if strings.Contains(replyMsg, "请输入要禁止的名字（一行一个") {

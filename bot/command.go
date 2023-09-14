@@ -2,14 +2,13 @@ package bot
 
 import (
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strconv"
 	"strings"
 	"telegramBot/group"
 	"telegramBot/services"
 	"telegramBot/setting"
 	"telegramBot/utils"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // 处理以/开头的指令消息,如/help  /status等
@@ -83,16 +82,10 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 			member, _ := getMemberInfo(update.Message.Chat.ID, update.Message.From.ID, bot.bot)
 			if member.IsAdministrator() || member.IsCreator() {
 				setting.ManagerMenu(&update, bot.bot)
+			} else {
+				utils.SendText(update.Message.Chat.ID, "此功能只针对管理员开放", bot.bot)
 			}
 		}
-		println(update.Message.Text)
-		// 如果参数中有solitaire: 开头 且在私有聊天中, 是用户接龙
-		//args := strings.TrimSpace(strings.Replace(update.Message.Text, "/start", "", -1))
-		//if strings.HasPrefix(args, "solitaire-") && update.Message != nil && update.Message.Chat.Type == "private" {
-		//	group.PlaySolitaire(&update, bot.bot, args)
-		//	return
-		//}
-		//setting.Settings(&update, bot.bot)
 
 	case "filter":
 
@@ -115,6 +108,9 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 
 	case "ban", "kick", "unmute", "mute", "unban":
 		setting.OperationHandler(&update, bot.bot)
+
+	case "t":
+		setting.SendMessageTask(bot.bot)
 
 	default:
 		fmt.Println("i don't know this command")
