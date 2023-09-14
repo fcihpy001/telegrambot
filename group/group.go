@@ -2,8 +2,9 @@ package group
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func GroupHandlerQuery(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
@@ -64,6 +65,9 @@ func GroupHandlerCommand(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	case "create":
 		LuckyCreateCommand(update, bot)
+
+	case "record":
+		LuckyRecordCommand(update, bot)
 
 	default:
 		fmt.Println("unknown command")

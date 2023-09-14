@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"gorm.io/gorm"
 )
 
@@ -74,10 +75,9 @@ type LuckyActivity struct {
 }
 
 func (la *LuckyActivity) ReachParticipantUsers() bool {
-	if la.LuckyType == LuckyTypeGeneral && la.LuckyEndType == LuckyEndTypeByUsers {
-		if la.Participant >= la.GetLuckGeneralUsers() {
-			return true
-		}
+	if la.LuckyEndType == LuckyEndTypeByUsers &&
+		la.Participant >= la.GetLuckGeneralUsers() {
+		return true
 	}
 	return false
 }
@@ -124,6 +124,14 @@ func (la *LuckyActivity) RecoverLuckyData() *LuckyData {
 	ld.EndType = la.LuckyEndType
 
 	return &ld
+}
+
+type LuckyInvite struct {
+	ChatId      int64
+	UserId      int64
+	Username    string
+	Invitee     int64 // 被邀请用户
+	InviteeName string
 }
 
 type LuckyRecord struct {
@@ -173,14 +181,22 @@ func (ld *LuckyData) GetTypeName() string {
 	return ld.Typ + "-" + ld.SubType
 }
 
-func (ld *LuckyData) HowToParticiate() (content string) {
+func (ld *LuckyData) HowToParticiate(escape bool) (content string) {
 	switch ld.Typ {
 	case LuckyTypeGeneral:
-		content = fmt.Sprintf("【如何参与？】在群组中回复关键词『%s』参与活动。", ld.Keyword)
+		word := ld.Keyword
+		if escape {
+			word = tgbotapi.EscapeText(tgbotapi.ModeMarkdownV2, word)
+		}
+		content = fmt.Sprintf("【如何参与？】在群组中回复关键词『%s』参与活动。", word)
 	case LuckyTypeChatJoin:
 	case LuckyTypeInvite:
 		if ld.SubType == LuckySubTypeInviteRank {
-			content = "【如何参与？】通过 /link 获得专属链接，使用 /link_stat 查看排名，到达开奖时间后，以该名单排名开奖。"
+			if escape {
+				content = "【如何参与？】通过 /link 获得专属链接，使用 /link\\_stat 查看排名，到达开奖时间后，以该名单排名开奖。"
+			} else {
+				content = "【如何参与？】通过 /link 获得专属链接，使用 /link_stat 查看排名，到达开奖时间后，以该名单排名开奖。"
+			}
 		} else {
 
 		}
