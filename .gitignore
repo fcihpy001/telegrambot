@@ -1,6 +1,7 @@
 .idea
 .env
 cert/
+build/
 telegramBot
 telegramBot.exe
 config.yaml

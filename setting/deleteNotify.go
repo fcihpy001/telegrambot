@@ -56,9 +56,10 @@ func notifyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
 		rows = append(rows, row)
 	}
 	//返回按钮
+	backData := getNotifyBackActionMsg()
 	backBtn := model.ButtonInfo{
 		Text:    "返回",
-		Data:    "prohibited_setting_menu",
+		Data:    backData,
 		BtnType: model.BtnTypeData,
 	}
 	row := []model.ButtonInfo{backBtn}
@@ -122,4 +123,18 @@ func updateDeleteNotifyMsg() string {
 		updateUserSettingMsg()
 	}
 	return content
+}
+
+func getNotifyBackActionMsg() string {
+	backAction := ""
+	if notifyClass == "flood" {
+		backAction = "flood_setting_menu"
+	} else if notifyClass == "spam" {
+		backAction = "spam_setting_menu"
+	} else if notifyClass == "prohibited" {
+		backAction = "prohibited_setting_menu"
+	} else if notifyClass == "userCheck" {
+		backAction = "user_check_menu"
+	}
+	return backAction
 }

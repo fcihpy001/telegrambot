@@ -32,11 +32,12 @@ func OperationHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 func muteUserHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, second int) {
 
 	chatId := update.Message.Chat.ID
-	userId := update.Message.ReplyToMessage.From.ID
+
 	if update.Message.ReplyToMessage == nil {
 		utils.SendText(chatId, "请在要操作的用户所发的消息上，回复此命令", bot)
 		return
 	}
+	userId := update.Message.ReplyToMessage.From.ID
 	MuteUser(chatId, bot, second, userId)
 }
 

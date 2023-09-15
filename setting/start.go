@@ -50,11 +50,11 @@ func StartHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 
 	//TODO 添加完群组后，需要将信息入库
-	//addBtn := model.ButtonInfo{
-	//	Text:    "+ 添加toplink到群组 +",
-	//	Data:    "manager_group_add",
-	//	BtnType: model.BtnTypeData,
-	//}
+	addBtn := model.ButtonInfo{
+		Text:    "+ 添加toplink到群组 +",
+		Data:    fmt.Sprintf("https://t.me/%s?startgroup=top", bot.Self.UserName),
+		BtnType: model.BtnTypeUrl,
+	}
 
 	supportBtn1 := model.ButtonInfo{
 		Text:    "抽奖推送",
@@ -72,9 +72,9 @@ func StartHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		BtnType: model.BtnTypeUrl,
 	}
 
-	//addRow := []model.ButtonInfo{addBtn}
+	addRow := []model.ButtonInfo{addBtn}
 	supportRow := []model.ButtonInfo{supportBtn1, supportBtn2, supportBtn3}
-	//rows = append(rows, addRow)
+	rows = append(rows, addRow)
 	rows = append(rows, supportRow)
 	keyboard := utils.MakeKeyboard(rows)
 	content := fmt.Sprintf("👏 欢迎使用%s，如何使用：\n                \n "+
@@ -146,13 +146,13 @@ func managerGroupSwitch(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		rows = append(rows, managerRow)
 	}
 	//TODO 添加完群组后，需要将信息入库
-	//addBtn := model.ButtonInfo{
-	//	Text:    "+ 添加toplink到群组 +",
-	//	Data:    "manager_group_add",
-	//	BtnType: model.BtnTypeData,
-	//}
-	//addRow := []model.ButtonInfo{addBtn}
-	//rows = append(rows, addRow)
+	addBtn := model.ButtonInfo{
+		Text:    "+ 添加toplink到群组 +",
+		Data:    fmt.Sprintf("https://t.me/%s?startgroup=top", bot.Self.UserName),
+		BtnType: model.BtnTypeUrl,
+	}
+	addRow := []model.ButtonInfo{addBtn}
+	rows = append(rows, addRow)
 	keyboard := utils.MakeKeyboard(rows)
 	content := "🔁切换到其它群组\n\n\n👉 选择你要管理的群组："
 	utils.SendMenu(update.CallbackQuery.Message.Chat.ID, content, keyboard, bot)

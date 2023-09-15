@@ -61,6 +61,21 @@ func TimeStr(time int) string {
 	return str
 }
 
+func TransferSecond(second int) string {
+	var str string = ""
+	if second == 0 {
+		str = ""
+	}
+	if second < 60 {
+		str = strconv.Itoa(second) + "秒"
+	} else if second < 3600 {
+		str = strconv.Itoa(second/60) + "分钟"
+	} else if second < 86400 {
+		str = strconv.Itoa(second/3600) + "小时"
+	}
+	return str
+}
+
 // 将时间字符串转换为秒
 func ParseTime(time string) int {
 	var count int = 0
