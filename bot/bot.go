@@ -43,8 +43,10 @@ func (bot *SmartBot) setupBotWithPool() {
 
 	// 创建定时任务
 	timer10Task(bot.bot)
-
+	//发送消息定时任务
 	timer600Task(bot.bot)
+	//dark检查定时任务
+	darkCheckTask(bot.bot)
 
 	// 机器人与用户的交互逻辑
 	for update := range updatesChannel {
@@ -185,6 +187,21 @@ func timer600Task(bot *tgbotapi.BotAPI) {
 			case <-ticker.C:
 				// 在这里执行您的定时任务代码
 				setting.SendMessageTask(bot)
+			}
+		}
+	}()
+}
+
+// darkcheck任务
+func darkCheckTask(bot *tgbotapi.BotAPI) {
+	ticker := time.NewTicker(5 * time.Minute)
+	// 使用 Goroutine 执行任务
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				// 在这里执行您的定时任务代码
+				setting.CheckDarkTask(bot)
 			}
 		}
 	}()

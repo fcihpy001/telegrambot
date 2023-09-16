@@ -124,3 +124,32 @@ func IsInDateSpan(startDateStr string, endDateStr string) bool {
 	}
 	return false
 }
+
+func IsInHoursRange(startHour, endHour int) bool {
+	// 获取当前时间
+	currentTime := time.Now()
+
+	// 获取当前时间的小时部分
+	currentHour := currentTime.Hour()
+
+	// 判断当前小时是否在指定范围内
+	return currentHour >= startHour && currentHour < endHour
+}
+
+func CalculateTimeDifferenceInSeconds(endHour int) int {
+	// 获取当前时间
+	currentTime := time.Now()
+
+	// 获取当前时间的小时部分
+	currentHour := currentTime.Hour()
+
+	// 计算当前时间与指定小时之间的时间差（秒数）
+	var timeDiffSeconds int
+	if currentHour < endHour {
+		timeDiffSeconds = (endHour - currentHour) * 3600
+	} else {
+		// 如果当前小时大于或等于结束小时，表示跨越了一天
+		timeDiffSeconds = (24 + endHour - currentHour) * 3600
+	}
+	return timeDiffSeconds
+}

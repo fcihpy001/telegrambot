@@ -41,6 +41,7 @@ func muteUserHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, second int) 
 	MuteUser(chatId, bot, second, userId)
 }
 
+// 对用户进行禁言或解除,second=解除禁言
 func MuteUser(chatId int64, bot *tgbotapi.BotAPI, second int, userId int64) {
 
 	permission := &tgbotapi.ChatPermissions{
@@ -72,6 +73,54 @@ func MuteUser(chatId int64, bot *tgbotapi.BotAPI, second int, userId int64) {
 			UserID: userId,
 		},
 		UntilDate:   date,
+		Permissions: permission,
+	}
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+// 对用户进行禁言或解除,second=解除禁言
+func MuteGroup(chatId int64, bot *tgbotapi.BotAPI, second int, muteMedia bool) {
+	permission := &tgbotapi.ChatPermissions{
+		CanSendMessages:       true,
+		CanSendMediaMessages:  true,
+		CanSendPolls:          true,
+		CanSendOtherMessages:  true,
+		CanAddWebPagePreviews: true,
+		CanChangeInfo:         true,
+		CanInviteUsers:        true,
+		CanPinMessages:        true,
+	}
+	if second > 0 {
+		permission = &tgbotapi.ChatPermissions{
+			CanSendMessages:       false,
+			CanSendMediaMessages:  false,
+			CanSendPolls:          false,
+			CanSendOtherMessages:  false,
+			CanAddWebPagePreviews: false,
+			CanChangeInfo:         false,
+			CanInviteUsers:        false,
+			CanPinMessages:        false,
+		}
+		if muteMedia {
+			permission = &tgbotapi.ChatPermissions{
+				CanSendMessages:       true,
+				CanSendMediaMessages:  false,
+				CanSendPolls:          false,
+				CanSendOtherMessages:  false,
+				CanAddWebPagePreviews: false,
+				CanChangeInfo:         false,
+				CanInviteUsers:        false,
+				CanPinMessages:        false,
+			}
+		}
+	}
+	msg := tgbotapi.SetChatPermissionsConfig{
+		ChatConfig: tgbotapi.ChatConfig{
+			ChatID: chatId,
+		},
 		Permissions: permission,
 	}
 	_, err := bot.Send(msg)

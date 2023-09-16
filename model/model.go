@@ -353,20 +353,22 @@ type FloodSetting struct {
 
 type DarkModelSetting struct {
 	gorm.Model
-	ChatId       int64 `gorm:"uniqueIndex"`
-	Uid          int64
-	Enable       bool
-	Notify       bool
-	BanType      BanType
-	BanTimeStart int
-	BanTimeEnd   int
+	ChatId        int64 `gorm:"uniqueIndex"`
+	Uid           int64
+	Enable        bool
+	Notify        bool
+	MuteType      MutType
+	MuteTimeStart int
+	MuteTimeEnd   int
+	OnMessageId   int
+	OffMessageId  int
 }
 
-type BanType string
+type MutType string
 
 const (
-	BanTypeMessage BanType = "BanTypeMessage"
-	BanTypeMedia   BanType = "BanTypeMedia"
+	MuteTypeMessage MutType = "MuteMessage"
+	MuteTypeMedia   MutType = "MuteMedia"
 )
 
 type VerifySetting struct {

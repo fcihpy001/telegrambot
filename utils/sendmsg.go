@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"telegramBot/model"
@@ -10,6 +11,34 @@ import (
 
 func SendText(chatId int64, text string, bot *tgbotapi.BotAPI) {
 	msg := tgbotapi.NewMessage(chatId, text)
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func SendMsg(chatId int64, text string, bot *tgbotapi.BotAPI) int {
+	config := tgbotapi.NewMessage(chatId, text)
+	resp, err := bot.Request(config)
+	if err != nil {
+		fmt.Println("invite get failed:", err)
+		return 0
+	}
+	m := map[string]interface{}{}
+	err = json.Unmarshal(resp.Result, &m)
+	if err != nil {
+		fmt.Println("json unmarshal failed", err)
+		return 0
+	}
+	message_id := m["message_id"].(float64)
+	return int(message_id)
+}
+
+func DeleteMessage(chatId int64, messageId int, bot *tgbotapi.BotAPI) {
+	if messageId == 0 {
+		return
+	}
+	msg := tgbotapi.NewDeleteMessage(chatId, messageId)
 	_, err := bot.Send(msg)
 	if err != nil {
 		log.Println(err)

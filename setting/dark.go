@@ -19,6 +19,7 @@ var (
 // todo 禁言时间被误写成ban单词，需要注意
 func darkModelSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	err = services.GetModelData(utils.GroupInfo.GroupId, &darkModelSetting)
+	darkModelSetting.ChatId = utils.GroupInfo.GroupId
 	var btns [][]model.ButtonInfo
 	utils.Json2Button2("./config/dark.json", &btns)
 	var rows [][]model.ButtonInfo
@@ -100,6 +101,8 @@ func statusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string)
 		statusMsg1 = "启用"
 		statusMsg2 = "✅关闭"
 	}
+	fmt.Println("status", darkModelSetting)
+
 	utils.DarkModelMenuMarkup.InlineKeyboard[0][1].Text = statusMsg1
 	utils.DarkModelMenuMarkup.InlineKeyboard[0][2].Text = statusMsg2
 	content := updateDarkSettingMsg()
@@ -116,9 +119,9 @@ func banModelHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params strin
 	}
 	statusMsg1 := "✅全员禁言"
 	statusMsg2 := "禁止媒体"
-	darkModelSetting.BanType = model.BanTypeMessage
+	darkModelSetting.MuteType = model.MuteTypeMessage
 	if params == "media" {
-		darkModelSetting.BanType = model.BanTypeMedia
+		darkModelSetting.MuteType = model.MuteTypeMedia
 		statusMsg1 = "全员禁言"
 		statusMsg2 = "✅禁止媒体"
 	}
@@ -216,7 +219,7 @@ func timeEndMenuHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	row = []model.ButtonInfo{btn}
 	rows = append(rows, row)
 	keyboard := utils.MakeKeyboard(rows)
-	content := fmt.Sprintf("🌘 夜间模式\n从%d点开始，选择结束时间：\n", darkModelSetting.BanTimeStart)
+	content := fmt.Sprintf("🌘 夜间模式\n从%d点开始，选择结束时间：\n", darkModelSetting.MuteTimeStart)
 	sendEditMsgMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, keyboard, bot)
 }
 
@@ -230,11 +233,11 @@ func timeSettingStartHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 	time, _ := strconv.Atoi(params)
 	if cmd == "dark_model_time_start" {
-		darkModelSetting.BanTimeStart = time
+		darkModelSetting.MuteTimeStart = time
 		updateDarkSettingMsg()
 		timeEndMenuHandler(update, bot)
 	} else if cmd == "dark_model_time_end" {
-		darkModelSetting.BanTimeEnd = time
+		darkModelSetting.MuteTimeEnd = time
 		updateDarkSettingMsg()
 		darkModelSettingMenu(update, bot)
 	}
@@ -247,18 +250,18 @@ func updateDarkSettingMsg() string {
 	if !darkModelSetting.Enable {
 		enableMsg = "状态：❌关闭\n"
 		content = content + enableMsg
+		services.SaveModel(&darkModelSetting, darkModelSetting.ChatId)
 		return content
 	}
-	banModelMsg := fmt.Sprintf("├从%d - %d 激活 🤫全员禁言\n", darkModelSetting.BanTimeStart, darkModelSetting.BanTimeEnd)
-	if darkModelSetting.BanType == model.BanTypeMedia {
-		banModelMsg = fmt.Sprintf("├从%d - %d 激活 🤖禁止媒体\n", darkModelSetting.BanTimeStart, darkModelSetting.BanTimeEnd)
+	banModelMsg := fmt.Sprintf("├从%d - %d 激活 🤫全员禁言\n", darkModelSetting.MuteTimeStart, darkModelSetting.MuteTimeEnd)
+	if darkModelSetting.MuteType == model.MuteTypeMedia {
+		banModelMsg = fmt.Sprintf("├从%d - %d 激活 🤖禁止媒体\n", darkModelSetting.MuteTimeStart, darkModelSetting.MuteTimeEnd)
 	}
 	notifyMsg := "└开始和结束通知：✅\n"
 	if !darkModelSetting.Notify {
 		notifyMsg = "└开始和结束通知：❌\n"
 	}
 
-	darkModelSetting.ChatId = utils.GroupInfo.GroupId
 	services.SaveModel(&darkModelSetting, darkModelSetting.ChatId)
 	content = content + enableMsg + banModelMsg + notifyMsg
 	return content
@@ -269,9 +272,9 @@ func updateDarkBtn(btn *model.ButtonInfo) {
 		btn.Text = "✅启用"
 	} else if btn.Data == "dark_model_status:disable" && !darkModelSetting.Enable {
 		btn.Text = "✅关闭"
-	} else if btn.Data == "dark_model_ban:message" && darkModelSetting.BanType == model.BanTypeMessage {
+	} else if btn.Data == "dark_model_ban:message" && darkModelSetting.MuteType == model.MuteTypeMessage {
 		btn.Text = "✅全员禁言"
-	} else if btn.Data == "dark_model_ban:media" && darkModelSetting.BanType == model.BanTypeMedia {
+	} else if btn.Data == "dark_model_ban:media" && darkModelSetting.MuteType == model.MuteTypeMedia {
 		btn.Text = "✅禁止媒体"
 	} else if btn.Data == "dark_model_notify:enable" && darkModelSetting.Notify {
 		btn.Text = "✅通知"
@@ -293,13 +296,13 @@ func DarkCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 	}
 	//	判断时间
 	currentHour := time.Now().Hour()
-	if currentHour >= setting.BanTimeStart && currentHour < setting.BanTimeEnd {
+	if currentHour >= setting.MuteTimeStart && currentHour < setting.MuteTimeEnd {
 		// 获取当前时间
 		currentTime := time.Now()
 		// 定义目标时间
-		targetTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), setting.BanTimeEnd, 0, 0, 0, currentTime.Location())
+		targetTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), setting.MuteTimeEnd, 0, 0, 0, currentTime.Location())
 		secondsDifference := targetTime.Sub(currentTime).Seconds()
-		banMember(bot, chatId, int(secondsDifference), userId, setting.BanType == model.BanTypeMedia)
+		banMember(bot, chatId, int(secondsDifference), userId, setting.MuteType == model.MuteTypeMedia)
 		return true
 	}
 	return false

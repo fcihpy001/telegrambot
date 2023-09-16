@@ -116,7 +116,26 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 		setting.OperationHandler(&update, bot.bot)
 
 	case "t":
-		setting.SendMessageTask(bot.bot)
+		msg := tgbotapi.SetChatPermissionsConfig{
+			ChatConfig: tgbotapi.ChatConfig{
+				ChatID: update.Message.Chat.ID,
+			},
+			Permissions: &tgbotapi.ChatPermissions{
+				CanSendMessages:       false,
+				CanSendMediaMessages:  false,
+				CanSendPolls:          false,
+				CanSendOtherMessages:  false,
+				CanAddWebPagePreviews: false,
+				CanChangeInfo:         false,
+				CanInviteUsers:        false,
+				CanPinMessages:        false,
+			},
+		}
+		mm, err := bot.bot.Send(msg)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(mm.MessageID)
 
 	default:
 		fmt.Println("i don't know this command")

@@ -712,4 +712,57 @@ func DeleteMessageTask(bot *tgbotapi.BotAPI) {
 		fmt.Println("删除消息成功,更新删除记录", mm.MessageID)
 		_ = services.DeleteTask(&task)
 	}
+
+}
+
+// 定时检测夜间模式
+func CheckDarkTask(bot *tgbotapi.BotAPI) {
+	settings, _ := services.GetAllDarkSettings()
+	for _, setting := range settings {
+		//禁言模式开启且在时间范围内
+		if setting.Enable && utils.IsInHoursRange(setting.MuteTimeStart, setting.MuteTimeEnd) {
+			//判断是否发送过
+			if setting.OnMessageId != 0 || !setting.Notify {
+				continue
+			}
+			//计算当前时间到结束时间的时间差
+			second := utils.CalculateTimeDifferenceInSeconds(setting.MuteTimeEnd)
+			MuteGroup(setting.ChatId, bot, second, setting.MuteType == model.MuteTypeMedia)
+
+			utils.DeleteMessage(setting.ChatId, setting.OffMessageId, bot)
+
+			services.SaveModel(&setting, setting.ChatId)
+			content := fmt.Sprintf("🌘夜间模式开始\n\n❌从现在起禁止发送消息，%d点自动关闭。", setting.MuteTimeEnd)
+			messageId := utils.SendMsg(setting.ChatId, content, bot)
+
+			if messageId != 0 {
+				setting.OnMessageId = messageId
+				setting.OffMessageId = 0
+				if setting.ChatId == darkModelSetting.ChatId {
+					darkModelSetting.OnMessageId = setting.OnMessageId
+					darkModelSetting.OffMessageId = setting.OffMessageId
+				}
+				services.SaveModel(&setting, setting.ChatId)
+			}
+		} else {
+			//夜间模式关闭
+			if setting.OffMessageId != 0 || !setting.Notify {
+				continue
+			}
+			MuteGroup(setting.ChatId, bot, 0, setting.MuteType == model.MuteTypeMedia)
+			utils.DeleteMessage(setting.ChatId, setting.OnMessageId, bot)
+
+			services.SaveModel(&setting, setting.ChatId)
+			messageId := utils.SendMsg(setting.ChatId, "☀夜间模式关闭，快出来聊天啦。", bot)
+			if messageId != 0 {
+				setting.OffMessageId = messageId
+				setting.OnMessageId = 0
+				if setting.ChatId == darkModelSetting.ChatId {
+					darkModelSetting.OnMessageId = setting.OnMessageId
+					darkModelSetting.OffMessageId = setting.OffMessageId
+				}
+				services.SaveModel(&setting, setting.ChatId)
+			}
+		}
+	}
 }

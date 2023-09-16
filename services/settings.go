@@ -133,14 +133,18 @@ func GetModelData(chatId int64, model interface{}) error {
 	fmt.Println("get model data success::", model)
 	return nil
 }
-func GetModels(model *[]interface{}) error {
-
-	err := db.Find(&model)
-	if err != nil {
-		log.Println("get models  failed")
-		return err.Error
+func GetModels(models []interface{}) error {
+	result := db.Find(&models)
+	if result.Error != nil {
+		return result.Error
 	}
 	return nil
+}
+
+func GetAllDarkSettings() ([]model.DarkModelSetting, error) {
+	var items []model.DarkModelSetting
+	err := db.Find(&items).Error
+	return items, err
 }
 
 func GetReplySetting(chat_id int64) (model.ReplySetting, error) {
