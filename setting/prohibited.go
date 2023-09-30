@@ -245,18 +245,18 @@ func updateProhibitedSettingMsg() string {
 	} else if prohibitedSetting.Punish == model.PunishTypeRevoke {
 		actionMsg = "仅撤回消息+不惩罚"
 	} else if prohibitedSetting.Punish == model.PunishTypeWarning {
-		actionMsg = fmt.Sprintf("警告%d次后 %s", prohibitedSetting.WarningCount, actionMap[prohibitedSetting.WarningAfterPunish])
+		actionMsg = fmt.Sprintf("警告%d次后%s", prohibitedSetting.WarningCount, actionMap[prohibitedSetting.WarningAfterPunish])
 	}
 	deleteNotifyMsg := "\n自动删除提醒消息：关闭"
 	if prohibitedSetting.DeleteNotifyMsgTime > 0 {
-		deleteNotifyMsg = fmt.Sprintf("\n自动删除提醒消息：%d ", prohibitedSetting.DeleteNotifyMsgTime)
+		deleteNotifyMsg = fmt.Sprintf("\n自动删除提醒消息：%s后", utils.TimeStr(prohibitedSetting.DeleteNotifyMsgTime))
 	} else if prohibitedSetting.DeleteNotifyMsgTime == -1 {
 		deleteNotifyMsg = "\n自动删除提醒消息：不提醒"
 	} else if prohibitedSetting.DeleteNotifyMsgTime == 0 {
 		deleteNotifyMsg = "\n自动删除提醒消息：不删除"
 	}
 
-	content = content + enableMsg + actionMsg + deleteNotifyMsg
+	content = content + enableMsg + "惩罚措施:" + actionMsg + deleteNotifyMsg
 	services.SaveModel(&prohibitedSetting, prohibitedSetting.ChatId)
 	return content
 }
@@ -271,26 +271,26 @@ var (
 	}
 )
 
-func updatePunishSettingMsg() string {
-	content := "🔇 违禁词\n\n惩罚："
-	actionMsg := "警告"
-
-	if prohibitedSetting.Punish == model.PunishTypeBan {
-		actionMsg = "禁言"
-	} else if prohibitedSetting.Punish == model.PunishTypeKick {
-		actionMsg = "踢出"
-	} else if prohibitedSetting.Punish == model.PunishTypeBanAndKick {
-		actionMsg = "踢出+禁言"
-	} else if prohibitedSetting.Punish == model.PunishTypeRevoke {
-		actionMsg = "仅撤回消息+不惩罚"
-	} else if prohibitedSetting.Punish == model.PunishTypeWarning {
-		actionMsg = fmt.Sprintf("警告%d次后 %s", prohibitedSetting.WarningCount, actionMap[prohibitedSetting.WarningAfterPunish])
-	}
-
-	content = content + actionMsg
-	services.SaveModel(&prohibitedSetting, prohibitedSetting.ChatId)
-	return content
-}
+//func updatePunishSettingMsg() string {
+//	content := "🔇 违禁词\n\n惩罚："
+//	actionMsg := "警告"
+//
+//	if prohibitedSetting.Punish == model.PunishTypeBan {
+//		actionMsg = "禁言"
+//	} else if prohibitedSetting.Punish == model.PunishTypeKick {
+//		actionMsg = "踢出"
+//	} else if prohibitedSetting.Punish == model.PunishTypeBanAndKick {
+//		actionMsg = "踢出+禁言"
+//	} else if prohibitedSetting.Punish == model.PunishTypeRevoke {
+//		actionMsg = "仅撤回消息+不惩罚"
+//	} else if prohibitedSetting.Punish == model.PunishTypeWarning {
+//		actionMsg = fmt.Sprintf("惩罚措施:警告%d次后%s", prohibitedSetting.WarningCount, actionMap[prohibitedSetting.WarningAfterPunish])
+//	}
+//
+//	content = content + "惩罚措施:" + actionMsg
+//	services.SaveModel(&prohibitedSetting, prohibitedSetting.ChatId)
+//	return content
+//}
 
 // 过滤违禁词
 func ProhibitedCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {

@@ -721,20 +721,31 @@ func CheckDarkTask(bot *tgbotapi.BotAPI) {
 	for _, setting := range settings {
 		//禁言模式开启且在时间范围内
 		if setting.Enable && utils.IsInHoursRange(setting.MuteTimeStart, setting.MuteTimeEnd) {
-			//判断是否发送过
-			if setting.OnMessageId != 0 || !setting.Notify {
-				continue
-			}
-			//计算当前时间到结束时间的时间差
+
+			//对群组里进行禁言和禁止媒体,计算当前时间到结束时间的时间差
 			second := utils.CalculateTimeDifferenceInSeconds(setting.MuteTimeEnd)
 			MuteGroup(setting.ChatId, bot, second, setting.MuteType == model.MuteTypeMedia)
 
+			//判断是否发送过
+			if setting.OnMessageId != 0 {
+				continue
+			}
+
+			if !setting.Notify {
+				//不通知，且把上一次通知的消息清除掉
+				utils.DeleteMessage(setting.ChatId, setting.OffMessageId, bot)
+				utils.DeleteMessage(setting.ChatId, setting.OnMessageId, bot)
+				continue
+			}
 			utils.DeleteMessage(setting.ChatId, setting.OffMessageId, bot)
-
-			services.SaveModel(&setting, setting.ChatId)
+			//组装要发送的消息
 			content := fmt.Sprintf("🌘夜间模式开始\n\n❌从现在起禁止发送消息，%d点自动关闭。", setting.MuteTimeEnd)
+			if setting.MuteType == model.MuteTypeMedia {
+				content = fmt.Sprintf("🌘夜间模式开始\n\n❌从现在起禁止发送媒体消息，%d点自动关闭。", setting.MuteTimeEnd)
+			}
+			//发送通知消息
 			messageId := utils.SendMsg(setting.ChatId, content, bot)
-
+			//更新messageid
 			if messageId != 0 {
 				setting.OnMessageId = messageId
 				setting.OffMessageId = 0
@@ -742,16 +753,25 @@ func CheckDarkTask(bot *tgbotapi.BotAPI) {
 					darkModelSetting.OnMessageId = setting.OnMessageId
 					darkModelSetting.OffMessageId = setting.OffMessageId
 				}
-				services.SaveModel(&setting, setting.ChatId)
 			}
+			//保存配置信息
+			services.SaveModel(&setting, setting.ChatId)
+
 		} else {
+
+			MuteGroup(setting.ChatId, bot, 0, setting.MuteType == model.MuteTypeMedia)
 			//夜间模式关闭
-			if setting.OffMessageId != 0 || !setting.Notify {
+			if setting.OffMessageId != 0 {
 				continue
 			}
-			MuteGroup(setting.ChatId, bot, 0, setting.MuteType == model.MuteTypeMedia)
-			utils.DeleteMessage(setting.ChatId, setting.OnMessageId, bot)
 
+			if !setting.Notify {
+				//不通知，且把上一次通知的消息清除掉
+				utils.DeleteMessage(setting.ChatId, setting.OffMessageId, bot)
+				utils.DeleteMessage(setting.ChatId, setting.OnMessageId, bot)
+				continue
+			}
+			utils.DeleteMessage(setting.ChatId, setting.OnMessageId, bot)
 			services.SaveModel(&setting, setting.ChatId)
 			messageId := utils.SendMsg(setting.ChatId, "☀夜间模式关闭，快出来聊天啦。", bot)
 			if messageId != 0 {

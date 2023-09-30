@@ -211,7 +211,7 @@ func kickUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, userId int64) {
 			ChatID: update.Message.Chat.ID,
 			UserID: userId,
 		},
-		UntilDate:      time.Now().Add(7 * 60 * 24 * time.Minute).Unix(),
+		UntilDate:      time.Now().Add(1 * time.Minute).Unix(),
 		RevokeMessages: false,
 	}
 	_, err = bot.Send(msg)
@@ -227,17 +227,17 @@ func banUserHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		return
 	}
 	userId := update.Message.ReplyToMessage.From.ID
-	banUser(update, bot, userId)
+	banUser(update, bot, userId, 5)
 }
 
-func banUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, userId int64) {
+func banUser(update *tgbotapi.Update, bot *tgbotapi.BotAPI, userId int64, minute uint) {
 
 	msg := tgbotapi.BanChatMemberConfig{
 		ChatMemberConfig: tgbotapi.ChatMemberConfig{
 			ChatID: update.Message.Chat.ID,
 			UserID: userId,
 		},
-		UntilDate:      time.Now().Add(1 * 60 * 24 * time.Minute).Unix(),
+		UntilDate:      time.Now().Add(time.Duration(minute) * time.Minute).Unix(),
 		RevokeMessages: false,
 	}
 	_, err = bot.Send(msg)

@@ -1,7 +1,7 @@
 
 .PHONY: linux
 linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/bot main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/telegramBot main.go
 
 .PHONY: mac
 mac:

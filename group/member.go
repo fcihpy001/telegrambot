@@ -6,7 +6,6 @@ import (
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/setting"
-	"telegramBot/utils"
 )
 
 // WelcomeNewMember 进群欢迎
@@ -45,12 +44,12 @@ func (mgr *GroupManager) welcomeNewMember(message *tgbotapi.Message) {
 
 		//	检查新成员进群后，是否需要禁言
 		memberCheck := model.NewMemberCheck{}
-		err = services.GetModelData(utils.GroupInfo.GroupId, &memberCheck)
+		err = services.GetModelData(message.Chat.ID, &memberCheck)
 		if err != nil {
 			return
 		}
 		if memberCheck.Enable && memberCheck.DelayTime > 0 {
-			setting.MuteUser(message.Chat.ID, mgr.bot, memberCheck.DelayTime, user.ID)
+			setting.MuteUser(message.Chat.ID, mgr.bot, memberCheck.DelayTime*60, user.ID)
 		}
 	}
 }

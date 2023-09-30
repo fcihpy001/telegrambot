@@ -24,6 +24,11 @@ var actionSelection = model.SelectInfo{
 	Column: 0,
 	Text:   "禁言",
 }
+var afterSelection = model.SelectInfo{
+	Row:    5,
+	Column: 0,
+	Text:   "禁言",
+}
 
 func PunishSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	data := update.CallbackQuery.Data
@@ -55,15 +60,27 @@ func PunishSettingHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 }
 
 func punishMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	where := ""
 	if class == "flood" {
-		where = fmt.Sprintf("flood_setting_id = %d", floodSetting.ID)
+		punishment.PunishType = floodSetting.Punish
+		punishment.WarningCount = floodSetting.WarningCount
+		punishment.WarningAfterPunish = floodSetting.WarningAfterPunish
+		punishment.BanTime = floodSetting.BanTime
 	} else if class == "spam" {
-		where = fmt.Sprintf("spam_setting_id = %d", spamsSetting.ID)
+		punishment.PunishType = spamsSetting.Punish
+		punishment.WarningCount = spamsSetting.WarningCount
+		punishment.WarningAfterPunish = spamsSetting.WarningAfterPunish
+		punishment.BanTime = spamsSetting.BanTime
 	} else if class == "prohibited" {
-		where = fmt.Sprintf("prohibited_setting_id = %d", prohibitedSetting.ID)
+		punishment.PunishType = prohibitedSetting.Punish
+		punishment.WarningCount = prohibitedSetting.WarningCount
+		punishment.WarningAfterPunish = prohibitedSetting.WarningAfterPunish
+		punishment.BanTime = prohibitedSetting.BanTime
+	} else if class == "userCheck" {
+		punishment.PunishType = userCheckSetting.Punish
+		punishment.WarningCount = userCheckSetting.WarningCount
+		punishment.WarningAfterPunish = userCheckSetting.WarningAfterPunish
+		punishment.BanTime = userCheckSetting.BanTime
 	}
-	err := services.GetModelWhere(where, &punishment)
 
 	var btns [][]model.ButtonInfo
 	utils.Json2Button2("./config/punish.json", &btns)
@@ -79,6 +96,7 @@ func punishMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 				//返回键盘选项
 				btn.Data = getBackActionMsg()
 			} else {
+				updatePunishBtn(&btn)
 				btn.Data = btn.Data + ":" + strconv.Itoa(i) + "&" + strconv.Itoa(j)
 			}
 			row = append(row, btn)
@@ -130,6 +148,7 @@ func punishTypeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 		utils.PunishMenuMarkup2.InlineKeyboard[0][2].Text = "踢出"
 		utils.PunishMenuMarkup2.InlineKeyboard[1][0].Text = "踢出+封禁"
 		utils.PunishMenuMarkup2.InlineKeyboard[1][1].Text = "仅撤回消息+不惩罚"
+		utils.PunishMenuMarkup2.InlineKeyboard[2][0].Text = "🔇⏱设置禁言时长"
 		content := updatePunishSetting()
 		msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.PunishMenuMarkup2)
 		_, err := bot.Send(msg)
@@ -158,6 +177,7 @@ func punishTypeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 		utils.PunishMenuMarkup2.InlineKeyboard[0][2].Text = "踢出"
 		utils.PunishMenuMarkup2.InlineKeyboard[1][0].Text = "✅踢出+封禁"
 		utils.PunishMenuMarkup2.InlineKeyboard[1][1].Text = "仅撤回消息+不惩罚"
+		utils.PunishMenuMarkup2.InlineKeyboard[2][0].Text = "🔇⏱设置封禁时长"
 		content := updatePunishSetting()
 		msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.PunishMenuMarkup2)
 		_, err := bot.Send(msg)
@@ -192,7 +212,7 @@ func warningCountHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, count in
 	warningSelection.Text = strconv.Itoa(count)
 
 	punishment.WarningCount = count
-	content := updatePunishSettingMsg()
+	content := updatePunishSetting()
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.PunishMenuMarkup)
 	_, err := bot.Send(msg)
 	if err != nil {
@@ -212,26 +232,32 @@ func warningActionHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	col, _ := strconv.Atoi(cc[1])
 
 	//取消以前的选中
-	utils.PunishMenuMarkup.InlineKeyboard[actionSelection.Row][actionSelection.Column].Text = actionSelection.Text
-	//更新选中
-	utils.PunishMenuMarkup.InlineKeyboard[5][col].Text = "✅" + text
-	//更新选中信息
-	actionSelection.Column = col
+	utils.PunishMenuMarkup.InlineKeyboard[afterSelection.Row][afterSelection.Column].Text = afterSelection.Text
 
 	//更新model数据
 	if text == "kick" {
 		punishment.WarningAfterPunish = model.PunishTypeKick
-		actionSelection.Text = "踢出"
+		afterSelection.Text = "踢出"
 	} else if text == "banAndKick" {
 		punishment.WarningAfterPunish = model.PunishTypeBanAndKick
-		actionSelection.Text = "踢出+封禁"
+		afterSelection.Text = "踢出+封禁"
+		utils.PunishMenuMarkup.InlineKeyboard[6][0].Text = "🔇⏱设置封禁时长"
 	} else if text == "mute" {
 		punishment.WarningAfterPunish = model.PunishTypeMute
-		actionSelection.Text = "禁言"
+		afterSelection.Text = "禁言"
+		utils.PunishMenuMarkup.InlineKeyboard[6][0].Text = "🔇⏱设置禁言时长"
 	}
+	//更新选中
+	utils.PunishMenuMarkup.InlineKeyboard[5][col].Text = "✅" + afterSelection.Text
+	//更新选中信息
+	afterSelection.Column = col
 
 	content := updatePunishSetting()
-	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.PunishMenuMarkup)
+	msg := tgbotapi.NewEditMessageTextAndMarkup(
+		update.CallbackQuery.Message.Chat.ID,
+		update.CallbackQuery.Message.MessageID,
+		content,
+		utils.PunishMenuMarkup)
 	_, err := bot.Send(msg)
 	if err != nil {
 		log.Println(err)
@@ -261,15 +287,7 @@ func updatePunishSetting() string {
 	} else if punishment.PunishType == model.PunishTypeRevoke {
 		actionMsg = "仅撤回消息+不惩罚"
 	} else if punishment.PunishType == model.PunishTypeWarning {
-		afterMsg := "禁言"
-		if punishment.WarningAfterPunish == model.PunishTypeKick {
-			afterMsg = "踢出"
-		} else if punishment.WarningAfterPunish == model.PunishTypeBanAndKick {
-			afterMsg = "踢出+禁言"
-		} else if punishment.WarningAfterPunish == model.PunishTypeMute {
-			afterMsg = "禁言"
-		}
-		actionMsg = fmt.Sprintf("警告%d次后 %s", punishment.WarningCount, afterMsg)
+		actionMsg = fmt.Sprintf("警告%d次后 %s", punishment.WarningCount, utils.PunishActionStr(punishment.WarningAfterPunish))
 	}
 
 	content = content + actionMsg
@@ -311,7 +329,12 @@ func updatePunishSetting() string {
 
 // 禁言时长
 func muteTimeMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	content := fmt.Sprintf("🔇 违禁词\n\n当前设置：%d分钟 \n👉 输入处罚禁言的时长（分钟，例如：60）：", punishment.MuteTime)
+	content := ""
+	if punishment.PunishType == model.PunishTypeBanAndKick || punishment.WarningAfterPunish == model.PunishTypeBanAndKick {
+		content = fmt.Sprintf("🔇 违禁词\n\n当前设置：%d分钟 \n👉 输入处罚封禁的时长（分钟，例如：60）：", punishment.BanTime)
+	} else if punishment.PunishType == model.PunishTypeMute || punishment.WarningAfterPunish == model.PunishTypeMute {
+		content = fmt.Sprintf("🔇 违禁词\n\n当前设置：%d分钟 \n👉 输入处罚禁言的时长（分钟，例如：60）：", punishment.MuteTime)
+	}
 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, content)
 	keybord := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -328,8 +351,14 @@ func muteTimeMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 func BanTimeReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	time, _ := strconv.Atoi(update.Message.Text)
-	punishment.MuteTime = time
 	content := "设置成功\n禁言的时长为：" + update.Message.Text + "分钟"
+	if punishment.PunishType == model.PunishTypeBanAndKick || punishment.WarningAfterPunish == model.PunishTypeBanAndKick {
+		punishment.BanTime = time
+		content = "设置成功\n封禁的时长为：" + update.Message.Text + "分钟"
+	} else if punishment.PunishType == model.PunishTypeMute || punishment.WarningAfterPunish == model.PunishTypeMute {
+		punishment.MuteTime = time
+		content = "设置成功\n禁言的时长为：" + update.Message.Text + "分钟"
+	}
 	btn1 := model.ButtonInfo{
 		Text:    "️️️⛔️删除已经设置的文本",
 		Data:    "group_welcome_text_remove",
@@ -402,7 +431,7 @@ func punishHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, punishment mod
 				record.Punish = model.PunishTypeKick
 
 			} else if punishment.WarningAfterPunish == model.PunishTypeBanAndKick { //踢出+封禁
-				banUser(update, bot, userId)
+				banUser(update, bot, userId, uint(punishment.BanTime))
 				record.Punish = model.PunishTypeBanAndKick
 			}
 			record.WarningCount = 0
@@ -414,7 +443,11 @@ func punishHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, punishment mod
 			} else if punishment.Reason == "spam" {
 				content = fmt.Sprintf("@%s 您的消息中有不被允许的内容，警告一次，已被警告%d次", name, record.WarningCount+1)
 			} else if punishment.Reason == "prohibited" {
-				content = fmt.Sprintf("@%s 您所发的消息中含有违禁词，警告一次，已被警告%d次", name, record.WarningCount+1)
+				content = fmt.Sprintf("@%s 您所发的消息中含有违禁词，现警告一次，已被警告%d次,警告%d次后会被%s",
+					name,
+					record.WarningCount+1,
+					prohibitedSetting.WarningCount,
+					utils.PunishActionStr(prohibitedSetting.WarningAfterPunish))
 			}
 			record.WarningCount = record.WarningCount + 1
 			record.Punish = model.PunishTypeWarning
@@ -430,7 +463,7 @@ func punishHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, punishment mod
 		record.Punish = model.PunishTypeKick
 
 	} else if punishment.PunishType == model.PunishTypeBan { //封禁，7天
-		banUserHandler(update, bot)
+		banUser(update, bot, userId, uint(punishment.BanTime))
 		record.Punish = model.PunishTypeMute
 
 	} else if punishment.PunishType == model.PunishTypeRevoke { //撤回
@@ -438,7 +471,6 @@ func punishHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, punishment mod
 		record.Punish = model.PunishTypeRevoke
 	}
 	savePunishRecord(bot, chatId, content, &record, int64(punishment.DeleteNotifyMsgTime))
-
 }
 
 func savePunishRecord(bot *tgbotapi.BotAPI, chatId int64, content string, record *model.PunishRecord, deleteTime int64) {
@@ -461,6 +493,53 @@ func savePunishRecord(bot *tgbotapi.BotAPI, chatId int64, content string, record
 		MessageId:  message.MessageID,
 		DeleteTime: time.Now().Add(time.Duration(deleteTime) * time.Minute),
 	}
-
+	//保存定时任务
 	services.SaveModel(&task, chatId)
+}
+
+func updatePunishBtn(btn *model.ButtonInfo) {
+	fmt.Println("type:", punishment.PunishType)
+	if btn.Data == "punish_setting_type:warn" && punishment.PunishType == model.PunishTypeWarning {
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "punish_setting_type:mute" && punishment.PunishType == model.PunishTypeMute {
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "punish_setting_type:kick" && punishment.PunishType == model.PunishTypeKick {
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "punish_setting_type:banAndKick" && punishment.PunishType == model.PunishTypeBanAndKick {
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "punish_setting_type:revoke" && punishment.PunishType == model.PunishTypeRevoke {
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "1" && punishment.WarningCount == 1 {
+		warningSelection.Text = btn.Text
+		warningSelection.Column = 0
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "2" && punishment.WarningCount == 2 {
+		warningSelection.Text = btn.Text
+		warningSelection.Column = 1
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "3" && punishment.WarningCount == 3 {
+		warningSelection.Text = btn.Text
+		warningSelection.Column = 2
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "4" && punishment.WarningCount == 4 {
+		warningSelection.Text = btn.Text
+		warningSelection.Column = 3
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "5" && punishment.WarningCount == 5 {
+		warningSelection.Text = btn.Text
+		warningSelection.Column = 4
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "punish_setting_action:mute" && punishment.WarningAfterPunish == model.PunishTypeMute {
+		afterSelection.Text = btn.Text
+		afterSelection.Column = 0
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "punish_setting_action:kick" && punishment.WarningAfterPunish == model.PunishTypeKick {
+		afterSelection.Text = btn.Text
+		afterSelection.Column = 1
+		btn.Text = "✅" + btn.Text
+	} else if btn.Data == "punish_setting_action:banAndKick" && punishment.WarningAfterPunish == model.PunishTypeBanAndKick {
+		afterSelection.Text = btn.Text
+		afterSelection.Column = 2
+		btn.Text = "✅" + btn.Text
+	}
 }

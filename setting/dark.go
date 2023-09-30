@@ -101,11 +101,15 @@ func statusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string)
 		statusMsg1 = "启用"
 		statusMsg2 = "✅关闭"
 	}
-	fmt.Println("status", darkModelSetting)
 
-	utils.DarkModelMenuMarkup.InlineKeyboard[0][1].Text = statusMsg1
-	utils.DarkModelMenuMarkup.InlineKeyboard[0][2].Text = statusMsg2
+	fmt.Println("status", darkModelSetting)
+	if len(utils.DarkModelMenuMarkup.InlineKeyboard) > 0 {
+		utils.DarkModelMenuMarkup.InlineKeyboard[0][1].Text = statusMsg1
+		utils.DarkModelMenuMarkup.InlineKeyboard[0][2].Text = statusMsg2
+	}
+
 	content := updateDarkSettingMsg()
+	CheckDarkTask(bot)
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.DarkModelMenuMarkup)
 	_, err := bot.Send(msg)
 	if err != nil {
@@ -125,9 +129,13 @@ func banModelHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params strin
 		statusMsg1 = "全员禁言"
 		statusMsg2 = "✅禁止媒体"
 	}
-	utils.DarkModelMenuMarkup.InlineKeyboard[1][1].Text = statusMsg1
-	utils.DarkModelMenuMarkup.InlineKeyboard[1][2].Text = statusMsg2
+	if len(utils.DarkModelMenuMarkup.InlineKeyboard) > 0 {
+		utils.DarkModelMenuMarkup.InlineKeyboard[1][1].Text = statusMsg1
+		utils.DarkModelMenuMarkup.InlineKeyboard[1][2].Text = statusMsg2
+	}
+
 	content := updateDarkSettingMsg()
+	CheckDarkTask(bot)
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.DarkModelMenuMarkup)
 	_, err := bot.Send(msg)
 	if err != nil {
@@ -147,9 +155,12 @@ func notifyHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string)
 		statusMsg1 = "通知"
 		statusMsg2 = "✅不通知"
 	}
-	utils.DarkModelMenuMarkup.InlineKeyboard[2][1].Text = statusMsg1
-	utils.DarkModelMenuMarkup.InlineKeyboard[2][2].Text = statusMsg2
+	if len(utils.DarkModelMenuMarkup.InlineKeyboard) > 0 {
+		utils.DarkModelMenuMarkup.InlineKeyboard[2][1].Text = statusMsg1
+		utils.DarkModelMenuMarkup.InlineKeyboard[2][2].Text = statusMsg2
+	}
 	content := updateDarkSettingMsg()
+	CheckDarkTask(bot)
 	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.DarkModelMenuMarkup)
 	_, err := bot.Send(msg)
 	if err != nil {

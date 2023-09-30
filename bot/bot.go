@@ -73,6 +73,9 @@ func (bot *SmartBot) setupBotWithPool() {
 		} else if update.Message != nil { // 普通消息，要重点监控自定义关键词的处理
 			bot.handleMessage(&update)
 
+		} else if update.ChatMember != nil { // 群组成员变
+			fmt.Println("chat member")
+
 		} else if update.CallbackQuery != nil { // 按钮回调
 			bot.handleQuery(&update)
 
@@ -81,6 +84,9 @@ func (bot *SmartBot) setupBotWithPool() {
 
 		} else if update.ChatJoinRequest != nil { // 用户申请加入群组
 			setting.UpdateInviteRecord(&update, bot.bot)
+
+		} else if update.MyChatMember != nil { // 群组成员变化
+			fmt.Println("my chat member")
 
 		} else {
 			if update.Message != nil && update.Message.Chat != nil { // 未定义消息的处理

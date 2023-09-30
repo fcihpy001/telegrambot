@@ -85,14 +85,8 @@ func memberCheckStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, ena
 }
 
 func memberCheckTimeMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	time := ""
-	if memberCheck.DelayTime < 61 {
-		time = fmt.Sprintf("%d秒", memberCheck.DelayTime)
-	} else if memberCheck.DelayTime > 60 {
-
-		time = fmt.Sprintf("%d分钟", memberCheck.DelayTime/60)
-	}
-	content := fmt.Sprintf("👤 新群员限制\n\n当前设置：%s\n👉 请输入新群员限制时间（秒，例如：600）：", time)
+	time := fmt.Sprintf("%d分钟", memberCheck.DelayTime)
+	content := fmt.Sprintf("👤 新群员限制\n\n当前设置：%s\n👉 请输入新群员限制时间（分钟，例如：3）：", time)
 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, content)
 	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

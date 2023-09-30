@@ -153,3 +153,13 @@ func CalculateTimeDifferenceInSeconds(endHour int) int {
 	}
 	return timeDiffSeconds
 }
+
+func PunishActionStr(punishType model.PunishType) string {
+	actionStr := "禁言"
+	if punishType == model.PunishTypeKick {
+		actionStr = "踢出"
+	} else if punishType == model.PunishTypeBanAndKick {
+		actionStr = "踢出+封禁"
+	}
+	return actionStr
+}

@@ -115,6 +115,8 @@ func (bot *SmartBot) handleCommand(update tgbotapi.Update) {
 	case "ban", "kick", "unmute", "mute", "unban":
 		setting.OperationHandler(&update, bot.bot)
 
+	case "tt":
+		setting.MuteUser(-1001770217331, bot.bot, 0, 6401399435)
 	case "t":
 		msg := tgbotapi.SetChatPermissionsConfig{
 			ChatConfig: tgbotapi.ChatConfig{

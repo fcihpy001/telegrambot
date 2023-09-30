@@ -45,6 +45,8 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 
 	} else if strings.Contains(replyMsg, "👉 输入处罚禁言的时长（分钟，例如：60") {
 		setting.BanTimeReply(update, bot.bot)
+	} else if strings.Contains(replyMsg, "👉 输入处罚封禁的时长（分钟，例如：60") {
+		setting.BanTimeReply(update, bot.bot)
 
 	} else if strings.Contains(replyMsg, "请输入要删除的违禁词（一行一个）") {
 		setting.ProhibitedDeleteResult(update, bot.bot)
