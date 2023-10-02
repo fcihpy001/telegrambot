@@ -19,11 +19,6 @@ var warningSelection = model.SelectInfo{
 	Column: 0,
 	Text:   "1",
 }
-var actionSelection = model.SelectInfo{
-	Row:    5,
-	Column: 0,
-	Text:   "禁言",
-}
 var afterSelection = model.SelectInfo{
 	Row:    5,
 	Column: 0,
@@ -65,21 +60,25 @@ func punishMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		punishment.WarningCount = floodSetting.WarningCount
 		punishment.WarningAfterPunish = floodSetting.WarningAfterPunish
 		punishment.BanTime = floodSetting.BanTime
+		punishment.DeleteNotifyMsgTime = floodSetting.DeleteNotifyMsgTime
 	} else if class == "spam" {
 		punishment.PunishType = spamsSetting.Punish
 		punishment.WarningCount = spamsSetting.WarningCount
 		punishment.WarningAfterPunish = spamsSetting.WarningAfterPunish
 		punishment.BanTime = spamsSetting.BanTime
+		punishment.DeleteNotifyMsgTime = spamsSetting.DeleteNotifyMsgTime
 	} else if class == "prohibited" {
 		punishment.PunishType = prohibitedSetting.Punish
 		punishment.WarningCount = prohibitedSetting.WarningCount
 		punishment.WarningAfterPunish = prohibitedSetting.WarningAfterPunish
 		punishment.BanTime = prohibitedSetting.BanTime
+		punishment.DeleteNotifyMsgTime = prohibitedSetting.DeleteNotifyMsgTime
 	} else if class == "userCheck" {
 		punishment.PunishType = userCheckSetting.Punish
 		punishment.WarningCount = userCheckSetting.WarningCount
 		punishment.WarningAfterPunish = userCheckSetting.WarningAfterPunish
 		punishment.BanTime = userCheckSetting.BanTime
+		punishment.DeleteNotifyMsgTime = userCheckSetting.DeleteNotifyMsgTime
 	}
 
 	var btns [][]model.ButtonInfo
@@ -127,6 +126,10 @@ func punishMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 }
 
 func punishTypeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
+	if len(utils.PunishMenuMarkup2.InlineKeyboard) < 1 {
+		utils.SendText(update.CallbackQuery.Message.Chat.ID, "请输入/start重新开始", bot)
+		return
+	}
 	switch params {
 	case "warn":
 		punishment.PunishType = model.PunishTypeWarning
@@ -141,6 +144,7 @@ func punishTypeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 		if err != nil {
 			fmt.Println("statusHandel", err)
 		}
+
 	case "mute":
 		punishment.PunishType = model.PunishTypeMute
 		utils.PunishMenuMarkup2.InlineKeyboard[0][0].Text = "警告"
@@ -203,6 +207,9 @@ func punishTypeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 
 func warningCountHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, count int) {
 
+	if len(utils.PunishMenuMarkup.InlineKeyboard) < 1 {
+		return
+	}
 	//取消以前的选中
 	utils.PunishMenuMarkup.InlineKeyboard[3][warningSelection.Column].Text = warningSelection.Text
 	//更新选中
@@ -232,7 +239,10 @@ func warningActionHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	col, _ := strconv.Atoi(cc[1])
 
 	//取消以前的选中
-	utils.PunishMenuMarkup.InlineKeyboard[afterSelection.Row][afterSelection.Column].Text = afterSelection.Text
+	if len(utils.PunishMenuMarkup.InlineKeyboard) < 1 {
+		utils.SendText(update.Message.Chat.ID, "请输入/start重新开始", bot)
+		return
+	}
 
 	//更新model数据
 	if text == "kick" {
@@ -437,17 +447,32 @@ func punishHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, punishment mod
 			record.WarningCount = 0
 		} else {
 			//	发出警告消息
-			content = fmt.Sprintf("@%s 您已触发反刷屏规则，警告一次，已被警告%d次", name, record.WarningCount+1)
+			content = fmt.Sprintf("@%s 您已触发反刷屏规则:%s，现警告一次，已被警告%d次,警告%d次后会被%s",
+				name,
+				punishment.Content,
+				record.WarningCount+1,
+				punishment.WarningCount,
+				utils.PunishActionStr(punishment.WarningAfterPunish))
 			if punishment.Reason == "userCheck" {
-				content = fmt.Sprintf("@%s 您已触用户规则检查，警告一次，已被警告%d次", name, record.WarningCount+1)
+				content = fmt.Sprintf("@%s 您已违法用户检查规则:%s，现警告一次，已被警告%d次,警告%d次后会被%s",
+					name,
+					punishment.Content,
+					record.WarningCount+1,
+					punishment.WarningCount,
+					utils.PunishActionStr(punishment.WarningAfterPunish))
 			} else if punishment.Reason == "spam" {
-				content = fmt.Sprintf("@%s 您的消息中有不被允许的内容，警告一次，已被警告%d次", name, record.WarningCount+1)
+				content = fmt.Sprintf("@%s 您已违法垃圾消息检查规则:%s，现警告一次，已被警告%d次,警告%d次后会被%s",
+					name,
+					punishment.Content,
+					record.WarningCount+1,
+					punishment.WarningCount,
+					utils.PunishActionStr(punishment.WarningAfterPunish))
 			} else if punishment.Reason == "prohibited" {
 				content = fmt.Sprintf("@%s 您所发的消息中含有违禁词，现警告一次，已被警告%d次,警告%d次后会被%s",
 					name,
 					record.WarningCount+1,
-					prohibitedSetting.WarningCount,
-					utils.PunishActionStr(prohibitedSetting.WarningAfterPunish))
+					punishment.WarningCount,
+					utils.PunishActionStr(punishment.WarningAfterPunish))
 			}
 			record.WarningCount = record.WarningCount + 1
 			record.Punish = model.PunishTypeWarning
@@ -462,12 +487,19 @@ func punishHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, punishment mod
 		kickUser(update, bot, userId)
 		record.Punish = model.PunishTypeKick
 
-	} else if punishment.PunishType == model.PunishTypeBan { //封禁，7天
+	} else if punishment.PunishType == model.PunishTypeBanAndKick { //封禁，7天
 		banUser(update, bot, userId, uint(punishment.BanTime))
 		record.Punish = model.PunishTypeMute
 
 	} else if punishment.PunishType == model.PunishTypeRevoke { //撤回
 		content = fmt.Sprintf("@%s，系统检测到您存在刷屏行为，请撤回消息", update.Message.From.FirstName)
+		if punishment.Reason == "userCheck" {
+			content = fmt.Sprintf("@%s 您已触用户规则检查,请撤回消息", name)
+		} else if punishment.Reason == "spam" {
+			content = fmt.Sprintf("@%s 您的消息中有不被允许的内容,请撤回消息", name)
+		} else if punishment.Reason == "prohibited" {
+			content = fmt.Sprintf("@%s 您所发的消息中含有违禁词,请撤回消息", name)
+		}
 		record.Punish = model.PunishTypeRevoke
 	}
 	savePunishRecord(bot, chatId, content, &record, int64(punishment.DeleteNotifyMsgTime))
@@ -477,7 +509,7 @@ func savePunishRecord(bot *tgbotapi.BotAPI, chatId int64, content string, record
 
 	//存储惩罚记录
 	services.SaveModel(&record, record.ChatId)
-	if len(content) == 0 || deleteTime < 1 {
+	if len(content) == 0 || deleteTime == -1 {
 		return
 	}
 
@@ -488,13 +520,15 @@ func savePunishRecord(bot *tgbotapi.BotAPI, chatId int64, content string, record
 		log.Println(err)
 	}
 	//需要把这个消息存到记录中，待将来删除
-	task := model.ScheduleDelete{
-		ChatId:     chatId,
-		MessageId:  message.MessageID,
-		DeleteTime: time.Now().Add(time.Duration(deleteTime) * time.Minute),
+	if deleteTime > 0 {
+		task := model.ScheduleDelete{
+			ChatId:     chatId,
+			MessageId:  message.MessageID,
+			DeleteTime: time.Now().Add(time.Duration(deleteTime) * time.Second),
+		}
+		//保存定时任务
+		services.SaveModel(&task, chatId)
 	}
-	//保存定时任务
-	services.SaveModel(&task, chatId)
 }
 
 func updatePunishBtn(btn *model.ButtonInfo) {

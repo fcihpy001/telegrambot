@@ -37,6 +37,15 @@ func DeleteNotifyHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 func notifyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
 	notifyClass = params
+	if notifyClass == "flood" {
+		deleteTime = floodSetting.DeleteNotifyMsgTime
+	} else if notifyClass == "spam" {
+		deleteTime = floodSetting.DeleteNotifyMsgTime
+	} else if notifyClass == "prohibited" {
+		deleteTime = floodSetting.DeleteNotifyMsgTime
+	} else if notifyClass == "userCheck" {
+		deleteTime = floodSetting.DeleteNotifyMsgTime
+	}
 
 	times := utils.GetTimeData()
 
@@ -51,6 +60,7 @@ func notifyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
 				Data:    "delete_notify_time:" + strconv.Itoa(i) + "&" + strconv.Itoa(j) + "&" + time,
 				BtnType: model.BtnTypeData,
 			}
+			updateDelNotifyBtn(&btn)
 			row = append(row, btn)
 		}
 		rows = append(rows, row)
@@ -84,6 +94,9 @@ func notifyTimeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 	deleteTime = utils.ParseTime(text)
 
 	//取消以前的选中
+	if len(utils.DeleteNotifyMenuMarkup.InlineKeyboard) < 1 {
+		return
+	}
 	utils.DeleteNotifyMenuMarkup.InlineKeyboard[deleteNotifySelect.Row][deleteNotifySelect.Column].Text = deleteNotifySelect.Text
 	//更新选中
 	utils.DeleteNotifyMenuMarkup.InlineKeyboard[row][column].Text = "✅" + text
@@ -137,4 +150,63 @@ func getNotifyBackActionMsg() string {
 		backAction = "user_check_menu"
 	}
 	return backAction
+}
+
+func updateDelNotifyBtn(btn *model.ButtonInfo) {
+	if btn.Text == "10秒" && deleteTime == 10 {
+		deleteNotifySelect.Row = 0
+		deleteNotifySelect.Column = 0
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "30秒" && deleteTime == 30 {
+		deleteNotifySelect.Row = 0
+		deleteNotifySelect.Column = 1
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "60秒" && deleteTime == 60 {
+		deleteNotifySelect.Row = 0
+		deleteNotifySelect.Column = 2
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "5分钟" && deleteTime == 300 {
+		deleteNotifySelect.Row = 1
+		deleteNotifySelect.Column = 0
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "10分钟" && deleteTime == 600 {
+		deleteNotifySelect.Row = 1
+		deleteNotifySelect.Column = 1
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "30分钟" && deleteTime == 1800 {
+		deleteNotifySelect.Row = 1
+		deleteNotifySelect.Column = 2
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "1小时" && deleteTime == 3600 {
+		deleteNotifySelect.Row = 2
+		deleteNotifySelect.Column = 0
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "6小时" && deleteTime == 21600 {
+		deleteNotifySelect.Row = 2
+		deleteNotifySelect.Column = 1
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "12小时" && deleteTime == 43200 {
+		deleteNotifySelect.Row = 2
+		deleteNotifySelect.Column = 2
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "不提醒" && deleteTime == -1 {
+		deleteNotifySelect.Row = 3
+		deleteNotifySelect.Column = 0
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	} else if btn.Text == "不删除" && deleteTime == 0 {
+		deleteNotifySelect.Row = 3
+		deleteNotifySelect.Column = 1
+		deleteNotifySelect.Text = btn.Text
+		btn.Text = "✅" + btn.Text
+	}
 }

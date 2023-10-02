@@ -12,6 +12,7 @@ import (
 
 var userCheckSetting model.UserCheck
 
+// 模块入口
 func UserCheckHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	data := update.CallbackQuery.Data
 	query := strings.Split(data, ":")
@@ -30,7 +31,7 @@ func UserCheckHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		iconCheck(update, bot)
 
 	} else if cmd == "user_check_subscribe" {
-		subScribeCheck(update, bot)
+		subscribeAddMenu(update, bot)
 
 	} else if cmd == "user_check_black_list" {
 		blackUserList(update, bot)
@@ -41,6 +42,7 @@ func UserCheckHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
+// 用户检查菜单
 func userCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	err := services.GetModelData(utils.GroupInfo.GroupId, &userCheckSetting)
 	fmt.Println("userCheckSetting-query", userCheckSetting)
@@ -72,6 +74,7 @@ func userCheckMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
+// 状态处理-名字检查
 func nameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	userCheckSetting.NameCheck = !userCheckSetting.NameCheck
 	if userCheckSetting.NameCheck {
@@ -88,6 +91,7 @@ func nameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
+// 状态处理-用户名检查
 func userNameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	userCheckSetting.UserNameCheck = !userCheckSetting.UserNameCheck
 	if userCheckSetting.UserNameCheck {
@@ -104,6 +108,7 @@ func userNameCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
+// 状态处理-头像检查
 func iconCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	userCheckSetting.IconCheck = !userCheckSetting.IconCheck
 	if userCheckSetting.IconCheck {
@@ -120,23 +125,69 @@ func iconCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
-func subScribeCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	userCheckSetting.SubScribe = !userCheckSetting.SubScribe
-	if userCheckSetting.SubScribe {
-		utils.UserCheckMenuMarkup.InlineKeyboard[1][1].Text = "✅必须订阅频道"
-	} else {
-		utils.UserCheckMenuMarkup.InlineKeyboard[1][1].Text = "❌必须订阅频道"
-	}
+// 状态处理-订阅检查
+func subscribeAddMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "🔦 用户检查\n\n"+
+		"群成员必须订阅指定频道(或加入指定群)后获得发言权限，并且机器人要在该频道(群组)中\n\n"+
+		"👉请输入频道或群组地址，格式：https://t.me/[公开链接]")
+	keyboard := tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("返回"),
+		))
 
-	content := updateUserSettingMsg()
-	msg := tgbotapi.NewEditMessageTextAndMarkup(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, content, utils.UserCheckMenuMarkup)
+	msg.ReplyMarkup = keyboard
+	msg.ReplyMarkup = tgbotapi.ForceReply{
+		ForceReply: true,
+	}
 	_, err := bot.Send(msg)
+	if err != nil {
+		return
+	}
+}
+
+func SubscribeAddResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	//判断返回的数据是否是以https://t.me开头
+	if !strings.HasPrefix(update.Message.Text, "https://t.me/") {
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "🔦 用户检查\n\n"+
+			"格式有误，请重新输入\n\n"+
+			"👉请输入频道或群组地址，格式：https://t.me/[公开链接]")
+		keyboard := tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("返回"),
+			))
+
+		msg.ReplyMarkup = keyboard
+		msg.ReplyMarkup = tgbotapi.ForceReply{
+			ForceReply: true,
+		}
+		_, err := bot.Send(msg)
+		if err != nil {
+			return
+		}
+		return
+	}
+	//判断当前机器人是否在这个频道中
+	content := "✅设置成功"
+	btn1 := model.ButtonInfo{
+		Text:    "返回",
+		Data:    "user_check_menu",
+		BtnType: model.BtnTypeData,
+	}
+	row1 := []model.ButtonInfo{btn1}
+	rows := [][]model.ButtonInfo{row1}
+	keyboard := utils.MakeKeyboard(rows)
+	userCheckSetting.SubScribe = true
+	userCheckSetting.ChannelAddr = update.Message.Text
+	updateUserSettingMsg()
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, content)
+	msg.ReplyMarkup = keyboard
+	_, err = bot.Send(msg)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-// 黑名单用户处理
+// 黑名单用户逻辑-列表
 func blackUserList(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	words := strings.Split(userCheckSetting.BlackUserList, "&")
 
@@ -172,8 +223,9 @@ func blackUserList(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
+// 黑名单用户逻辑-添加
 func blackUserAdd(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "🔇 黑名单\\n\\n👉请输入要禁止的名字（一行一个）")
+	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "🔇 黑名单\\n\\n👉请输入要禁止的名字(一行一个)")
 	keybord := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("返回"),
@@ -186,6 +238,7 @@ func blackUserAdd(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	bot.Send(msg)
 }
 
+// 黑名单用户逻辑-添加反馈
 func BlackUserAddResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if len(userCheckSetting.BlackUserList) > 0 {
 		userCheckSetting.BlackUserList = userCheckSetting.BlackUserList + "&" + update.Message.Text
@@ -222,24 +275,25 @@ func BlackUserAddResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 }
 
+// 配置数据更新
 func updateUserSettingMsg() string {
-	content := "🔦 用户检查\n\n在用户进入群组和发送消息时进行检查和屏蔽。\n\n惩罚：警告 3 次后禁言 60 分钟\n\n自动删除提醒消息：10分钟"
-	//if replySetting.Enable == false {
-	//	content = "💬 关键词回复\n\n当前状态：关闭❌"
-	//	return content
-	//}
-	//fmt.Println("reply_keyworld", replySetting.KeywordReply)
-	////enableMsg := "- " + replySetting.KeywordReply[0].KeyWorld
-	//
-	//enableMsg := "* match world"
-	//
-	//content = content + enableMsg + "\n" + "\n- 表示精准触发\n * 表示包含触发"
-
+	content := "🔦 用户检查\n\n在用户进入群组和发送消息时进行检查和屏蔽。\n\n"
+	punishMsg := "惩罚措施：无\n"
+	if len(userCheckSetting.Punish) > 0 {
+		if userCheckSetting.Punish == model.PunishTypeWarning {
+			punishMsg = fmt.Sprintf("惩罚措施：警告%d次后%s\n", userCheckSetting.WarningCount, utils.PunishActionStr(userCheckSetting.WarningAfterPunish))
+		} else {
+			punishMsg = fmt.Sprintf("惩罚措施：%s\n", utils.PunishActionStr(userCheckSetting.Punish))
+		}
+	}
+	deleteNotifyMsg := fmt.Sprintf("自动删除提醒消息:%s", utils.TimeStr(userCheckSetting.DeleteNotifyMsgTime))
+	content += punishMsg + deleteNotifyMsg
 	userCheckSetting.ChatId = utils.GroupInfo.GroupId
 	services.SaveModel(&userCheckSetting, utils.GroupInfo.GroupId)
 	return content
 }
 
+// 菜单按钮初始化显示
 func updateUserCheckButtonStatus(btn *model.ButtonInfo) {
 	if btn.Data == "user_check_name" && userCheckSetting.NameCheck {
 		btn.Text = "✅" + btn.Text
@@ -247,7 +301,7 @@ func updateUserCheckButtonStatus(btn *model.ButtonInfo) {
 		btn.Text = "✅" + btn.Text
 	} else if btn.Data == "user_check_icon" && userCheckSetting.IconCheck {
 		btn.Text = "✅" + btn.Text
-	} else if btn.Data == "user_check_subscribe" && userCheckSetting.SubScribe {
+	} else if btn.Data == "user_check_subscribe" && userCheckSetting.SubScribe && len(userCheckSetting.ChannelAddr) > 0 {
 		btn.Text = "✅" + btn.Text
 	} else if btn.Data == "user_check_name" && !userCheckSetting.NameCheck {
 		btn.Text = "❌" + btn.Text
@@ -266,12 +320,13 @@ func UserValidateCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 	_ = services.GetModelData(chatId, &setting)
 
 	content := ""
+	//检查用户名
 	if setting.UserNameCheck && update.Message.From.UserName == "" {
-		content = fmt.Sprintf("@%s 🚫请设置用户名", update.Message.From.FirstName)
-
+		content = "没有设置用户名"
 	}
+	//检查名字
 	if setting.NameCheck && update.Message.From.LastName == "" {
-		content = fmt.Sprintf("@%s 🚫请设置名字", update.Message.From.FirstName)
+		content = "没有设置名字"
 	}
 	//获取头像信息
 	profile, _ := bot.GetUserProfilePhotos(tgbotapi.UserProfilePhotosConfig{
@@ -280,16 +335,18 @@ func UserValidateCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 		Offset: 0,
 	})
 	if setting.IconCheck && profile.TotalCount < 1 {
-		content = fmt.Sprintf("🚫@%s 请设置头像", update.Message.From.FirstName)
-		utils.SendText(update.Message.Chat.ID, content, bot)
+		content = "没有设置头像"
 	}
 
 	// 检查是否在黑名单中
-	if len(setting.BlackUserList) > 0 && strings.Contains(setting.BlackUserList, update.Message.From.UserName) {
-		content := fmt.Sprintf("🚫@%s 你是黑名单用户，已被禁言", update.Message.From.FirstName)
-		utils.SendText(update.Message.Chat.ID, content, bot)
+	if len(setting.BlackUserList) > 0 &&
+		len(update.Message.From.UserName) > 0 &&
+		strings.Contains(setting.BlackUserList, update.Message.From.FirstName) {
+		content = "是黑名单用户"
 	}
-
+	if len(content) == 0 {
+		return false
+	}
 	punishment := model.Punishment{
 		PunishType:          setting.Punish,
 		WarningCount:        setting.WarningCount,
@@ -299,7 +356,7 @@ func UserValidateCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 		DeleteNotifyMsgTime: setting.DeleteNotifyMsgTime,
 		Reason:              "userCheck",
 		ReasonType:          4,
-		Content:             "",
+		Content:             content,
 	}
 	punishHandler(update, bot, punishment)
 	return true

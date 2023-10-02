@@ -1,32 +1,8 @@
 [
   [
     {
-      "text": "❌AI屏蔽垃圾消息[强劲版]",
-      "data": "spam_setting_type:ai",
-      "btn_type": "data"
-    }
-  ],
-  [
-    {
-      "text": "❌反洪水攻击",
-      "data": "spam_setting_type:ddos",
-      "btn_type": "data"
-    },
-    {
-      "text": "❌屏蔽被封禁账号",
-      "data": "spam_setting_type:blackUser",
-      "btn_type": "data"
-    }
-  ],
-  [
-    {
       "text": "❌屏蔽链接",
       "data": "spam_setting_type:link",
-      "btn_type": "data"
-    },
-    {
-      "text": "❌屏蔽频道马甲发言",
-      "data": "spam_setting_type:channelCopy",
       "btn_type": "data"
     }
   ],
@@ -73,7 +49,7 @@
       "btn_type": "data"
     },
     {
-      "text": "设置消息最大长度",
+      "text": "⚙\uFE0F设置消息最大长度",
       "data": "spam_setting_msg_length",
       "btn_type": "data"
     }
@@ -85,7 +61,7 @@
       "btn_type": "data"
     },
     {
-      "text": "设置姓名最大长度",
+      "text": "⚙\uFE0F设置姓名最大长度",
       "data": "spam_setting_name_length",
       "btn_type": "data"
     }

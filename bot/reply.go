@@ -16,7 +16,7 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 	} else if strings.Contains(replyMsg, "请输入新群员限制时间") {
 		setting.MemberCheckTimeResult(update, bot.bot)
 
-	} else if strings.Contains(replyMsg, "请输入要禁止的名字（一行一个") {
+	} else if strings.Contains(replyMsg, "请输入要禁止的名字(一行一个)") {
 		setting.BlackUserAddResult(update, bot.bot)
 
 	} else if strings.Contains(replyMsg, "请输入时间内发送消息的最大条数") {
@@ -68,6 +68,9 @@ func (bot *SmartBot) handleReply(update *tgbotapi.Update) {
 
 	} else if strings.Contains(replyMsg, "请回复生成链接数量上限(不限制请输入：0)") {
 		setting.InviteLinkLimitResult(update, bot.bot)
+
+	} else if strings.Contains(replyMsg, "请输入频道或群组地址") {
+		setting.SubscribeAddResult(update, bot.bot)
 
 	} else if strings.Contains(replyMsg, "请输入要kick的用户") {
 		//setting.KickUserHandler(update, bot.bot)

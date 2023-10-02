@@ -80,7 +80,7 @@ func typeStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 		if spamsSetting.EnableAi {
 			utils.SpamSettingMenuMarkup.InlineKeyboard[0][0].Text = "✅AI屏蔽垃圾消息[强劲版]"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[0][0].Text = "AI屏蔽垃圾消息[强劲版]"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[0][0].Text = "❌AI屏蔽垃圾消息[强劲版]"
 		}
 
 	case "ddos":
@@ -88,87 +88,86 @@ func typeStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 		if spamsSetting.DDos {
 			utils.SpamSettingMenuMarkup.InlineKeyboard[1][0].Text = "✅反洪水攻击"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[1][0].Text = "反洪水攻击"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[1][0].Text = "❌反洪水攻击"
 		}
 	case "blackUser":
 		spamsSetting.BlackUser = !spamsSetting.BlackUser
 		if spamsSetting.BlackUser {
 			utils.SpamSettingMenuMarkup.InlineKeyboard[1][1].Text = "✅屏蔽被封禁账号"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[1][1].Text = "屏蔽被封禁账号"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[1][1].Text = "❌屏蔽被封禁账号"
 		}
 	case "link":
 		spamsSetting.Link = !spamsSetting.Link
 		if spamsSetting.Link {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[2][0].Text = "✅屏蔽链接"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[0][0].Text = "✅屏蔽链接"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[2][0].Text = "屏蔽链接"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[0][0].Text = "❌屏蔽链接"
 		}
 	case "channelCopy":
 		spamsSetting.ChannelCopy = !spamsSetting.ChannelCopy
 		if spamsSetting.ChannelCopy {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[2][1].Text = "✅屏蔽频道马甲发言"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[1][0].Text = "✅屏蔽频道马甲发言"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[2][1].Text = "屏蔽频道马甲发言"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[1][0].Text = "❌屏蔽频道马甲发言"
 		}
 	case "channelForward":
 		spamsSetting.ChannelForward = !spamsSetting.ChannelForward
 		if spamsSetting.ChannelForward {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[3][0].Text = "✅屏蔽来自频道转发"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[1][0].Text = "✅屏蔽来自频道转发"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[3][0].Text = "屏蔽来自频道转发"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[1][0].Text = "❌屏蔽来自频道转发"
 		}
 	case "userForward":
 		spamsSetting.UserForward = !spamsSetting.UserForward
 		if spamsSetting.UserForward {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[3][1].Text = "✅屏蔽来自用户转发"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[1][1].Text = "✅屏蔽来自用户转发"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[3][1].Text = "屏蔽来自用户转发"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[1][1].Text = "❌屏蔽来自用户转发"
 		}
 	case "atGroup":
 		spamsSetting.AtGroup = !spamsSetting.AtGroup
 		if spamsSetting.AtGroup {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[4][0].Text = "✅屏蔽@群组ID"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[2][0].Text = "✅屏蔽@群组ID"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[4][0].Text = "屏蔽@群组ID"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[2][0].Text = "❌屏蔽@群组ID"
 		}
 	case "atUser":
 		spamsSetting.AtUser = !spamsSetting.AtUser
 		if spamsSetting.AtUser {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[4][1].Text = "✅屏蔽@用户ID"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[2][1].Text = "✅屏蔽@用户ID"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[4][1].Text = "屏蔽@用户ID"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[2][1].Text = "❌屏蔽@用户ID"
 		}
 	case "ethAddress":
 		spamsSetting.EthAddr = !spamsSetting.EthAddr
 		if spamsSetting.EthAddr {
 
-			utils.SpamSettingMenuMarkup.InlineKeyboard[5][0].Text = "✅屏蔽以太坊地址"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[3][0].Text = "✅屏蔽以太坊地址"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[5][0].Text = "屏蔽以太坊地址"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[3][0].Text = "❌屏蔽以太坊地址"
 		}
 	case "command":
 		spamsSetting.Command = !spamsSetting.Command
 		if spamsSetting.Command {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[5][1].Text = "✅清除命令消息"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[3][1].Text = "✅清除命令消息"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[5][1].Text = "清除命令消息"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[3][1].Text = "❌清除命令消息"
 		}
 	case "longMsg":
 		spamsSetting.LongMsg = !spamsSetting.LongMsg
 		if spamsSetting.LongMsg {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[6][0].Text = "✅屏蔽超长消息"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[4][0].Text = "✅屏蔽超长消息"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[6][0].Text = "屏蔽超长消息"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[4][0].Text = "❌屏蔽超长消息"
 		}
 	case "longName":
 		spamsSetting.LongName = !spamsSetting.LongName
 		if spamsSetting.LongName {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[7][0].Text = "✅屏蔽超长名字"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[5][0].Text = "✅屏蔽超长名字"
 		} else {
-			utils.SpamSettingMenuMarkup.InlineKeyboard[7][0].Text = "屏蔽超长名字"
+			utils.SpamSettingMenuMarkup.InlineKeyboard[5][0].Text = "❌屏蔽超长名字"
 		}
-
 	}
 
 	updateSpamMsg()
@@ -177,7 +176,10 @@ func typeStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params str
 		update.CallbackQuery.Message.MessageID,
 		utils.SpamSettingMenuMarkup,
 	)
-	bot.Send(editText)
+	_, err := bot.Send(editText)
+	if err != nil {
+		return
+	}
 }
 
 func msgLengthHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
@@ -251,17 +253,7 @@ func sendReplyMsg(chatId int64, content string, bot *tgbotapi.BotAPI) {
 func updateSpamMsg() string {
 	content := fmt.Sprintf("📨 反垃圾\n\n"+
 		"惩罚：踢出+封禁 60 分钟\n\n"+
-		"自动删除提醒消息：%s\n\n"+
-		"✅AI屏蔽垃圾消息[强劲版]: \n"+
-		"└ 全网已拦截广告：20645283 次 查看详情\n"+
-		"✅ 反洪水攻击:\n"+
-		"└ 同一条(相似)消息一段时间内在多个群发送\n"+
-		"✅ 屏蔽被封禁账号:\n"+
-		"└ 多次发送垃圾消息被全网封禁的账号", utils.TransferSecond(spamsSetting.DeleteNotifyMsgTime))
-	//spamsSetting.Punishment.PunishType = model.PunishTypeBan
-	//spamsSetting.Punishment.BanTime = 60
-	//spamsSetting.Punishment.WarningCount = 3
-
+		"自动删除提醒消息：%s\n\n", utils.TransferSecond(spamsSetting.DeleteNotifyMsgTime))
 	services.SaveModel(&spamsSetting, spamsSetting.ChatId)
 	return content
 }
@@ -302,7 +294,37 @@ func SpamCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 	//获取数据库中的违禁词列表
 	setting := model.SpamSetting{}
 	_ = services.GetModelData(chatId, &setting)
+	result := false
+	content := ""
 	if setting.Link && strings.Contains(messageText, "http") {
+		content = "消息中含有超链接"
+		result = true
+	} else if setting.LongName && len(update.Message.From.FirstName) >= setting.NameLength {
+		content = fmt.Sprintf("名字长度超过%d位", setting.NameLength)
+		result = true
+	} else if setting.LongMsg && len(messageText) >= setting.MsgLength {
+		content = fmt.Sprintf("消息长度超过%d位", setting.MsgLength)
+		result = true
+	} else if setting.EthAddr && len(messageText) >= 40 && utils.ContainsEthereumAddress(messageText) {
+		content = fmt.Sprintf("消息包含以太坊地址")
+		result = true
+	} else if setting.Command && utils.ContainsCommand(messageText) {
+		content = fmt.Sprintf("消息包含了以/开头的命令内容")
+		result = true
+	} else if setting.AtGroup && utils.ContainsAtGroupID(messageText) {
+		content = fmt.Sprintf("消息中@了群组")
+		result = true
+	} else if setting.AtUser && utils.ContainsAtUserID(messageText) {
+		content = fmt.Sprintf("消息中@了用户")
+		result = true
+	} else if setting.UserForward && update.Message.ForwardFrom != nil && len(update.Message.ForwardFrom.FirstName) > 0 {
+		content = fmt.Sprintf("转发了某人的消息")
+		result = true
+	} else if setting.ChannelForward && update.Message.ForwardFromChat != nil && update.Message.ForwardFromChat.Type == "channel" {
+		content = fmt.Sprintf("转发了来自频道的消息")
+		result = true
+	}
+	if result {
 		punishment := model.Punishment{
 			PunishType:          setting.Punish,
 			WarningCount:        setting.WarningCount,
@@ -312,11 +334,11 @@ func SpamCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 			DeleteNotifyMsgTime: setting.DeleteNotifyMsgTime,
 			Reason:              "spam",
 			ReasonType:          2,
-			Content:             "",
+			Content:             content,
 		}
 		punishHandler(update, bot, punishment)
 		return true
+	} else {
+		return false
 	}
-	return false
-
 }

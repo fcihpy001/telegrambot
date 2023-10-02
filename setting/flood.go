@@ -9,7 +9,6 @@ import (
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
-	"time"
 )
 
 var floodSetting model.FloodSetting
@@ -54,16 +53,7 @@ func floodSettingMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		var row []model.ButtonInfo
 		for j := 0; j < len(btnArr); j++ {
 			btn := btnArr[j]
-			if btn.Text == "启用" && floodSetting.Enable {
-				btn.Text = "✅启用"
-			} else if btn.Text == "关闭" && !floodSetting.Enable {
-				btn.Text = "✅关闭"
-			}
-			if btn.Text == "违规后清理消息" && floodSetting.DeleteMsg {
-				btn.Text = "✅违规后清理消息"
-			} else if btn.Text == "违规后清理消息" && !floodSetting.DeleteMsg {
-				btn.Text = "❌违规后清理消息"
-			}
+			updateFloodBtn(&btn)
 			row = append(row, btn)
 		}
 		rows = append(rows, row)
@@ -157,6 +147,10 @@ func FloodMsgCountResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 }
 
 func floodStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bool) {
+	if len(utils.FloodSettingMenuMarkup.InlineKeyboard) < 1 {
+		utils.SendText(update.CallbackQuery.Message.Chat.ID, "请输入/start重新执行", bot)
+		return
+	}
 	if enable {
 		utils.FloodSettingMenuMarkup.InlineKeyboard[1][1].Text = "✅启用"
 		utils.FloodSettingMenuMarkup.InlineKeyboard[1][2].Text = "关闭"
@@ -174,6 +168,10 @@ func floodStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bo
 }
 
 func floodDeleteMsgHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	if len(utils.FloodSettingMenuMarkup.InlineKeyboard) < 3 {
+		utils.SendText(update.CallbackQuery.Message.Chat.ID, "请输入/start重新开始", bot)
+		return
+	}
 	floodSetting.DeleteMsg = !floodSetting.DeleteMsg
 	if floodSetting.DeleteMsg {
 		utils.FloodSettingMenuMarkup.InlineKeyboard[2][0].Text = "✅违规后清理消息"
@@ -199,11 +197,27 @@ func updateFloodMsg() string {
 
 	setting_msg := fmt.Sprintf("当前设置：在 %d秒内发送 %d条消息触发反刷屏\n", floodSetting.Interval, floodSetting.MsgCount)
 
-	punish_msg := fmt.Sprintf("惩罚：%s %d \n", utils.ActionMap[floodSetting.Punish], floodSetting.MuteTime)
+	actionMsg := "警告"
+	if floodSetting.Punish == model.PunishTypeBan {
+		actionMsg = "禁言"
+	} else if floodSetting.Punish == model.PunishTypeKick {
+		actionMsg = "踢出"
+	} else if floodSetting.Punish == model.PunishTypeBanAndKick {
+		actionMsg = "踢出+禁言"
+	} else if floodSetting.Punish == model.PunishTypeRevoke {
+		actionMsg = "仅撤回消息+不惩罚"
+	} else if floodSetting.Punish == model.PunishTypeWarning {
+		actionMsg = fmt.Sprintf("警告%d次后%s", floodSetting.WarningCount, utils.PunishActionStr(floodSetting.WarningAfterPunish))
+	}
+	punish_msg := fmt.Sprintf("惩罚措施：%s \n", actionMsg)
 
-	delete_msg := fmt.Sprintf("自动删除提醒消息：%d分钟", floodSetting.DeleteNotifyMsgTime)
+	delete_msg := fmt.Sprintf("自动删除提醒消息：%d分钟\n", floodSetting.DeleteNotifyMsgTime)
 
-	content = content + status_msg + setting_msg + punish_msg + delete_msg
+	delete_flood_msg := fmt.Sprint("是否清理违规消息:❌ 否")
+	if floodSetting.DeleteMsg {
+		delete_flood_msg = fmt.Sprint("是否清理违规消息:✅ 是")
+	}
+	content = content + status_msg + setting_msg + punish_msg + delete_msg + delete_flood_msg
 	services.SaveModel(&floodSetting, floodSetting.ChatId)
 	return content
 }
@@ -228,6 +242,11 @@ func FloodCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 	if sendCount < setting.MsgCount {
 		return false
 	}
+
+	//确定是否删除违规消息
+	if setting.DeleteMsg {
+
+	}
 	punishment := model.Punishment{
 		PunishType:          setting.Punish,
 		WarningCount:        setting.WarningCount,
@@ -237,105 +256,20 @@ func FloodCheck(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 		DeleteNotifyMsgTime: setting.DeleteNotifyMsgTime,
 		Reason:              "flood",
 		ReasonType:          3,
-		Content:             "",
+		Content:             fmt.Sprintf("在%d秒内发送了至少%d条消息", setting.Interval, setting.MsgCount),
 	}
 	punishHandler(update, bot, punishment)
 	return true
-	//
-	////要返回的结果
-	//result := false
-	//content := ""
-	//
-	////惩罚记录
-	//record := model.PunishRecord{}
-	//record.ChatId = chatId
-	//record.UserId = userId
-	//record.Name = name
-	//record.Reason = "flood"
-	//record.WarningCount = 0
-	//record.MuteTime = 0
-	//
-	//if setting.Punish == model.PunishTypeWarning { //警告
-	//	//	检查警告次数
-	//	//获取被警告的次数
-	//	where := fmt.Sprintf("chat_id = %d and user_id = %d", chatId, userId)
-	//	_ = services.GetModelWhere(where, &record)
-	//	if record.WarningCount >= setting.WarningCount { //超出警告次数
-	//		//执行超出警告次数后的逻辑
-	//		if setting.WarningAfterPunish == model.PunishTypeMute { //禁言
-	//			muteUser(update, bot, setting.MuteTime*60, userId)
-	//			content = fmt.Sprintf("@%s"+
-	//				" 您在 %d 秒内发送了 %d 条消息，"+
-	//				"已触发反刷屏规则，将被禁言 %d 分钟",
-	//				name, setting.Interval, setting.MsgCount, setting.MuteTime)
-	//			record.Punish = model.PunishTypeMute
-	//			record.MuteTime = setting.MuteTime
-	//
-	//		} else if setting.WarningAfterPunish == model.PunishTypeKick { //踢出
-	//			kickUser(update, bot, update.Message.From.ID)
-	//			record.Punish = model.PunishTypeKick
-	//
-	//		} else if setting.WarningAfterPunish == model.PunishTypeBanAndKick { //踢出+封禁
-	//			banUser(update, bot, userId)
-	//			record.Punish = model.PunishTypeBanAndKick
-	//		}
-	//		record.WarningCount = 0
-	//		saveRecord(bot, chatId, content, &record, setting.DeleteNotifyMsgTime)
-	//	} else {
-	//		//	发出警告消息
-	//		content = fmt.Sprintf("@%s 您在 %d 秒内发送了 %d 条消息，已触发反刷屏规则，警告一次，已被警告%d次", name, setting.Interval, setting.MsgCount, record.WarningCount+1)
-	//		record.WarningCount = record.WarningCount + 1
-	//		record.Punish = model.PunishTypeWarning
-	//		saveRecord(bot, chatId, content, &record, setting.DeleteNotifyMsgTime)
-	//		return true
-	//	}
-	//	result = true
-	//} else if setting.Punish == model.PunishTypeMute { //禁言
-	//	muteUser(update, bot, setting.MuteTime, userId)
-	//	record.Punish = model.PunishTypeMute
-	//	record.MuteTime = setting.MuteTime
-	//	result = true
-	//
-	//} else if setting.Punish == model.PunishTypeKick { //踢出，1天
-	//	kickUser(update, bot, userId)
-	//	record.Punish = model.PunishTypeKick
-	//	result = true
-	//
-	//} else if setting.Punish == model.PunishTypeBan { //封禁，7天
-	//	banUserHandler(update, bot)
-	//	record.Punish = model.PunishTypeMute
-	//	result = true
-	//
-	//} else if setting.Punish == model.PunishTypeRevoke { //撤回
-	//	content = fmt.Sprintf("@%s，系统检测到您存在刷屏行为，请撤回消息", update.Message.From.FirstName)
-	//	record.Punish = model.PunishTypeRevoke
-	//	result = true
-	//	saveRecord(bot, chatId, content, &record, setting.DeleteNotifyMsgTime)
-	//	return result
-	//}
-	//return result
 }
 
-func saveRecord(bot *tgbotapi.BotAPI, chatId int64, content string, record *model.PunishRecord, deleteTime int64) {
-
-	//存储惩罚记录
-	services.SaveModel(&record, record.ChatId)
-	if len(content) == 0 {
-		return
+func updateFloodBtn(btn *model.ButtonInfo) {
+	if btn.Text == "启用" && floodSetting.Enable {
+		btn.Text = "✅启用"
+	} else if btn.Text == "关闭" && !floodSetting.Enable {
+		btn.Text = "✅关闭"
+	} else if btn.Text == "违规后清理消息" && floodSetting.DeleteMsg {
+		btn.Text = "✅违规后清理消息"
+	} else if btn.Text == "违规后清理消息" && !floodSetting.DeleteMsg {
+		btn.Text = "❌违规后清理消息"
 	}
-
-	//对警告类行为，发送提醒消息
-	msg := tgbotapi.NewMessage(chatId, content)
-	message, err := bot.Send(msg)
-	if err != nil {
-		log.Println(err)
-	}
-
-	//需要把这个消息存到记录中，待将来删除
-	task := model.Task{
-		MessageId:     message.MessageID,
-		Type:          "delete",
-		OperationTime: time.Now().Add(time.Duration(deleteTime) * time.Minute),
-	}
-	services.SaveModel(&task, chatId)
 }

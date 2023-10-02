@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"telegramBot/model"
@@ -47,9 +48,9 @@ func GetTimeData() [][]string {
 
 func TimeStr(time int) string {
 	str := ""
-	if time == 0 {
+	if time == -1 {
 		str = "不提醒"
-	} else if time == -1 {
+	} else if time == 0 {
 		str = "不删除"
 	} else if time <= 60 {
 		str = strconv.Itoa(time) + "秒"
@@ -155,11 +156,70 @@ func CalculateTimeDifferenceInSeconds(endHour int) int {
 }
 
 func PunishActionStr(punishType model.PunishType) string {
-	actionStr := "禁言"
+	actionStr := "警告"
 	if punishType == model.PunishTypeKick {
 		actionStr = "踢出"
+	} else if punishType == model.PunishTypeMute {
+		actionStr = "禁言"
 	} else if punishType == model.PunishTypeBanAndKick {
 		actionStr = "踢出+封禁"
+	} else if punishType == model.PunishTypeRevoke {
+		actionStr = "仅撤回消息不惩罚"
 	}
 	return actionStr
+}
+
+func ContainsEthereumAddress(input string) bool {
+	// 定义以太坊地址的正则表达式模式
+	ethereumAddressPattern := `0x[0-9a-fA-F]{40}`
+
+	// 编译正则表达式
+	re := regexp.MustCompile(ethereumAddressPattern)
+
+	// 在输入字符串中查找匹配
+	matches := re.FindStringSubmatch(input)
+
+	// 如果找到匹配，则字符串包含以太坊地址
+	return len(matches) > 0
+}
+
+func ContainsAtGroupID(input string) bool {
+	// 定义正则表达式模式
+	pattern := `@(-\d{13})`
+
+	// 编译正则表达式
+	re := regexp.MustCompile(pattern)
+
+	// 在输入字符串中查找匹配
+	matches := re.FindStringSubmatch(input)
+
+	// 如果找到匹配，则字符串包含@后面的10位数字
+	return len(matches) > 1
+}
+func ContainsAtUserID(input string) bool {
+	// 定义正则表达式模式
+	pattern := `@([a-zA-Z0-9]+)`
+
+	// 编译正则表达式
+	re := regexp.MustCompile(pattern)
+
+	// 在输入字符串中查找匹配
+	matches := re.FindStringSubmatch(input)
+
+	// 如果找到匹配，则字符串包含@后面的10位数字
+	return len(matches) > 1
+}
+
+func ContainsCommand(input string) bool {
+	// 定义正则表达式模式
+	pattern := `/[a-zA-Z]+`
+
+	// 编译正则表达式
+	re := regexp.MustCompile(pattern)
+
+	// 在输入字符串中查找匹配
+	matches := re.FindStringSubmatch(input)
+
+	// 如果找到匹配，则字符串包含以斜杠 "/" 开头，后面跟着字母
+	return len(matches) > 0
 }

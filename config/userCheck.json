@@ -19,13 +19,13 @@
     },
     {
       "text": "必须设置用订阅频道",
-      "data": "user_check_channel",
+      "data": "user_check_subscribe",
       "btn_type": "data"
     }
   ],
   [
     {
-      "text": "黑名单列表",
+      "text": "⛔\uFE0F黑名单列表",
       "data": "user_check_black_list",
       "btn_type": "data"
     }
