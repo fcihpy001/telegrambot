@@ -9,6 +9,7 @@ import (
 	"telegramBot/model"
 	"telegramBot/services"
 	"telegramBot/utils"
+	"time"
 )
 
 var replySetting model.ReplySetting
@@ -120,6 +121,10 @@ func replyStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, enable bo
 
 // 自动删除时间
 func deleteReplyTimeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
+	if len(utils.ReplEnableyMenuMarkup.InlineKeyboard) < 1 {
+		utils.SendText(update.CallbackQuery.Message.Chat.ID, "请输入/start重新执行", bot)
+		return
+	}
 	if len(params) == 0 {
 		return
 	}
@@ -128,7 +133,7 @@ func deleteReplyTimeHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, param
 	col := index[1]
 	colInt, _ := strconv.Atoi(col)
 
-	time, _ := strconv.Atoi(params)
+	time, _ := strconv.Atoi(text)
 	replySetting.DeleteReplyTime = time
 
 	//	取消原来的选中
@@ -255,7 +260,7 @@ func deleteKeywordMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, content)
 	msg.ReplyMarkup = tgbotapi.ForceReply{
 		ForceReply:            true,
-		InputFieldPlaceholder: "tetetet",
+		InputFieldPlaceholder: "",
 		Selective:             true,
 	}
 	bot.Send(msg)
@@ -294,7 +299,7 @@ func DeleteKeywordResult(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 // 更新model数据，并将信息入库
 func updateReplySettingMsg() string {
-	content := "💬 关键词回复\n\n在群组中使用命令：\n/filter 添加自动回复规则\n/stop 删除自动回复规则\n/filters 所有自动回复规则列表\n查看命令帮助\n\n已添加的关键词：\n"
+	content := "💬 关键词回复\n\n在群组中使用命令：\n/filters 所有自动回复规则列表\n查看命令帮助\n\n已添加的关键词：\n"
 	if replySetting.Enable == false {
 		content = "💬 关键词回复\n\n当前状态：关闭❌"
 		return content
@@ -329,23 +334,45 @@ func HandlerAutoReply(update *tgbotapi.Update, bot *tgbotapi.BotAPI) bool {
 	if err != nil {
 		log.Println(err)
 	}
-	//根据收到消息，与ll中每个Model的keyworkd比较，如果matchAll为true，那么就是完全匹配，否则就是包含匹配
+	//根据收到消息，与ll中每个Model的keyword比较，如果matchAll为true，那么就是完全匹配，否则就是包含匹配
 	for _, v := range relyList {
 		if v.MatchAll {
 			if messageText == v.KeyWorld {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, v.ReplyWorld)
-				_, err := bot.Send(msg)
+				chatId := update.Message.Chat.ID
+				msg := tgbotapi.NewMessage(chatId, v.ReplyWorld)
+				message, err := bot.Send(msg)
 				if err != nil {
 					log.Println(err)
+				}
+				//需要把这个消息存到记录中，待将来删除
+				if deleteTime > 0 {
+					task := model.ScheduleDelete{
+						ChatId:     chatId,
+						MessageId:  message.MessageID,
+						DeleteTime: time.Now(),
+					}
+					//保存定时任务
+					services.SaveModel(&task, chatId)
 				}
 				return true
 			}
 		} else {
 			if strings.Contains(messageText, v.KeyWorld) {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, v.ReplyWorld)
-				_, err := bot.Send(msg)
+				chatId := update.Message.Chat.ID
+				msg := tgbotapi.NewMessage(chatId, v.ReplyWorld)
+				message, err := bot.Send(msg)
 				if err != nil {
 					log.Println(err)
+				}
+				//需要把这个消息存到记录中，待将来删除
+				if deleteTime > 0 {
+					task := model.ScheduleDelete{
+						ChatId:     chatId,
+						MessageId:  message.MessageID,
+						DeleteTime: time.Now(),
+					}
+					//保存定时任务
+					services.SaveModel(&task, chatId)
 				}
 				return true
 			}

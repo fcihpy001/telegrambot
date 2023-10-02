@@ -407,6 +407,9 @@ func getBackActionMsg() string {
 }
 
 func punishHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, punishment model.Punishment) {
+	if update.Message.From.IsBot {
+		return
+	}
 	chatId := update.Message.Chat.ID
 	userId := update.Message.From.ID
 	name := update.Message.From.FirstName

@@ -159,6 +159,10 @@ func scheduleMessageMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 // 修改定时消息菜单
 func scheduleMessageModifyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
+	if len(msgs) < 1 {
+		utils.SendText(update.CallbackQuery.Message.Chat.ID, "请输入/start重新开始", bot)
+		return
+	}
 	index, _ := strconv.Atoi(params)
 	message := msgs[index]
 	msgId = message.ID
@@ -194,6 +198,10 @@ func scheduleMessageModifyMenu(update *tgbotapi.Update, bot *tgbotapi.BotAPI, pa
 
 // 状态处理
 func scheduleStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
+	if len(utils.ScheduleMsgMenuMarkup.InlineKeyboard) < 1 {
+		utils.SendText(update.CallbackQuery.Message.Chat.ID, "请输入/start重新开始", bot)
+		return
+	}
 	if len(params) == 0 {
 		return
 	}
@@ -216,6 +224,10 @@ func scheduleStatusHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params
 }
 
 func scheduleDeletePrevHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
+	if len(utils.ScheduleMsgMenuMarkup.InlineKeyboard) < 1 {
+		utils.SendText(update.CallbackQuery.Message.Chat.ID, "请输入/start重新开始", bot)
+		return
+	}
 	if len(params) == 0 {
 		return
 	}
@@ -238,6 +250,10 @@ func scheduleDeletePrevHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, pa
 }
 
 func schedulePinHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
+	if len(utils.ScheduleMsgMenuMarkup.InlineKeyboard) < 1 {
+		utils.SendText(update.CallbackQuery.Message.Chat.ID, "请输入/start重新开始", bot)
+		return
+	}
 	if len(params) == 0 {
 		return
 	}
@@ -311,7 +327,7 @@ func scheduleRepeatMenuHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	}
 	rows = append(rows, minuteRow)
 	btn := model.ButtonInfo{
-		Text:    "返回",
+		Text:    "schedule_message",
 		Data:    "schedule_and",
 		BtnType: model.BtnTypeData,
 	}
@@ -324,6 +340,10 @@ func scheduleRepeatMenuHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 }
 
 func repeatValueHandler(update *tgbotapi.Update, bot *tgbotapi.BotAPI, params string) {
+	if len(utils.ScheduleMsgMenuMarkup.InlineKeyboard) < 1 {
+		utils.SendText(update.Message.Chat.ID, "请输入/start重新开始", bot)
+		return
+	}
 	if len(params) == 0 {
 		return
 	}
@@ -656,10 +676,7 @@ func updateScheduleMessageBtn(btn *model.ButtonInfo) {
 func SendMessageTask(bot *tgbotapi.BotAPI) {
 	messages, _ := services.GetScheduleMsgList("")
 	for _, message := range messages {
-		//检查是否达到发送时间
-		if !time.Now().After(message.ExecuteTime) {
-			continue
-		}
+
 		//检查发送开关
 		if !message.Enable {
 			continue
@@ -668,6 +685,15 @@ func SendMessageTask(bot *tgbotapi.BotAPI) {
 		if !utils.IsInDateSpan(message.StartDate, message.EndDate) {
 			continue
 		}
+
+		if !utils.IsInHoursRange(message.StartHour, message.EndHour) {
+			continue
+		}
+		//检查是否达到发送时间
+		if !time.Now().After(message.ExecuteTime) {
+			continue
+		}
+
 		//删除上次发的消息
 		if message.DeletePrevMsg {
 			deleteMsg := tgbotapi.NewDeleteMessage(message.ChatId, int(message.MessageId))
