@@ -1,0 +1,9 @@
+datasource:
+  driverName: mysql
+  host: 127.0.0.1:3306
+  port: 3306
+  database: wallet_bot
+  username: root
+  password: root1234
+debug: true
+token: 6936920245:AAHVA2au5E41uwDB4uqmY730nhR0S6clebg
